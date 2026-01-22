@@ -22,10 +22,15 @@ struct Book: Codable {
     let releaseDate: String
     let summary: String
     let dedication: String
+    let chapters: [Chapter]
     
     // data.json 형식 맞추기 : releaseDate는 data.json의 release_date
     enum CodingKeys: String, CodingKey {
-            case title, author, pages, summary, dedication
+            case title, author, pages, summary, dedication, chapters
             case releaseDate = "release_date"
         }
+}
+
+struct Chapter: Codable {
+    let title: String
 }

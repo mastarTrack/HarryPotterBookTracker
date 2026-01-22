@@ -10,23 +10,24 @@ import SnapKit
 
 class ViewController: UIViewController {
     
-    
     let dataService = DataService() // DataService 생성
     var books: [Book] = [] //받아온 데이터 저장용 배열
     
     let titleText = UILabel()
     let seriesButton = SeriesButton()
     
+    let scrollView = UIScrollView() // 스크롤 뷰 생성
+    let contentView = UIStackView() // 스크롤 뷰 내부 메인 뷰
+    
     let bookInfoView = BookInfoStackView() // bookInfoView 생성
     let bookSummaryStackView = BookSummaryStackView()
+    let bookChapterStackView = BookChapterStackView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configUI()
         loadBooks()
     }
-
-
 }
 
 extension ViewController {
@@ -45,9 +46,20 @@ extension ViewController {
         seriesButton.backgroundColor = .systemBlue
 //        seriesButton.layer.cornerRadius = 8
         
-        [titleText, seriesButton].forEach { view.addSubview($0) }
-        view.addSubview(bookInfoView) // bookInfoView 추가
-        view.addSubview(bookSummaryStackView) //bookSummaryStackView 추가
+        scrollView.showsVerticalScrollIndicator = false // 스크롤 바 숨기기
+        
+        contentView.axis = .vertical
+        contentView.spacing = 24 // contentView 내부 컴포넌트들의 거리 24
+        contentView.alignment = .leading
+        
+        [titleText, seriesButton, scrollView].forEach { view.addSubview($0) }
+        scrollView.addSubview(contentView)
+        
+//        view.addSubview(bookInfoView) // bookInfoView 추가
+//        view.addSubview(bookSummaryStackView) //bookSummaryStackView 추가
+        [bookInfoView, bookSummaryStackView, bookChapterStackView].forEach {
+            contentView.addArrangedSubview($0)
+        }
         
         titleText.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(20)
@@ -61,15 +73,29 @@ extension ViewController {
             $0.width.equalTo(seriesButton.snp.height) // height에 width 고정 -> 가로, 세로 비율 유지
         }
         
-        bookInfoView.snp.makeConstraints {
+        //scrollView 속성 정의
+        scrollView.snp.makeConstraints {
             $0.top.equalTo(seriesButton.snp.bottom).offset(20)
-            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.bottom.equalToSuperview()
         }
         
-        bookSummaryStackView.snp.makeConstraints {
-            $0.top.equalTo(bookInfoView.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(20)
+        //contentView 속성 정의 -> scrollView에 맞춤
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
         }
+        
+        
+//        bookInfoView.snp.makeConstraints {
+//            $0.top.equalTo(seriesButton.snp.bottom).offset(20)
+//            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
+//        }
+//        
+//        bookSummaryStackView.snp.makeConstraints {
+//            $0.top.equalTo(bookInfoView.snp.bottom).offset(24)
+//            $0.leading.trailing.equalToSuperview().inset(20)
+//        }
         
     }
 }
@@ -90,17 +116,23 @@ extension ViewController {
          dataService.loadBooks { [weak self] result in
              guard let self = self else { return }
              
-             switch result {
-             case .success(let books):
-                 self.books = books
-                 if let firstBook = books.first {
-                     self.titleText.text = firstBook.title
-                     self.bookInfoView.configure(with: firstBook)
-                     self.bookSummaryStackView.configure(dedication: firstBook.dedication, summary: firstBook.summary)
+                 switch result {
+                 case .success(let books):
+                     self.books = books
+                     if let firstBook = books.first {
+                         self.titleText.text = firstBook.title
+                         self.bookInfoView.configure(with: firstBook)
+                         self.bookSummaryStackView.configure(dedication: firstBook.dedication, summary: firstBook.summary)
+                         self.bookChapterStackView.config(with: firstBook.chapters)
+                     }
+                 case .failure(let error):
+                     print("에러 : \(error)")
                  }
-             case .failure(let error):
-                 print("에러 : \(error)")
-             }
          }
      }
+}
+
+@available(iOS 17.0, *)
+#Preview{
+    ViewController()
 }
