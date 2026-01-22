@@ -10,12 +10,17 @@ import SnapKit
 
 class ViewController: UIViewController {
     
+    
+    let dataService = DataService() // DataService 생성
+    var books: [Book] = [] //받아온 데이터 저장용 배열
+    
     let titleText = UILabel()
     let seriesButton = SeriesButton()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configUI()
+        loadBooks()
     }
 
 
@@ -25,7 +30,7 @@ extension ViewController {
     private func configUI() {
         view.backgroundColor = .white
         
-        titleText.text = "ASDFASDFASDFASDFSADFSADFASDFSADFSADFSADFSADS"
+//        titleText.text = "ASDFASDFASDFASDFSADFSADFASDFSADFSADFSADFSADS"
         titleText.textColor = .black
         titleText.font = .systemFont(ofSize: 24, weight: .bold)
         titleText.numberOfLines = 0 // 줄 바꿈 제한 x
@@ -62,4 +67,23 @@ class SeriesButton: UIButton {
         self.layer.cornerRadius = self.frame.height / 2
         self.clipsToBounds = true
     }
+}
+
+// data.json 파싱 이후 titleText에 적용
+extension ViewController {
+    func loadBooks() {
+         dataService.loadBooks { [weak self] result in
+             guard let self = self else { return }
+             
+             switch result {
+             case .success(let books):
+                 self.books = books
+                 if let firstBook = books.first {
+                     self.titleText.text = firstBook.title
+                 }
+             case .failure(let error):
+                 print("에러 : \(error)")
+             }
+         }
+     }
 }
