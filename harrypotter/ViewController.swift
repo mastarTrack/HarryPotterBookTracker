@@ -17,6 +17,8 @@ class ViewController: UIViewController {
     let titleText = UILabel()
     let seriesButton = SeriesButton()
     
+    let bookInfoView = BookInfoStackView() // bookInfoView 생성
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configUI()
@@ -43,6 +45,7 @@ extension ViewController {
 //        seriesButton.layer.cornerRadius = 8
         
         [titleText, seriesButton].forEach { view.addSubview($0) }
+        view.addSubview(bookInfoView) // bookInfoView 추가
         
         titleText.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(20)
@@ -54,6 +57,11 @@ extension ViewController {
             $0.centerX.equalToSuperview()
             $0.top.equalTo(titleText.snp.bottom).offset(16)
             $0.width.equalTo(seriesButton.snp.height) // height에 width 고정 -> 가로, 세로 비율 유지
+        }
+        
+        bookInfoView.snp.makeConstraints {
+            $0.top.equalTo(seriesButton.snp.bottom).offset(20)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
         }
         
     }
@@ -69,7 +77,7 @@ class SeriesButton: UIButton {
     }
 }
 
-// data.json 파싱 이후 titleText에 적용
+// data.json 파싱 이후 titleText에 적용, book에도 적용
 extension ViewController {
     func loadBooks() {
          dataService.loadBooks { [weak self] result in
@@ -80,6 +88,7 @@ extension ViewController {
                  self.books = books
                  if let firstBook = books.first {
                      self.titleText.text = firstBook.title
+                     self.bookInfoView.configure(with: firstBook)
                  }
              case .failure(let error):
                  print("에러 : \(error)")
