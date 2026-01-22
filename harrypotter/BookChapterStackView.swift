@@ -50,8 +50,7 @@ extension BookChapterStackView {
     func config(with chapters: [Chapter]) {
         chapterListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() } // 뷰를 삭제하는 로직 필요 : 스택뷰는 아래에 계속 쌓임.(addArrangedSubView를 사용하기에 덮어쓰지 않음)
         
-        
-        // 새로운 뷰를 생성
+        // 새로운 뷰를 생성 -> 적용 ( 덮어쓰기 x )
         chapters.forEach { chapter in
             let label = UILabel()
             label.text = chapter.title
