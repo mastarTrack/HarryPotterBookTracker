@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     let seriesButton = SeriesButton()
     
     let bookInfoView = BookInfoStackView() // bookInfoView 생성
+    let bookSummaryStackView = BookSummaryStackView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,6 +47,7 @@ extension ViewController {
         
         [titleText, seriesButton].forEach { view.addSubview($0) }
         view.addSubview(bookInfoView) // bookInfoView 추가
+        view.addSubview(bookSummaryStackView) //bookSummaryStackView 추가
         
         titleText.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(20)
@@ -62,6 +64,11 @@ extension ViewController {
         bookInfoView.snp.makeConstraints {
             $0.top.equalTo(seriesButton.snp.bottom).offset(20)
             $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
+        }
+        
+        bookSummaryStackView.snp.makeConstraints {
+            $0.top.equalTo(bookInfoView.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview().inset(20)
         }
         
     }
@@ -89,6 +96,7 @@ extension ViewController {
                  if let firstBook = books.first {
                      self.titleText.text = firstBook.title
                      self.bookInfoView.configure(with: firstBook)
+                     self.bookSummaryStackView.configure(dedication: firstBook.dedication, summary: firstBook.summary)
                  }
              case .failure(let error):
                  print("에러 : \(error)")
