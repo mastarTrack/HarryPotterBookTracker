@@ -112,7 +112,7 @@ extension BookInfoStackView {
     func configure(with book: Book) {
         titleLabel.text = book.title
         authorValueLabel.text = book.author
-        releaseDateValueLabel.text = book.releaseDate
+        releaseDateValueLabel.text = book.releaseDateFormatted // releaseDate를 형식 변경한 releaseDateFormatted로 변경
         pageValueLabel.text = "\(book.pages)"
     }
 }
