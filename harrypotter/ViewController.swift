@@ -14,7 +14,11 @@ class ViewController: UIViewController {
     var books: [Book] = [] //받아온 데이터 저장용 배열
     
     let titleText = UILabel()
-    let seriesButton = SeriesButton()
+    
+    
+    //    let seriesButton = SeriesButton()
+    let seriesStackView = UIStackView()
+    var seriesButtons: [SeriesButton] = []
     
     let scrollView = UIScrollView() // 스크롤 뷰 생성
     let contentView = UIStackView() // 스크롤 뷰 내부 메인 뷰
@@ -40,11 +44,16 @@ extension ViewController {
         titleText.numberOfLines = 0 // 줄 바꿈 제한 x
         titleText.textAlignment = .center // 텍스트 중앙 정렬
         
-        seriesButton.setTitle("1", for: .normal)
-        seriesButton.setTitleColor(.white , for: .normal)
-        seriesButton.titleLabel?.font = .systemFont(ofSize: 16)
-        seriesButton.backgroundColor = .systemBlue
+        //        seriesButton.setTitle("1", for: .normal)
+        //        seriesButton.setTitleColor(.white , for: .normal)
+        //        seriesButton.titleLabel?.font = .systemFont(ofSize: 16)
+        //        seriesButton.backgroundColor = .systemBlue
         //        seriesButton.layer.cornerRadius = 8
+        
+        seriesStackView.axis = .horizontal
+        seriesStackView.spacing = 6
+        seriesStackView.distribution = .fillEqually
+        seriesStackView.alignment = .center
         
         scrollView.showsVerticalScrollIndicator = false // 스크롤 바 숨기기
         
@@ -52,7 +61,7 @@ extension ViewController {
         contentView.spacing = 24 // contentView 내부 컴포넌트들의 거리 24
         contentView.alignment = .leading
         
-        [titleText, seriesButton, scrollView].forEach { view.addSubview($0) }
+        [titleText, seriesStackView, scrollView].forEach { view.addSubview($0) }
         scrollView.addSubview(contentView)
         
         //        view.addSubview(bookInfoView) // bookInfoView 추가
@@ -66,16 +75,16 @@ extension ViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
         
-        seriesButton.snp.makeConstraints {
+        seriesStackView.snp.makeConstraints {
             //            $0.leading.trailing.equalToSuperview().inset(20)
             $0.centerX.equalToSuperview()
             $0.top.equalTo(titleText.snp.bottom).offset(16)
-            $0.width.equalTo(seriesButton.snp.height) // height에 width 고정 -> 가로, 세로 비율 유지
+            /*$0.width.equalTo(seriesButton.snp.height)*/ // height에 width 고정 -> 가로, 세로 비율 유지
         }
         
         //scrollView 속성 정의
         scrollView.snp.makeConstraints {
-            $0.top.equalTo(seriesButton.snp.bottom).offset(20)
+            $0.top.equalTo(seriesStackView.snp.bottom).offset(20) // seriesStackView 기준으로 변경
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview()
         }
@@ -85,7 +94,6 @@ extension ViewController {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
-        
         
         //        bookInfoView.snp.makeConstraints {
         //            $0.top.equalTo(seriesButton.snp.bottom).offset(20)
@@ -120,8 +128,10 @@ extension ViewController {
             switch result {
             case .success(let books):
                 self.books = books
+                self.setSeriesButton(with: books)
                 if let firstBook = books.first {
                     self.infoUpdate(with: firstBook) // 업데이트 정보가 많아져서 함수로 분리
+                    selectedSeriesButton(0) // 기본 앱 실행 시 1권 표시 : 1번 버튼 선택
                 }
             case .failure(let error):
                 print("에러 : \(error)")
@@ -147,6 +157,54 @@ extension ViewController {
         self.bookChapterStackView.config(with: book.chapters)
     }
 }
+
+// 버튼 관련 메소드 관리
+extension ViewController {
+    
+    // 기존 : 버튼 1개 생성 -> 배열로 받아와서 개수만큼 버튼 생성
+    private func setSeriesButton(with books: [Book]) {
+        
+        // 기본 버튼 생성, 속성 정의
+        for idx in books.indices {
+            let button = SeriesButton()
+            button.setTitle("\(idx + 1)", for: .normal)
+            button.setTitleColor(.systemBlue, for: .normal)
+            button.titleLabel?.font = .systemFont(ofSize: 16)
+            button.backgroundColor = .systemGray5
+            button.tag = idx
+            button.addTarget(self, action: #selector(seriesButtonTapped(_:)), for: .touchDown)
+            
+            button.snp.makeConstraints {
+                $0.width.equalTo(button.snp.height)
+            }
+            seriesStackView.addArrangedSubview(button)
+            seriesButtons.append(button)
+        }
+    }
+    
+    // 버튼을 눌렀을 때, 동작하는 메서드 정의
+    @objc
+    private func seriesButtonTapped(_ sender: SeriesButton) {
+        let idx = sender.tag
+        let book = books[idx]
+        
+        infoUpdate(with: book)
+        self.scrollView.setContentOffset(.zero, animated: false) // 스크롤 위치 초기화
+        selectedSeriesButton(idx)
+        
+    }
+    
+    // 버튼 눌렸을 때 상태 변화 메서드 정의
+    private func selectedSeriesButton(_ selectedSeriesIdx: Int) {
+        for (idx, btn) in seriesButtons.enumerated() {
+            btn.backgroundColor = (idx == selectedSeriesIdx) ? .systemBlue : .systemGray5
+            
+            let titleColor: UIColor = (idx == selectedSeriesIdx) ? .white : .systemBlue
+            btn.setTitleColor(titleColor, for: .normal)
+        }
+    }
+}
+
 
 @available(iOS 17.0, *)
 #Preview{

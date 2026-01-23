@@ -77,7 +77,7 @@ extension BookInfoStackView {
         releaseDateLabel.textColor = .black
         releaseDateLabel.font = .systemFont(ofSize: 14, weight: .bold)
         releaseDateValueLabel.font = .systemFont(ofSize: 14)
-        releaseDateLabel.textColor = .darkGray
+        releaseDateValueLabel.textColor = .gray
         
         pageLabel.text = "Page"
         pageLabel.textColor = .black
