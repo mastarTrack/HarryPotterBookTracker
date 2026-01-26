@@ -20,6 +20,8 @@ class ViewController: UIViewController {
     }
     
     func setUI() {
+        view.backgroundColor = .white
+        
         setLabel()
         setSeriesButton()
         
