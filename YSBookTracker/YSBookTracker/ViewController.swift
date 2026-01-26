@@ -11,14 +11,15 @@ import SnapKit
 class ViewController: UIViewController {
     private let dataService = DataService()
     private var books: [Book] = []
+    private var buttons: [UIButton] = []
+    
     let bookTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "bookTitle"
+        label.numberOfLines = 0
         label.font = .systemFont(ofSize: 24, weight: .bold)
         label.textAlignment = .center
         return label
     }()
-    private var buttons: [UIButton] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,20 +28,20 @@ class ViewController: UIViewController {
         configureHeader()
     }
     
-    func loadBooks() {
+    private func loadBooks() {
         dataService.loadBooks { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let books):
                 self.books = books
-                
+                updateBookDetail(Volume: 1)
             case .failure(let error):
                 print(error)
             }
         }
     }
-    func makeButton(name: String) -> UIButton {
+    private func makeButton(name: String) -> UIButton {
         var config = UIButton.Configuration.filled()
         config.baseBackgroundColor = .systemBlue
         config.baseForegroundColor = .white
@@ -56,7 +57,7 @@ class ViewController: UIViewController {
         button.snp.makeConstraints {
             $0.height.equalTo(button.snp.width)
         }
-
+        
         return button
     }
     
@@ -64,11 +65,12 @@ class ViewController: UIViewController {
         buttons = (1...7).map { i in
             let b = makeButton(name: "\(i)")
             b.tag = i
+            
             return b
         }
     }
     
-    func configureHeader() {
+    private func configureHeader() {
         view.addSubview(bookTitleLabel)
         
         bookTitleLabel.snp.makeConstraints {
@@ -93,6 +95,10 @@ class ViewController: UIViewController {
             $0.top.equalTo(bookTitleLabel.snp.bottom).offset(16)
             $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20)
         }
+    }
+    
+    func updateBookDetail(Volume: Int) {
+        bookTitleLabel.text = books[Volume - 1].title
     }
 }
 
