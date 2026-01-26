@@ -23,6 +23,9 @@ class ViewController: UIViewController {
     private let infoReleased = UILabel()
     private let infoPages = UILabel()
     
+    private let infoScroll = UIScrollView()
+    private let contentView = UIView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
@@ -34,10 +37,9 @@ class ViewController: UIViewController {
         setLabel()
         setSeriesButton()
         setInfoView()
+        setInfoScroll()
         
-        let infoStack = setInfoStack()
-        
-        [titleLabel, seriesButton, infoImage, infoStack].forEach {
+        [titleLabel, seriesButton, infoScroll].forEach {
             view.addSubview($0)
         }
         
@@ -54,18 +56,12 @@ class ViewController: UIViewController {
             $0.height.width.equalTo(44) // HIG 권장 최소 버튼 크기
         }
         
-        infoImage.snp.makeConstraints {
-            $0.leading.equalTo(view.safeAreaLayoutGuide).inset(20)
-            $0.width.equalTo(100)
-            $0.height.equalTo(infoImage.snp.width).multipliedBy(1.5)
+        infoScroll.snp.makeConstraints {
+            $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
             $0.top.equalTo(seriesButton.snp.bottom).offset(16)
         }
         
-        infoStack.snp.makeConstraints {
-            $0.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
-            $0.leading.equalTo(infoImage.snp.trailing).offset(16)
-            $0.top.equalTo(infoImage)
-        }
+
     
     }
     
@@ -137,6 +133,31 @@ class ViewController: UIViewController {
         stackView.alignment = .leading
         
         return stackView
+    }
+    
+    func setInfoScroll() {
+        infoScroll.showsVerticalScrollIndicator = false
+        
+        let infoStack = setInfoStack()
+        
+        infoScroll.addSubview(contentView)
+        
+        contentView.snp.makeConstraints {
+            $0.edges.width.height.equalToSuperview()
+        }
+        contentView.addSubview(infoStack)
+        contentView.addSubview(infoImage)
+        
+        infoStack.snp.makeConstraints {
+            $0.trailing.top.equalToSuperview()
+            $0.leading.equalTo(infoImage.snp.trailing).offset(16)
+        }
+        
+        infoImage.snp.makeConstraints {
+            $0.leading.top.equalToSuperview()
+            $0.width.equalTo(100)
+            $0.height.equalTo(infoImage.snp.width).multipliedBy(1.5)
+        }
     }
 
 }
