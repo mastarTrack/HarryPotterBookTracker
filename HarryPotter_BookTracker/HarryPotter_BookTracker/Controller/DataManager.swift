@@ -12,36 +12,61 @@ class DataManager {
         case parsingFailed
     }
     
-    func loadBooks(completion: @escaping (Result<[Book], Error>) -> Void) {
+    static var shared = DataManager()
+    private var books: [Book] = []
+    
+    func loadBooks() throws -> [Book] {
         // data.json 파일 주소 가져오기
         guard let path = Bundle.main.path(forResource: "data", ofType: "json") else {
-            completion(.failure(DataError.fileNotFound))
-            return
+            throw DataError.fileNotFound
         }
         
         do {
             let data = try Data(contentsOf: URL(filePath: path)) // data.json 파일 데이터 가져오기
             let bookResponse = try JSONDecoder().decode(BookResponse.self, from: data) // BookResponse 타입으로 Json 디코딩
             let books = bookResponse.data.map { $0.attributes } // Book 타입 배열로 가져오기
-            completion(.success(books)) // 결과로 사용
+            return books // 결과로 사용
         } catch {
             print("⛔️ JSON 파싱 에러: \(error)")
-            completion(.failure(DataError.parsingFailed))
+            throw DataError.parsingFailed
         }
     }
     
-    func fetchData() -> [Book] {
-        var data: [Book] = []
-        loadBooks { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let books):
-                data = books
-            case .failure(let error):
-                print("⛔️ 알 수 없는 에러: \(error)")
-            }
+    func fetchData() {        
+        do {
+           books = try loadBooks()
+        } catch DataError.fileNotFound {
+            print("⛔️ 파일을 찾을 수 없습니다.")
+        } catch {
+            print("⛔️ 알 수 없는 오류: \(error)")
         }
-        return data
     }
+    
+    func fetchInfo(num: Int, info: Description) -> String {
+        if books.isEmpty { fetchData() }
+        
+        let i = num - 1
+        
+        switch info {
+        case .title: return books[i].title
+        case .author: return books[i].author
+        case .pages: return String(books[i].pages)
+        case .release_date: return formatDate(books[i].release_date)
+        }
+    }
+    
+    func formatDate(_ released: String) -> String {
+        // date 타입 얻기
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let date = dateFormatter.date(from: released)
+
+        // dateFormat 설정
+        let newFormatter = DateFormatter()
+        newFormatter.dateFormat = "MMMM dd, yyyy"
+
+        // June 26, 1997 형태의 문자열 반환
+        return newFormatter.string(from: date!)
+    }
+    
 }
