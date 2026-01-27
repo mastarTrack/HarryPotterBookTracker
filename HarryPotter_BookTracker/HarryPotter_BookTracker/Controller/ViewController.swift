@@ -60,9 +60,6 @@ class ViewController: UIViewController {
             $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
             $0.top.equalTo(seriesButton.snp.bottom).offset(16)
         }
-        
-
-    
     }
     
     func setLabel() {

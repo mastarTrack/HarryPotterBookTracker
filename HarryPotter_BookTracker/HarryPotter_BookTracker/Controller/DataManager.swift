@@ -21,9 +21,15 @@ class DataManager {
             throw DataError.fileNotFound
         }
         
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd" // 날짜 형식 설정
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(dateFormatter) // JSONDecoder의 날짜 디코딩 형식 설정
+        
         do {
             let data = try Data(contentsOf: URL(filePath: path)) // data.json 파일 데이터 가져오기
-            let bookResponse = try JSONDecoder().decode(BookResponse.self, from: data) // BookResponse 타입으로 Json 디코딩
+            let bookResponse = try decoder.decode(BookResponse.self, from: data) // BookResponse 타입으로 Json 디코딩
             let books = bookResponse.data.map { $0.attributes } // Book 타입 배열로 가져오기
             return books // 결과로 사용
         } catch {
@@ -55,18 +61,18 @@ class DataManager {
         }
     }
     
-    func formatDate(_ released: String) -> String {
-        // date 타입 얻기
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let date = dateFormatter.date(from: released)
+    func formatDate(_ released: Date) -> String {
+//        // date 타입 얻기
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "yyyy-MM-dd"
+//        let date = dateFormatter.date(from: released)
 
         // dateFormat 설정
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "MMMM dd, yyyy"
 
         // June 26, 1997 형태의 문자열 반환
-        return newFormatter.string(from: date!)
+        return newFormatter.string(from: released)
     }
     
 }

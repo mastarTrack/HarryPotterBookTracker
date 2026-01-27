@@ -19,7 +19,7 @@ struct Book: Codable {
     let title: String
     let author: String
     let pages: Int
-    let release_date: String
+    let release_date: Date
     let dedication: String
     let summary: String
     let wiki: String
