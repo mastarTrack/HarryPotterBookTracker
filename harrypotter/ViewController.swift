@@ -76,7 +76,8 @@ extension ViewController {
         }
         
         seriesStackView.snp.makeConstraints {
-            //            $0.leading.trailing.equalToSuperview().inset(20)
+//            $0.leading.trailing.equalToSuperview().inset(20)
+//            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20)
             $0.centerX.equalToSuperview()
             $0.top.equalTo(titleText.snp.bottom).offset(16)
             /*$0.width.equalTo(seriesButton.snp.height)*/ // height에 width 고정 -> 가로, 세로 비율 유지
@@ -130,7 +131,7 @@ extension ViewController {
                 self.books = books
                 self.setSeriesButton(with: books)
                 if let firstBook = books.first {
-                    self.infoUpdate(with: firstBook) // 업데이트 정보가 많아져서 함수로 분리
+                    self.infoUpdate(with: firstBook, idx: 0) // 업데이트 정보가 많아져서 함수로 분리
                     selectedSeriesButton(0) // 기본 앱 실행 시 1권 표시 : 1번 버튼 선택
                 }
             case .failure(let error):
@@ -140,9 +141,9 @@ extension ViewController {
     }
     
     // 정보 업데이트 함수 분리
-    func infoUpdate(with book: Book) {
+    func infoUpdate(with book: Book, idx: Int) {
         self.titleText.text = book.title
-        self.bookInfoView.configure(with: book)
+        self.bookInfoView.configure(with: book, idx: idx) // bookInfoView.configure 함수에 idx 넘겨주기
         
         // isFolded_\(book.title) 상대로 저장하는 이유 : 다음 챕터에서 책에 따라 버튼 생성 시 개별적으로 상태 저장하기 위해
         let isSaved = UserDefaults.standard.object(forKey: "isFolded_\(book.title)") != nil // UserDefauls에 isFolded_isFolded_\(book.title) 상태로 저장된 값 유무 확인
@@ -188,7 +189,7 @@ extension ViewController {
         let idx = sender.tag
         let book = books[idx]
         
-        infoUpdate(with: book)
+        infoUpdate(with: book, idx: idx) // infoUpdate에 idx 넘겨주기
         self.scrollView.setContentOffset(.zero, animated: false) // 스크롤 위치 초기화
         selectedSeriesButton(idx)
         

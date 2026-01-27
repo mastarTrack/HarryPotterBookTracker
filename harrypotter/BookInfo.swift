@@ -26,9 +26,9 @@ struct Book: Codable {
     
     // data.json 형식 맞추기 : releaseDate는 data.json의 release_date
     enum CodingKeys: String, CodingKey {
-            case title, author, pages, summary, dedication, chapters
-            case releaseDate = "release_date"
-        }
+        case title, author, pages, summary, dedication, chapters
+        case releaseDate = "release_date"
+    }
     
     // releaseData로 넘어온 형식 변경
     var releaseDateFormatted: String {
