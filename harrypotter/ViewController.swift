@@ -33,10 +33,14 @@ class ViewController: UIViewController {
         configUI()
         loadBooks()
     }
+    
 }
+
 
 extension ViewController {
     private func configUI() {
+        
+        bookSummaryStackView.delegate = self // bookSummaryStackView의 delegate는 ViewController 자신이다.
         view.backgroundColor = .white
         
         //        titleText.text = "ASDFASDFASDFASDFSADFSADFASDFSADFSADFSADFSADS"
@@ -159,13 +163,7 @@ extension ViewController {
         // isFolded_\(book.title) 상대로 저장하는 이유 : 다음 챕터에서 책에 따라 버튼 생성 시 개별적으로 상태 저장하기 위해
         let isSaved = UserDefaults.standard.object(forKey: "isFolded_\(book.title)") != nil // UserDefauls에 isFolded_isFolded_\(book.title) 상태로 저장된 값 유무 확인
         self.bookSummaryStackView.config(dedication: book.dedication, summary: book.summary, folded: isSaved)
-        self.bookSummaryStackView.onTapExtraButton = { isFolded in
-            if isFolded {
-                UserDefaults.standard.set(true, forKey: "isFolded_\(book.title)") // 접혀있는 상태일 경우, UserDefaults에 isFolded_\(book.title) 형태로 저장
-            } else {
-                UserDefaults.standard.removeObject(forKey: "isFolded_\(book.title)") // 더보기 상태일 경우, UserDefaults에 저장된 isFolded_\(book.title) 제거
-            }
-        }
+
         self.bookChapterStackView.config(with: book.chapters)
     }
 }
@@ -213,6 +211,20 @@ extension ViewController {
             
             let titleColor: UIColor = (idx == selectedSeriesIdx) ? .white : .systemBlue
             btn.setTitleColor(titleColor, for: .normal)
+        }
+    }
+}
+
+// Delegate 사용
+extension ViewController: BookSummaryStackViewDelegate {
+    
+    func onTapExtraButton(isFolded: Bool) {
+        guard let title = titleText.text else { return }
+        
+        if isFolded {
+            UserDefaults.standard.set(true, forKey: "isFolded_\(title)") // 접혀있는 상태일 경우, UserDefaults에 isFolded_\(title) 형태로 저장
+        } else {
+            UserDefaults.standard.removeObject(forKey: "isFolded_\(title)") // 더보기 상태일 경우, UserDefaults에 저장된 isFolded_\(title) 제거
         }
     }
 }

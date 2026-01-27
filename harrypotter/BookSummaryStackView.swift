@@ -8,7 +8,15 @@
 import UIKit
 import SnapKit
 
+// Delegate 생성, AnyObject 사용 : Class에서 사용할 경우로 제한 (weak 사용 가능)
+protocol BookSummaryStackViewDelegate: AnyObject {
+    func onTapExtraButton(isFolded: Bool)
+}
+
 class BookSummaryStackView: UIStackView {
+    
+    // 변수 생성
+    weak var delegate: BookSummaryStackViewDelegate?
     
     let dedicationStackView = UIStackView()
     let dedicationLabel = UILabel()
@@ -22,7 +30,7 @@ class BookSummaryStackView: UIStackView {
     
     private var isFolded = false // 상태 저장용
     private var summaryText = "" // 텍스트 저장
-    var onTapExtraButton: ((Bool) -> Void)?
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -33,6 +41,7 @@ class BookSummaryStackView: UIStackView {
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
 }
 
@@ -117,11 +126,11 @@ extension BookSummaryStackView {
     
     // 버튼 눌렀을 때, 동작하기 위한 함수 생성
     @objc
-    private func extraButtonTapped() {
+    func extraButtonTapped() {
         isFolded.toggle()
         displaySummary()
-        
-        onTapExtraButton?(isFolded)
+        delegate?.onTapExtraButton(isFolded: isFolded)
     }
+    
 }
 
