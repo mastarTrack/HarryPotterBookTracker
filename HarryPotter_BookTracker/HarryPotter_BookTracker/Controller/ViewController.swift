@@ -159,6 +159,22 @@ class ViewController: UIViewController {
 
 }
 
+// UILabel 생성자 정의
+extension UILabel {
+    convenience init(
+        text: String,
+        font: UIFont,
+        color: UIColor
+    ) {
+        self.init()
+        self.text = text
+        self.font = font
+        self.textColor = color
+    }
+}
+
+
+
 @available(iOS 17.0, *)
 #Preview{
     ViewController()

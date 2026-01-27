@@ -62,11 +62,6 @@ class DataManager {
     }
     
     func formatDate(_ released: Date) -> String {
-//        // date 타입 얻기
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = "yyyy-MM-dd"
-//        let date = dateFormatter.date(from: released)
-
         // dateFormat 설정
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "MMMM dd, yyyy"
