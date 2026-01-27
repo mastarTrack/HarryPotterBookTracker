@@ -7,6 +7,10 @@
 
 import Foundation
 
-enum Description {
-    case title, author, pages, release_date //, dedication, summary, wiki, chapters
+enum Description: String {
+    case title
+    case author = "Author"
+    case pages = "Pages"
+    case release_date = "Released"
+    //, dedication, summary, wiki, chapters
 }

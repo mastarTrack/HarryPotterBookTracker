@@ -10,18 +10,6 @@ import SnapKit
 
 class ViewController: UIViewController {
     private let dataManager = DataManager()
-
-    private let infoImage = UIImageView()
-    private let infoTitle = UILabel()
-    private let authorTitle = UILabel()
-    private let releasedTitle = UILabel()
-    private let pagesTitle = UILabel()
-    private let infoAuthor = UILabel()
-    private let infoReleased = UILabel()
-    private let infoPages = UILabel()
-    
-    private let infoScroll = UIScrollView()
-    private let contentView = UIView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,8 +21,7 @@ class ViewController: UIViewController {
         
         let titleLabel = setTitleLabel()
         let seriesButton = setSeriesButton()
-        setInfoView()
-        setInfoScroll()
+        let infoScroll = setInfoScroll()
         
         [titleLabel, seriesButton, infoScroll].forEach {
             view.addSubview($0)
@@ -58,81 +45,25 @@ class ViewController: UIViewController {
         }
     }
     
-    func setInfoView() {
-
+    func setInfoScroll() -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
         
- //       infoTitle.text = titleLabel.text
-        infoTitle.font = .boldSystemFont(ofSize: 20)
-        infoTitle.textColor = .black
-        infoTitle.numberOfLines = 0
-        
-        authorTitle.text = "Author"
-        authorTitle.font = .boldSystemFont(ofSize: 16)
-        authorTitle.textColor = .black
-        
-        infoAuthor.text = dataManager.fetchInfo(num: 1, info: .author)
-        infoAuthor.font = .systemFont(ofSize: 18)
-        infoAuthor.textColor = .darkGray
-        
-        releasedTitle.text = "Released"
-        releasedTitle.font = .boldSystemFont(ofSize: 14)
-        releasedTitle.textColor = .black
-        
-        infoReleased.text = dataManager.fetchInfo(num: 1, info: .release_date)
-        infoReleased.font = .systemFont(ofSize: 14)
-        infoReleased.textColor = .darkGray
-        
-        pagesTitle.text = "Pages"
-        pagesTitle.font = .boldSystemFont(ofSize: 14)
-        pagesTitle.textColor = .black
-        
-        infoPages.text = dataManager.fetchInfo(num: 1, info: .pages)
-        infoPages.font = .systemFont(ofSize: 14)
-        infoPages.textColor = .darkGray
-    }
-    
-    func setInfoStack() -> UIStackView {
-        let authorStack = UIStackView(arrangedSubviews: [authorTitle, infoAuthor])
-        let releasedStack = UIStackView(arrangedSubviews: [releasedTitle, infoReleased])
-        let pagesStack = UIStackView(arrangedSubviews: [pagesTitle, infoPages])
-        
-        [authorStack, releasedStack, pagesStack].forEach {
-            $0.axis = .horizontal
-            $0.spacing = 8
-        }
-        
-        let stackView = UIStackView(arrangedSubviews: [infoTitle, authorStack, releasedStack, pagesStack])
-        
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.alignment = .leading
-        
-        return stackView
-    }
-    
-    func setInfoScroll() {
-        infoScroll.showsVerticalScrollIndicator = false
-        
-        let infoStack = setInfoStack()
-        
-        infoScroll.addSubview(contentView)
+        let contentView = UIView()
+        scrollView.addSubview(contentView)
         
         contentView.snp.makeConstraints {
             $0.edges.width.height.equalToSuperview()
         }
+        
+        let infoStack = setInfoStack()
         contentView.addSubview(infoStack)
-        contentView.addSubview(infoImage)
         
         infoStack.snp.makeConstraints {
-            $0.trailing.top.equalToSuperview()
-            $0.leading.equalTo(infoImage.snp.trailing).offset(16)
+            $0.leading.trailing.top.equalToSuperview()
         }
         
-        infoImage.snp.makeConstraints {
-            $0.leading.top.equalToSuperview()
-            $0.width.equalTo(100)
-            $0.height.equalTo(infoImage.snp.width).multipliedBy(1.5)
-        }
+        return scrollView
     }
 
 }
@@ -172,9 +103,79 @@ extension ViewController {
         let imageView = UIImageView()
         imageView.image = UIImage(resource: .harrypotter1)
         imageView.contentMode = .scaleAspectFit
+        
+        imageView.snp.makeConstraints {
+            $0.width.equalTo(100)
+            $0.height.equalTo(imageView.snp.width).multipliedBy(1.5)
+        }
+        
         return imageView
     }
     
+    // 정보 레이블 가로 스택 생성
+    func setHorizontalInfoLabelStack(_ info: Description) -> UIStackView {
+        let title = info.rawValue
+        let titleLabel = UILabel(
+            text: title,
+            font: .boldSystemFont(ofSize: 16),
+            color: .black
+        )
+
+        let infoDetail = dataManager.fetchInfo(num: 1, info: info)
+        let infoLabel = UILabel(
+            text: infoDetail,
+            font: .systemFont(ofSize: 18),
+            color: .darkGray
+        )
+        
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, infoLabel])
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        
+        return stackView
+    }
+    
+    // 정보 레이블 스택 생성
+    func setInfoLabelStack() -> UIStackView {
+        // 제목 레이블 생성
+        let text = dataManager.fetchInfo(num: 1, info: .title)
+        let titleLabel = UILabel(
+            text: text,
+            font: .boldSystemFont(ofSize: 20),
+            color: .black
+        )
+        titleLabel.numberOfLines  = 0
+        
+        // 저자, 발간일, 페이지 정보 레이블 스택 생성
+        let authorStack = setHorizontalInfoLabelStack(.author)
+        let releasedStack = setHorizontalInfoLabelStack(.release_date)
+        let pagesStack = setHorizontalInfoLabelStack(.pages)
+        
+        // 레이블 전체 스택 생성
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, authorStack, releasedStack, pagesStack])
+        
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.alignment = .leading
+        
+        return stackView
+    }
+    
+    // 정보 영역 스택 생성
+    func setInfoStack() -> UIStackView {
+        let imageView = setBookImage()
+        let labels = setInfoLabelStack()
+        
+        labels.setContentHuggingPriority(.required, for: .vertical)
+        
+        let stackView = UIStackView(arrangedSubviews: [imageView, labels])
+        
+        stackView.axis = .horizontal
+        stackView.spacing = 16
+        stackView.alignment = .top
+        
+        return stackView
+    }
     
 }
 
@@ -193,6 +194,7 @@ extension UILabel {
     }
 }
 
+// 시리즈 버튼 원형 만들기
 class SeriesButton: UIButton {
     override func layoutSubviews() {
         super.layoutSubviews()
