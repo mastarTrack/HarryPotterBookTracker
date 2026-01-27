@@ -10,10 +10,7 @@ import SnapKit
 
 class ViewController: UIViewController {
     private let dataManager = DataManager()
-    
-    private let titleLabel = UILabel()
-    private let seriesButton = UIButton()
-    
+
     private let infoImage = UIImageView()
     private let infoTitle = UILabel()
     private let authorTitle = UILabel()
@@ -34,8 +31,8 @@ class ViewController: UIViewController {
     func setUI() {
         view.backgroundColor = .white
         
-        setLabel()
-        setSeriesButton()
+        let titleLabel = setTitleLabel()
+        let seriesButton = setSeriesButton()
         setInfoView()
         setInfoScroll()
         
@@ -53,7 +50,6 @@ class ViewController: UIViewController {
             $0.leading.greaterThanOrEqualToSuperview().offset(20)
             $0.trailing.lessThanOrEqualToSuperview().offset(-20)
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
-            $0.height.width.equalTo(44) // HIG 권장 최소 버튼 크기
         }
         
         infoScroll.snp.makeConstraints {
@@ -62,28 +58,10 @@ class ViewController: UIViewController {
         }
     }
     
-    func setLabel() {
-        titleLabel.text = dataManager.fetchInfo(num: 1, info: .title)
-        titleLabel.textAlignment = .center
-        titleLabel.font = .boldSystemFont(ofSize: 24)
-        titleLabel.numberOfLines = 0
-    }
-    
-    func setSeriesButton() {
-        seriesButton.setTitle("1", for: .normal)
-        seriesButton.titleLabel?.font = .systemFont(ofSize: 16)
-        seriesButton.titleLabel?.textColor = .white
-        seriesButton.backgroundColor = .systemBlue
-        
-        seriesButton.layer.cornerRadius = 22
-        seriesButton.clipsToBounds = true
-    }
-    
     func setInfoView() {
-        infoImage.image = UIImage(resource: .harrypotter1)
-        infoImage.contentMode = .scaleAspectFit
+
         
-        infoTitle.text = titleLabel.text
+ //       infoTitle.text = titleLabel.text
         infoTitle.font = .boldSystemFont(ofSize: 20)
         infoTitle.textColor = .black
         infoTitle.numberOfLines = 0
@@ -100,7 +78,7 @@ class ViewController: UIViewController {
         releasedTitle.font = .boldSystemFont(ofSize: 14)
         releasedTitle.textColor = .black
         
-        infoReleased.text = dataManager.fetchInfo(num: 1, info: .release_date) // 형태 변경 필요 June 26, 1997
+        infoReleased.text = dataManager.fetchInfo(num: 1, info: .release_date)
         infoReleased.font = .systemFont(ofSize: 14)
         infoReleased.textColor = .darkGray
         
@@ -159,6 +137,48 @@ class ViewController: UIViewController {
 
 }
 
+//MARK: 제목 영역
+extension ViewController {
+    // 책 제목 레이블 생성
+    func setTitleLabel() -> UILabel {
+        let text = dataManager.fetchInfo(num: 1, info: .title)
+        let label = UILabel(
+            text: text,
+            font:.boldSystemFont(ofSize: 24),
+            color: .black
+        )
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        
+        return label
+    }
+    
+    // 시리즈 버튼 생성
+    func setSeriesButton() -> SeriesButton {
+        let button = SeriesButton()
+        button.setTitle("1", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16)
+        button.titleLabel?.textColor = .white
+        button.backgroundColor = .systemBlue
+        
+        return button
+    }
+}
+
+//MARK: 정보 영역
+extension ViewController {
+    // 책 이미지 생성
+    func setBookImage() -> UIImageView {
+        let imageView = UIImageView()
+        imageView.image = UIImage(resource: .harrypotter1)
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }
+    
+    
+}
+
+//MARK: Custom Components
 // UILabel 생성자 정의
 extension UILabel {
     convenience init(
@@ -173,6 +193,13 @@ extension UILabel {
     }
 }
 
+class SeriesButton: UIButton {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.layer.cornerRadius = self.frame.height / 2
+        self.clipsToBounds = true
+    }
+}
 
 
 @available(iOS 17.0, *)
