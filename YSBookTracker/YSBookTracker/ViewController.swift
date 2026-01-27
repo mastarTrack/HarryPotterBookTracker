@@ -12,8 +12,31 @@ class ViewController: UIViewController {
     private let dataService = DataService()
     private var books: [Book] = []
     private var buttons: [UIButton] = []
-    private let mainTitleLabel = UILabel()
     private let buttonStackView = UIStackView()
+    private let mainTitleLabel = UILabel()
+    
+    let authorNameLabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 18)
+        label.textColor = .darkGray
+        label.text = "J. K. Rowling"
+        label.textAlignment = .left
+        return label
+    }()
+    
+    let releasedDateLabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .gray
+        return label
+    }()
+    
+    let pagesNumberLabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .gray
+        return label
+    }()
     
     let bookTitleLabel: UILabel = {
         let label = UILabel()
@@ -26,7 +49,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        
         loadBooks()
+        
         configureHeader()
         configureMain()
     }
@@ -55,9 +80,9 @@ class ViewController: UIViewController {
         config.baseForegroundColor = .white
         config.cornerStyle = .capsule
 
-        var attr = AttributedString(name)
-        attr.font = .systemFont(ofSize: 16)
-        config.attributedTitle = attr
+        var attri = AttributedString(name)
+        attri.font = .systemFont(ofSize: 16)
+        config.attributedTitle = attri
 
         let button = UIButton(configuration: config)
         button.clipsToBounds = true
@@ -88,7 +113,6 @@ class ViewController: UIViewController {
         
         buttonStackView.axis = .horizontal
         buttonStackView.spacing = 10
-        buttonStackView.alignment = .center
         buttonStackView.distribution = .equalSpacing
         
         createButtons()
@@ -100,19 +124,22 @@ class ViewController: UIViewController {
         buttonStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.top.equalTo(bookTitleLabel.snp.bottom).offset(16)
-            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(20)
         }
     }
     
     private func updateBookDetail(Volume: Int) {
         bookTitleLabel.text = books[Volume - 1].title
+        mainTitleLabel.text = books[Volume - 1].title
+        releasedDateLabel.text = books[Volume - 1].releaseDate.changeToUSADate()
+        pagesNumberLabel.text = String(books[Volume - 1].pages)
     }
     
     private func configureMain() {
         let mainStackView = UIStackView()
         mainStackView.axis = .horizontal
         mainStackView.spacing = 10
-        mainStackView.distribution = .fillProportionally
+        mainStackView.alignment = .firstBaseline
         
         view.addSubview(mainStackView)
         
@@ -127,10 +154,81 @@ class ViewController: UIViewController {
         coverImageView.clipsToBounds = true
         
         coverImageView.snp.makeConstraints {
+            $0.width.equalTo(100)
             $0.height.equalTo(coverImageView.snp.width).multipliedBy(1.5)
         }
         
+        let mainDetailStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .vertical
+            stackView.distribution = .fill
+            stackView.alignment = .leading
+            stackView.spacing = 8
+            return stackView
+        }()
+        
         mainStackView.addArrangedSubview(coverImageView)
+        mainStackView.addArrangedSubview(mainDetailStackView)
+        
+        mainTitleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        mainTitleLabel.numberOfLines = 0
+        
+        mainDetailStackView.addArrangedSubview(mainTitleLabel)
+        
+        let authorLabel = {
+            let label = UILabel()
+            label.text = "Author"
+            label.font = .systemFont(ofSize: 16, weight: .bold)
+            label.textAlignment = .left
+            return label
+        }()
+        
+        let authorStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .horizontal
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        authorStackView.addArrangedSubview(authorLabel)
+        authorStackView.addArrangedSubview(authorNameLabel)
+        mainDetailStackView.addArrangedSubview(authorStackView)
+        
+        let releasedLabel = {
+            let label = UILabel()
+            label.text = "Released"
+            label.font = .systemFont(ofSize: 14, weight: .bold)
+            return label
+        }()
+        
+        let releasedStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .horizontal
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        releasedStackView.addArrangedSubview(releasedLabel)
+        releasedStackView.addArrangedSubview(releasedDateLabel)
+        mainDetailStackView.addArrangedSubview(releasedStackView)
+        
+        let pagesLabel = {
+            let label = UILabel()
+            label.text = "Pages"
+            label.font = .systemFont(ofSize: 14, weight: .bold)
+            return label
+        }()
+        
+        let pagesStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .horizontal
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        pagesStackView.addArrangedSubview(pagesLabel)
+        pagesStackView.addArrangedSubview(pagesNumberLabel)
+        mainDetailStackView.addArrangedSubview(pagesStackView)
     }
     
     private func showErrorAlert(_ error: Error) {
