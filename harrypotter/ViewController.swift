@@ -29,6 +29,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         configUI()
         loadBooks()
     }
@@ -76,8 +77,8 @@ extension ViewController {
         }
         
         seriesStackView.snp.makeConstraints {
-//            $0.leading.trailing.equalToSuperview().inset(20)
-//            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20)
+            //            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20) // leading, trailing 추가
             $0.centerX.equalToSuperview()
             $0.top.equalTo(titleText.snp.bottom).offset(16)
             /*$0.width.equalTo(seriesButton.snp.height)*/ // height에 width 고정 -> 가로, 세로 비율 유지
@@ -135,7 +136,17 @@ extension ViewController {
                     selectedSeriesButton(0) // 기본 앱 실행 시 1권 표시 : 1번 버튼 선택
                 }
             case .failure(let error):
-                print("에러 : \(error)")
+                let alert = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                
+                DispatchQueue.main.async {
+                    self.present(alert, animated: true)
+                }
+                
+                
+//                self.present(alert, animated: true)
+                
+                
             }
         }
     }
