@@ -19,7 +19,7 @@ class MainView: UIView {
     let scrollView = UIScrollView() // 스크롤 뷰 생성
     let contentView = UIStackView() // 스크롤 뷰 내부 메인 뷰
     
-    let bookInfoView = BookInfoStackView() // bookInfoView 생성
+    let bookInfoStackView = BookInfoStackView() // bookInfoView 생성
     let bookSummaryStackView = BookSummaryStackView()
     let bookChapterStackView = BookChapterStackView()
     
@@ -72,7 +72,7 @@ extension MainView {
         
         //        view.addSubview(bookInfoView) // bookInfoView 추가
         //        view.addSubview(bookSummaryStackView) //bookSummaryStackView 추가
-        [bookInfoView, bookSummaryStackView, bookChapterStackView].forEach {
+        [bookInfoStackView, bookSummaryStackView, bookChapterStackView].forEach {
             contentView.addArrangedSubview($0)
         }
         

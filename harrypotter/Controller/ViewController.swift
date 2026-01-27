@@ -72,7 +72,7 @@ extension ViewController {
     // 정보 업데이트 함수 분리
     func infoUpdate(with book: Book, idx: Int) {
         mainView.titleText.text = book.title
-        mainView.bookInfoView.configure(with: book, idx: idx) // bookInfoView.configure 함수에 idx 넘겨주기
+        mainView.bookInfoStackView.configure(with: book, idx: idx) // bookInfoView.configure 함수에 idx 넘겨주기
         
         // isFolded_\(book.title) 상대로 저장하는 이유 : 다음 챕터에서 책에 따라 버튼 생성 시 개별적으로 상태 저장하기 위해
         let isSaved = UserDefaults.standard.object(forKey: "isFolded_\(book.title)") != nil // UserDefauls에 isFolded_isFolded_\(book.title) 상태로 저장된 값 유무 확인
