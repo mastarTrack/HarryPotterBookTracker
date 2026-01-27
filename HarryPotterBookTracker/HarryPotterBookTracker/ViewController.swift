@@ -10,68 +10,220 @@ import SnapKit
 
 class ViewController: UIViewController {
 
+    /// json 파싱 클래스
     private let dataService = DataService()
-    let labelHeader = UILabel()
+    /// 해리포터 책 정보 배열
     var bookData: [Book] = []
     
-    
+    /// 제목 헤더 레이블
+    let labelHeader = UILabel()
+    /// 책 이미지뷰
+    let imageInfoImage = UIImageView()
+    /// 상세정보 제목 레이블
+    let labelInfoHeader = UILabel()
+    /// 상세정보 저자 레이블
+    let labelInfoAuthor = UILabel()
+    /// 상세정보 책 출시일 레이블
+    let labelInfoRelesed = UILabel()
+    /// 상세정보 페이지 레이블
+    let labelInfoPages = UILabel()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         view.backgroundColor = .white
         
-        loadBooks()
-        if bookData.isEmpty {
-            return
-        }
         configureUI()
+        loadBooks()
     }
     
-    
+    /// 책 정보 로드 메소드
     func loadBooks() {
         dataService.loadBooks { [weak self] result in
             guard let self = self else { return }
-            
             switch result {
             case .success(let books):
                 bookData = books
+                setViewData(1)
             case .failure(let error):
-                print(error)
+                if let dataError = error as? DataService.DataError {
+                    switch dataError {
+                    case .fileNotFound:
+                        DispatchQueue.main.async {self.showAlert("파일을 찾을 수 없습니다.")}
+                    case .parsingFailed:
+                        DispatchQueue.main.async {self.showAlert("파싱 실패")}
+                    }
+                }
             }
         }
     }
     
+    /// UI 세팅 메소드
     private func configureUI(){
         
-        labelHeader.text = bookData[0].title
+        /// 컨트롤 설정부
         labelHeader.textColor = .black
         labelHeader.textAlignment = .center
         labelHeader.font = UIFont.boldSystemFont(ofSize: 24)
         labelHeader.numberOfLines = 0
         
-        
         let buttonBookCount = UIButton()
-        
         buttonBookCount.backgroundColor = .systemBlue
         buttonBookCount.setTitle("1", for: .normal)
         buttonBookCount.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         buttonBookCount.setTitleColor(.white, for: .normal)
         buttonBookCount.layer.cornerRadius = 15
         
+        let stackMain = UIStackView()
+        stackMain.axis = .horizontal
+        stackMain.alignment = .top
+        stackMain.distribution = .fill
+        stackMain.spacing = 10
+        
+        let subView = UIView()
+        
+        imageInfoImage.contentMode = .scaleAspectFit
+        
+        labelInfoHeader.numberOfLines = 0
+        labelInfoHeader.adjustsFontSizeToFitWidth = true
+        labelInfoHeader.font = UIFont.boldSystemFont(ofSize: 20)
+        labelInfoHeader.textColor = .black
+        
+        let labelAuthor = UILabel()
+        labelAuthor.font = UIFont.boldSystemFont(ofSize: 16)
+        labelAuthor.textColor = .black
+        labelAuthor.text = "Author"
+        labelInfoAuthor.font = UIFont.systemFont(ofSize: 18)
+        labelInfoAuthor.textColor = .darkGray
+        
+        let labelReleased = UILabel()
+        labelReleased.font = UIFont.boldSystemFont(ofSize: 14)
+        labelReleased.textColor = .black
+        labelReleased.text = "Released"
+        labelInfoRelesed.font = UIFont.systemFont(ofSize: 14)
+        labelInfoRelesed.textColor = .gray
+
+        let labelPage = UILabel()
+        labelPage.font = UIFont.boldSystemFont(ofSize: 14)
+        labelPage.textColor = .black
+        labelPage.text = "Page"
+        labelInfoPages.font = UIFont.systemFont(ofSize: 14)
+        labelInfoPages.textColor = .gray
+
         view.addSubview(labelHeader)
         view.addSubview(buttonBookCount)
-        
+        subView.addSubview(labelInfoHeader)
+        subView.addSubview(labelAuthor)
+        subView.addSubview(labelInfoAuthor)
+        subView.addSubview(labelReleased)
+        subView.addSubview(labelInfoRelesed)
+        subView.addSubview(labelPage)
+        subView.addSubview(labelInfoPages)
+        stackMain.addArrangedSubview(imageInfoImage)
+        stackMain.addArrangedSubview(subView)
+        view.addSubview(stackMain)
+    
+        // 오토 레이아웃 선언부
         labelHeader.snp.makeConstraints{
+            $0.height.equalTo(100)
             $0.centerX.equalToSuperview()
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
-            
         }
+        
         buttonBookCount.snp.makeConstraints{
+            $0.height.equalTo(30)
             $0.top.equalTo(labelHeader.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
             $0.leading.greaterThanOrEqualToSuperview().offset(20)
             $0.trailing.lessThanOrEqualToSuperview().inset(20)
+        }
+        
+        imageInfoImage.snp.makeConstraints{
+            $0.width.equalTo(100)
+            $0.height.equalTo(imageInfoImage.snp.width).multipliedBy(1.5)
+        }
+        
+        stackMain.snp.makeConstraints{
+            $0.top.equalTo(buttonBookCount.snp.bottom).offset(20)
+            $0.trailing.leading.equalTo(view.safeAreaLayoutGuide).inset(20)
+        }
+        
+        
+        labelInfoHeader.snp.makeConstraints{
+            $0.leading.top.trailing.equalToSuperview()
+        }
+        
+        labelAuthor.snp.makeConstraints{
+            $0.top.equalTo(labelInfoHeader.snp.bottom).offset(7)
+        }
+    
+        labelInfoAuthor.snp.makeConstraints{
+            $0.centerY.equalTo(labelAuthor)
+            $0.leading.equalTo(labelAuthor.snp.trailing).offset(8)
+        }
+        
+        labelReleased.snp.makeConstraints{
+            $0.top.equalTo(labelAuthor.snp.bottom).offset(5)
+        }
+        
+        labelInfoRelesed.snp.makeConstraints{
+            $0.centerY.equalTo(labelReleased.snp.centerY)
+            $0.leading.equalTo(labelReleased.snp.trailing).offset(8)
+        }
+        
+        labelPage.snp.makeConstraints{
+            $0.top.equalTo(labelReleased.snp.bottom).offset(5)
+            $0.bottom.equalToSuperview().inset(10)
+        }
+        
+        labelInfoPages.snp.makeConstraints{
+            $0.centerY.equalTo(labelPage)
+            $0.leading.equalTo(labelPage.snp.trailing).offset(8)
+        }
+
+    }
+    
+    /// 경고 메소드
+    func showAlert(_ messageText: String) {
+        let alert = UIAlertController(
+            title: "경고",
+            message: messageText,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        self.present(alert, animated: true)
+    }
+
+    /// 뷰 데이터 변환 메소드
+    func setViewData(_ series: Int){
+        guard bookData.count != 0 else{
+            return
+        }
+        labelHeader.text = bookData.first?.title ?? "책 제목이 없습니다."
+        labelInfoHeader.text = bookData.first?.title ?? "책 제목이 없습니다."
+        labelInfoAuthor.text = bookData.first?.author ?? "불명"
+        labelInfoRelesed.text = bookData.first?.release_date ?? "불명"
+        labelInfoPages.text = bookData.first.map { "\($0.pages)" } ?? "불명"
+        
+        
+        switch series {
+        case 1:
+            imageInfoImage.image = .harrypotter1
+        case 2:
+            imageInfoImage.image = .harrypotter2
+        case 3:
+            imageInfoImage.image = .harrypotter3
+        case 4:
+            imageInfoImage.image = .harrypotter4
+        case 5:
+            imageInfoImage.image = .harrypotter5
+        case 6:
+            imageInfoImage.image = .harrypotter6
+        case 7:
+            imageInfoImage.image = .harrypotter7
+        default:
+            imageInfoImage.image = .none
         }
     }
 }
