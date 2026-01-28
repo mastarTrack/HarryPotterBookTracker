@@ -6,20 +6,18 @@
 //
 import Foundation
 
-class DataManager {
-    enum DataError: Error {
-        case fileNotFound
-        case parsingFailed
-    }
-    
-    static var shared = DataManager()
+class DataManager {    
     private var books: [Book] = []
     
     func loadBooks() throws -> [Book] {
         // data.json 파일 주소 가져오기
-        guard let path = Bundle.main.path(forResource: "data", ofType: "json") else {
+        guard let path = Bundle.main.path(forResource: "data9", ofType: "json") else {
             throw DataError.fileNotFound
         }
+        
+//        guard let path = Bundle.main.path(forResource: "data", ofType: "json") else {
+//            throw DataError.fileNotFound
+//        }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd" // 날짜 형식 설정
@@ -33,41 +31,24 @@ class DataManager {
             let books = bookResponse.data.map { $0.attributes } // Book 타입 배열로 가져오기
             return books // 결과로 사용
         } catch {
-            print("⛔️ JSON 파싱 에러: \(error)")
-            throw DataError.parsingFailed
+            throw DataError.parsingFailed(error)
         }
     }
     
-    func fetchData() {        
-        do {
-           books = try loadBooks()
-        } catch DataError.fileNotFound {
-            print("⛔️ 파일을 찾을 수 없습니다.")
-        } catch {
-            print("⛔️ 알 수 없는 오류: \(error)")
-        }
-    }
-    
-    func fetchInfo(num: Int, info: Description) -> String {
-        if books.isEmpty { fetchData() }
+    func fetchBook(num: Int) throws -> Book {
+        // books 배열이 비었다면 가져오기
+        if books.isEmpty { books = try loadBooks() }
         
         let i = num - 1
         
-        switch info {
-        case .title: return books[i].title
-        case .author: return books[i].author
-        case .pages: return String(books[i].pages)
-        case .release_date: return formatDate(books[i].release_date)
+        if books.indices.contains(i) { // 인덱스가 유효할 경우
+            return books[i]
+        } else { // 유효하지 않을 경우
+            throw DataError.invalidNumberOfBooks
         }
     }
     
-    func formatDate(_ released: Date) -> String {
-        // dateFormat 설정
-        let newFormatter = DateFormatter()
-        newFormatter.dateFormat = "MMMM dd, yyyy"
 
-        // June 26, 1997 형태의 문자열 반환
-        return newFormatter.string(from: released)
-    }
     
 }
+

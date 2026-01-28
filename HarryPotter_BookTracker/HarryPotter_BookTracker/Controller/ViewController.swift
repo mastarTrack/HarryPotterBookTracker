@@ -70,9 +70,11 @@ class ViewController: UIViewController {
 
 //MARK: 제목 영역
 extension ViewController {
+    // TODO: 책 제목 레이블 생성 함수 분리하기?
     // 책 제목 레이블 생성
     func setTitleLabel() -> UILabel {
-        let text = dataManager.fetchInfo(num: 1, info: .title)
+        let text = getBook(num: 1)?.title ?? ""
+
         let label = UILabel(
             text: text,
             font:.boldSystemFont(ofSize: 24),
@@ -112,6 +114,7 @@ extension ViewController {
         return imageView
     }
     
+    //TODO: 분리하기
     // 정보 레이블 가로 스택 생성
     func setHorizontalInfoLabelStack(_ info: Description) -> UIStackView {
         let title = info.rawValue
@@ -120,8 +123,21 @@ extension ViewController {
             font: .boldSystemFont(ofSize: 16),
             color: .black
         )
-
-        let infoDetail = dataManager.fetchInfo(num: 1, info: info)
+        
+        var infoDetail = ""
+        if let book = getBook(num: 1) {
+            switch info {
+            case .author:
+                infoDetail = book.author
+            case .pages:
+                infoDetail = "\(book.pages)"
+            case .release_date:
+                infoDetail = formatDate(book.release_date)
+            default:
+                break
+            }
+        }
+        
         let infoLabel = UILabel(
             text: infoDetail,
             font: .systemFont(ofSize: 18),
@@ -138,7 +154,8 @@ extension ViewController {
     // 정보 레이블 스택 생성
     func setInfoLabelStack() -> UIStackView {
         // 제목 레이블 생성
-        let text = dataManager.fetchInfo(num: 1, info: .title)
+        let text = getBook(num: 1)?.title ?? ""
+
         let titleLabel = UILabel(
             text: text,
             font: .boldSystemFont(ofSize: 20),
@@ -179,30 +196,48 @@ extension ViewController {
     
 }
 
-//MARK: Custom Components
-// UILabel 생성자 정의
-extension UILabel {
-    convenience init(
-        text: String,
-        font: UIFont,
-        color: UIColor
-    ) {
-        self.init()
-        self.text = text
-        self.font = font
-        self.textColor = color
+//MARK: Alert
+extension ViewController {
+    // Alert 생성
+    func showAlert(_ message: String) {
+        let alert = UIAlertController(title: "오류 발생", message: message, preferredStyle: .alert)
+        let confirm = UIAlertAction(title: "확인", style: .default, handler: nil)
+        
+        alert.addAction(confirm)
+
+        DispatchQueue.main.async {
+            guard self.presentedViewController == nil else { return }
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    // 데이터(책) 가져오기
+    func getBook(num: Int) -> Book? {
+        var book: Book?
+        
+        do {
+            book = try dataManager.fetchBook(num: num)
+        } catch DataError.fileNotFound {
+            showAlert("⛔️ 파일을 찾을 수 없습니다.")
+        } catch DataError.parsingFailed(let error) {
+            showAlert("⛔️ JSON 파싱 에러: \(error)")
+        } catch DataError.invalidNumberOfBooks {
+            showAlert("⛔️ 유효하지 않은 입력값입니다.")
+        } catch {
+            showAlert("⛔️ 알 수 없는 오류: \(error)")
+        }
+        return book
+    }
+    
+    func formatDate(_ released: Date) -> String {
+        // dateFormat 설정
+        let newFormatter = DateFormatter()
+        newFormatter.dateFormat = "MMMM dd, yyyy"
+        
+        // June 26, 1997 형태의 문자열 반환
+        return newFormatter.string(from: released)
     }
 }
-
-// 시리즈 버튼 원형 만들기
-class SeriesButton: UIButton {
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        self.layer.cornerRadius = self.frame.height / 2
-        self.clipsToBounds = true
-    }
-}
-
 
 @available(iOS 17.0, *)
 #Preview{
