@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     private var buttons: [UIButton] = []
     private let buttonStackView = UIStackView()
     private let mainTitleLabel = UILabel()
+    let mainStackView = UIStackView()
     
     let authorNameLabel = {
         let label = UILabel()
@@ -45,6 +46,23 @@ class ViewController: UIViewController {
         label.textAlignment = .center
         return label
     }()
+    
+    let dedicationInfoLabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        return label
+    }()
+    
+    let summaryInfoLabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 18)
+        label.textColor = .darkGray
+        return label
+    }()
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,6 +72,7 @@ class ViewController: UIViewController {
         
         configureHeader()
         configureMain()
+        ConfigureDetail()
     }
     
     private func loadBooks() {
@@ -133,10 +152,11 @@ class ViewController: UIViewController {
         mainTitleLabel.text = books[Volume - 1].title
         releasedDateLabel.text = books[Volume - 1].releaseDate.changeToUSADate()
         pagesNumberLabel.text = String(books[Volume - 1].pages)
+        summaryInfoLabel.text = books[Volume - 1].summary
+        dedicationInfoLabel.text = books[Volume - 1].dedication
     }
     
     private func configureMain() {
-        let mainStackView = UIStackView()
         mainStackView.axis = .horizontal
         mainStackView.spacing = 10
         mainStackView.alignment = .firstBaseline
@@ -229,6 +249,55 @@ class ViewController: UIViewController {
         pagesStackView.addArrangedSubview(pagesLabel)
         pagesStackView.addArrangedSubview(pagesNumberLabel)
         mainDetailStackView.addArrangedSubview(pagesStackView)
+    }
+    
+    func ConfigureDetail() {
+        let dedicationStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .vertical
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        let dedicationTitleLabel: UILabel = {
+            let label = UILabel()
+            label.text = "Dedication"
+            label.font = .systemFont(ofSize: 18, weight: .bold)
+            return label
+        }()
+        
+        view.addSubview(dedicationStackView)
+        dedicationStackView.addArrangedSubview(dedicationTitleLabel)
+        dedicationStackView.addArrangedSubview(dedicationInfoLabel)
+        
+        dedicationStackView.snp.makeConstraints {
+            $0.top.equalTo(mainStackView.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+        
+        let summaryStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .vertical
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        let summaryTitleLabel: UILabel = {
+            let label = UILabel()
+            label.text = "Summary"
+            label.font = .systemFont(ofSize: 18, weight: .bold)
+            return label
+        }()
+        
+        view.addSubview(summaryStackView)
+        summaryStackView.addArrangedSubview(summaryTitleLabel)
+        summaryStackView.addArrangedSubview(summaryInfoLabel)
+        
+        summaryStackView.snp.makeConstraints {
+            $0.top.equalTo(dedicationStackView.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+        
     }
     
     private func showErrorAlert(_ error: Error) {
