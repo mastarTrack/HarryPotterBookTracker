@@ -15,6 +15,7 @@ class ViewController: UIViewController {
     private let buttonStackView = UIStackView()
     private let mainTitleLabel = UILabel()
     let mainStackView = UIStackView()
+    let scrollStackView = UIStackView()
     
     let authorNameLabel = {
         let label = UILabel()
@@ -63,13 +64,18 @@ class ViewController: UIViewController {
         return label
     }()
     
+    let chapterStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        return stackView
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         
         loadBooks()
-        
         configureHeader()
         configureMain()
         ConfigureDetail()
@@ -147,6 +153,15 @@ class ViewController: UIViewController {
         }
     }
     
+    private func makeChapterLabels(text: String) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        return label
+    }
+    
     private func updateBookDetail(Volume: Int) {
         bookTitleLabel.text = books[Volume - 1].title
         mainTitleLabel.text = books[Volume - 1].title
@@ -154,19 +169,44 @@ class ViewController: UIViewController {
         pagesNumberLabel.text = String(books[Volume - 1].pages)
         summaryInfoLabel.text = books[Volume - 1].summary
         dedicationInfoLabel.text = books[Volume - 1].dedication
+        
+        for ch in books[Volume - 1].chapters {
+            chapterStackView.addArrangedSubview(makeChapterLabels(text: ch.title))
+        }
     }
     
     private func configureMain() {
+        let scrollView = UIScrollView()
+        let contentView = UIView()
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(scrollStackView)
+        
+        scrollView.snp.makeConstraints {
+            $0.top.equalTo(buttonStackView.snp.bottom)
+            $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
+        }
+        
+        scrollStackView.snp.makeConstraints {
+            $0.leading.trailing.top.bottom.equalToSuperview().inset(24)
+        }
+        
+        scrollStackView.axis = .vertical
+        scrollStackView.spacing = 24
+        scrollStackView.distribution = .fill
+        
+        
         mainStackView.axis = .horizontal
         mainStackView.spacing = 10
         mainStackView.alignment = .firstBaseline
         
-        view.addSubview(mainStackView)
-        
-        mainStackView.snp.makeConstraints {
-            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
-            $0.top.equalTo(buttonStackView.snp.bottom).offset(10)
-        }
+        scrollStackView.addArrangedSubview(mainStackView)
         
         let coverImageView = UIImageView()
         coverImageView.image = UIImage(named: "harrypotter1")
@@ -266,14 +306,9 @@ class ViewController: UIViewController {
             return label
         }()
         
-        view.addSubview(dedicationStackView)
+        scrollStackView.addArrangedSubview(dedicationStackView)
         dedicationStackView.addArrangedSubview(dedicationTitleLabel)
         dedicationStackView.addArrangedSubview(dedicationInfoLabel)
-        
-        dedicationStackView.snp.makeConstraints {
-            $0.top.equalTo(mainStackView.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
         
         let summaryStackView = {
             let stackView = UIStackView()
@@ -289,15 +324,19 @@ class ViewController: UIViewController {
             return label
         }()
         
-        view.addSubview(summaryStackView)
+        scrollStackView.addArrangedSubview(summaryStackView)
         summaryStackView.addArrangedSubview(summaryTitleLabel)
         summaryStackView.addArrangedSubview(summaryInfoLabel)
         
-        summaryStackView.snp.makeConstraints {
-            $0.top.equalTo(dedicationStackView.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(20)
-        }
+        let chapterTitleLabel: UILabel = {
+            let label = UILabel()
+            label.text = "Chapters"
+            label.font = .systemFont(ofSize: 18, weight: .bold)
+            return label
+        }()
         
+        scrollStackView.addArrangedSubview(chapterStackView)
+        chapterStackView.addArrangedSubview(chapterTitleLabel)
     }
     
     private func showErrorAlert(_ error: Error) {
