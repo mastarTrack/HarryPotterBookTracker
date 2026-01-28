@@ -19,14 +19,21 @@ class ViewController: UIViewController {
         self.view = mainView
     }
     
+    //    viewDidAppear에 loadBooks()를 사용해도 alert 처리됨.
+    //    override func viewDidAppear(_ animated: Bool) {
+    //        super.viewDidAppear(animated)
+    //
+    //        loadBooks()
+    //    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        기존의 View 위에 덮어씌우기 (레이아웃 설정 필요)
-//        view.addSubview(mainView)
-//        mainView.snp.makeConstraints {
-//            $0.edges.equalToSuperview()
-//        }
+        //        기존의 View 위에 덮어씌우기 (레이아웃 설정 필요)
+        //        view.addSubview(mainView)
+        //        mainView.snp.makeConstraints {
+        //            $0.edges.equalToSuperview()
+        //        }
         
         setDelegate()
         loadBooks()
@@ -63,22 +70,18 @@ extension ViewController {
                 DispatchQueue.main.async {
                     self.present(alert, animated: true)
                 }
-//                self.present(alert, animated: true)
+                //                self.present(alert, animated: true)
                 
             }
         }
     }
     
-    // 정보 업데이트 함수 분리
+    // 정보 업데이트 함수 분리, config mainView에 통합
     func infoUpdate(with book: Book, idx: Int) {
-        mainView.titleText.text = book.title
-        mainView.bookInfoStackView.configure(with: book, idx: idx) // bookInfoView.configure 함수에 idx 넘겨주기
-        
         // isFolded_\(book.title) 상대로 저장하는 이유 : 다음 챕터에서 책에 따라 버튼 생성 시 개별적으로 상태 저장하기 위해
         let isSaved = UserDefaults.standard.object(forKey: "isFolded_\(book.title)") != nil // UserDefauls에 isFolded_isFolded_\(book.title) 상태로 저장된 값 유무 확인
-        mainView.bookSummaryStackView.config(dedication: book.dedication, summary: book.summary, folded: isSaved)
-
-        mainView.bookChapterStackView.config(with: book.chapters)
+        // mainView에서 UI 업데이트
+        mainView.config(with: book, idx: idx, isFolded: isSaved)
     }
 }
 
@@ -97,14 +100,9 @@ extension ViewController {
         
     }
     
-    // 버튼 눌렸을 때 상태 변화 메서드 정의
+    // 버튼 선택 시 색상 변경 MainView로 분리
     private func selectedSeriesButton(_ selectedSeriesIdx: Int) {
-        for (idx, btn) in mainView.seriesButtons.enumerated() {
-            btn.backgroundColor = (idx == selectedSeriesIdx) ? .systemBlue : .systemGray5
-            
-            let titleColor: UIColor = (idx == selectedSeriesIdx) ? .white : .systemBlue
-            btn.setTitleColor(titleColor, for: .normal)
-        }
+        mainView.updateButtonColor(selectedSeriesIdx)
     }
 }
 

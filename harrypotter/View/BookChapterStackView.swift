@@ -26,7 +26,7 @@ class BookChapterStackView: UIStackView {
 }
 
 extension BookChapterStackView {
-
+    
     func setAttribute() {
         self.axis = .vertical
         self.spacing = 8
@@ -40,7 +40,7 @@ extension BookChapterStackView {
         chapterListStackView.spacing = 8 // 각 챕터 사이 간격 8
         chapterListStackView.alignment = .leading
     }
-        
+    
     func setLayout() {
         [titleLabel, chapterListStackView].forEach { addArrangedSubview($0) }
     }
