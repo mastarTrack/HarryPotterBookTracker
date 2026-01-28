@@ -83,7 +83,7 @@ extension MainView {
         
         seriesStackView.snp.makeConstraints {
             //            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20) // leading, trailing 추가
+            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20).priority(.high) // leading, trailing 추가, stackView의 제약 조건을 .high(750)으로 변경 : 랜드스케이프에서 SuperView가 늘어나도 stackView는 버튼의 제약 조건에 걸림(.required)
             $0.centerX.equalToSuperview()
             $0.top.equalTo(titleText.snp.bottom).offset(16)
             /*$0.width.equalTo(seriesButton.snp.height)*/ // height에 width 고정 -> 가로, 세로 비율 유지
@@ -120,7 +120,6 @@ extension MainView {
         bookInfoStackView.config(with: book, idx: idx) // bookInfoView.config 함수에 idx 넘겨주기
         bookSummaryStackView.config(dedication: book.dedication, summary: book.summary, folded: isFolded)
         bookChapterStackView.config(with: book.chapters)
-        
     }
 }
 
@@ -140,6 +139,7 @@ extension MainView {
             button.snp.makeConstraints {
                 $0.width.equalTo(button.snp.height)
             }
+            button.setContentHuggingPriority(.required, for: .horizontal) // 버튼의 크기는 글자 크기에 맞게 고정
             self.seriesStackView.addArrangedSubview(button)
             self.seriesButtons.append(button)
         }
