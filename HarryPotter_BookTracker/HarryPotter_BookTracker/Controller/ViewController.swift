@@ -47,6 +47,7 @@ class ViewController: UIViewController {
         }
     }
     
+    //TODO: contentView 없이는 못할까?
     func setInfoScroll(of book: Book?) -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
@@ -55,7 +56,8 @@ class ViewController: UIViewController {
         scrollView.addSubview(contentView)
         
         contentView.snp.makeConstraints {
-            $0.edges.width.equalToSuperview()
+            $0.width.equalToSuperview()
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
         }
         
         let infoStack = setInfoStack(of: book)
@@ -78,6 +80,14 @@ class ViewController: UIViewController {
         summaryStack.snp.makeConstraints {
             $0.top.equalTo(dedicationStack.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview()
+        }
+        
+        let chapterStack = makeChapterStack(of: book)
+        contentView.addSubview(chapterStack)
+        
+        chapterStack.snp.makeConstraints {
+            $0.top.equalTo(summaryStack.snp.bottom).offset(24)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
         
         return scrollView
@@ -279,6 +289,38 @@ extension ViewController {
         infoLabel.numberOfLines = 0
         
         let stackView = UIStackView(arrangedSubviews: [title, infoLabel])
+        
+        stackView.axis = .vertical
+        stackView.alignment = .leading
+        stackView.spacing = 8
+        
+        return stackView
+    }
+}
+
+//MARK: 목차 영역
+extension ViewController {
+    func makeChapterStack(of book: Book?) -> UIStackView {
+        let title = UILabel(
+            text: "Chapter",
+            font: .boldSystemFont(ofSize: 18),
+            color: .black
+        )
+        
+        let chapters = book?.chapters ?? []
+        var chapterLabels: [UILabel] = [title]
+        
+        for chapter in chapters {
+            let text = chapter.title
+            let label = UILabel(
+                text: text,
+                font: .systemFont(ofSize: 14),
+                color: .darkGray
+            )
+            chapterLabels.append(label)
+        }
+        
+        let stackView = UIStackView(arrangedSubviews: chapterLabels)
         
         stackView.axis = .vertical
         stackView.alignment = .leading
