@@ -27,6 +27,10 @@ class ViewController: UIViewController {
     let labelInfoRelesed = UILabel()
     /// 상세정보 페이지 레이블
     let labelInfoPages = UILabel()
+    /// 상세정보 헌사 레이블
+    let labelInfoDedication = UILabel()
+    /// 상세정보 개요 레이블
+    let labelInfoSummary = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,16 +78,16 @@ class ViewController: UIViewController {
         buttonBookCount.setTitleColor(.white, for: .normal)
         buttonBookCount.layer.cornerRadius = 15
         
-        let stackMain = UIStackView()
-        stackMain.axis = .horizontal
-        stackMain.alignment = .top
-        stackMain.distribution = .fill
-        stackMain.spacing = 10
+        let stackDetailMain = UIStackView()
+        stackDetailMain.axis = .horizontal
+        stackDetailMain.alignment = .top
+        stackDetailMain.distribution = .fill
+        stackDetailMain.spacing = 10
         
         let subView = UIView()
         
         imageInfoImage.contentMode = .scaleAspectFit
-        
+    
         labelInfoHeader.numberOfLines = 0
         labelInfoHeader.adjustsFontSizeToFitWidth = true
         labelInfoHeader.font = UIFont.boldSystemFont(ofSize: 20)
@@ -119,10 +123,54 @@ class ViewController: UIViewController {
         subView.addSubview(labelInfoRelesed)
         subView.addSubview(labelPage)
         subView.addSubview(labelInfoPages)
-        stackMain.addArrangedSubview(imageInfoImage)
-        stackMain.addArrangedSubview(subView)
-        view.addSubview(stackMain)
+        stackDetailMain.addArrangedSubview(imageInfoImage)
+        stackDetailMain.addArrangedSubview(subView)
+        view.addSubview(stackDetailMain)
     
+        
+        /// 책 구성 스택뷰
+        let stackMatter = UIStackView()
+        stackMatter.axis = .vertical
+        stackMatter.alignment = .top
+        stackMatter.spacing = 24
+        
+        // 헌사 스택뷰
+        let stackDedication = UIStackView()
+        stackDedication.axis = .vertical
+        stackDedication.alignment = .top
+        stackDedication.spacing = 8
+        
+        // 개요 스텍뷰
+        let stackSummary = UIStackView()
+        stackSummary.axis = .vertical
+        stackSummary.alignment = .top
+        stackSummary.spacing = 8
+        
+        let labelDedication = UILabel()
+        labelDedication.font = UIFont.boldSystemFont(ofSize: 18)
+        labelDedication.textColor = .black
+        labelDedication.text = "Dedication"
+        labelInfoDedication.font = UIFont.systemFont(ofSize: 14)
+        labelInfoDedication.textColor = .darkGray
+        labelInfoDedication.numberOfLines = 0
+        stackDedication.addArrangedSubview(labelDedication)
+        stackDedication.addArrangedSubview(labelInfoDedication)
+        
+        let labelSummary = UILabel()
+        labelSummary.font = UIFont.boldSystemFont(ofSize: 18)
+        labelSummary.textColor = .black
+        labelSummary.text = "Summary"
+        labelInfoSummary.font = UIFont.systemFont(ofSize: 14)
+        labelInfoSummary.textColor = .darkGray
+        labelInfoSummary.numberOfLines = 0
+        stackSummary.addArrangedSubview(labelSummary)
+        stackSummary.addArrangedSubview(labelInfoSummary)
+        
+        stackMatter.addArrangedSubview(stackDedication)
+        stackMatter.addArrangedSubview(stackSummary)
+        
+        view.addSubview(stackMatter)
+        
         // 오토 레이아웃 선언부
         labelHeader.snp.makeConstraints{
             $0.height.equalTo(100)
@@ -144,7 +192,7 @@ class ViewController: UIViewController {
             $0.height.equalTo(imageInfoImage.snp.width).multipliedBy(1.5)
         }
         
-        stackMain.snp.makeConstraints{
+        stackDetailMain.snp.makeConstraints{
             $0.top.equalTo(buttonBookCount.snp.bottom).offset(20)
             $0.trailing.leading.equalTo(view.safeAreaLayoutGuide).inset(20)
         }
@@ -182,6 +230,11 @@ class ViewController: UIViewController {
             $0.leading.equalTo(labelPage.snp.trailing).offset(8)
         }
 
+        stackMatter.snp.makeConstraints{
+            $0.top.equalTo(stackDetailMain.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview().inset(20)
+        }
+        
     }
     
     /// 경고 메소드
@@ -200,12 +253,13 @@ class ViewController: UIViewController {
         guard bookData.count != 0 else{
             return
         }
-        labelHeader.text = bookData.first?.title ?? "책 제목이 없습니다."
-        labelInfoHeader.text = bookData.first?.title ?? "책 제목이 없습니다."
-        labelInfoAuthor.text = bookData.first?.author ?? "불명"
-        labelInfoRelesed.text = bookData.first?.release_date ?? "불명"
-        labelInfoPages.text = bookData.first.map { "\($0.pages)" } ?? "불명"
-        
+        labelHeader.text = bookData[series-1].title
+        labelInfoHeader.text = bookData[series-1].title
+        labelInfoAuthor.text = bookData[series-1].author
+        labelInfoRelesed.text = convertDateText(bookData[series-1].release_date)
+        labelInfoPages.text = "\(bookData[series-1].pages)"
+        labelInfoDedication.text = bookData[series-1].dedication
+        labelInfoSummary.text = bookData[series-1].summary
         
         switch series {
         case 1:
