@@ -19,9 +19,11 @@ class ViewController: UIViewController {
     func setUI() {
         view.backgroundColor = .white
         
-        let titleLabel = setTitleLabel()
+        let book = getBook(num: 1)
+        
+        let titleLabel = setTitleLabel(of: book)
         let seriesButton = setSeriesButton()
-        let infoScroll = setInfoScroll()
+        let infoScroll = setInfoScroll(of: book)
         
         [titleLabel, seriesButton, infoScroll].forEach {
             view.addSubview($0)
@@ -45,7 +47,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func setInfoScroll() -> UIScrollView {
+    func setInfoScroll(of book: Book?) -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
         
@@ -53,14 +55,29 @@ class ViewController: UIViewController {
         scrollView.addSubview(contentView)
         
         contentView.snp.makeConstraints {
-            $0.edges.width.height.equalToSuperview()
+            $0.edges.width.equalToSuperview()
         }
         
-        let infoStack = setInfoStack()
+        let infoStack = setInfoStack(of: book)
         contentView.addSubview(infoStack)
         
         infoStack.snp.makeConstraints {
             $0.leading.trailing.top.equalToSuperview()
+        }
+        
+        let dedicationStack = makeDedicationStack(.dedication, of: book)
+        let summaryStack = makeDedicationStack(.summary, of: book)
+        contentView.addSubview(dedicationStack)
+        contentView.addSubview(summaryStack)
+        
+        dedicationStack.snp.makeConstraints {
+            $0.top.equalTo(infoStack.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview()
+        }
+        
+        summaryStack.snp.makeConstraints {
+            $0.top.equalTo(dedicationStack.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview()
         }
         
         return scrollView
@@ -72,8 +89,8 @@ class ViewController: UIViewController {
 extension ViewController {
     // TODO: 책 제목 레이블 생성 함수 분리하기?
     // 책 제목 레이블 생성
-    func setTitleLabel() -> UILabel {
-        let text = getBook(num: 1)?.title ?? ""
+    func setTitleLabel(of book: Book?) -> UILabel {
+        let text = book?.title ?? ""
 
         let label = UILabel(
             text: text,
@@ -116,7 +133,7 @@ extension ViewController {
     
     //TODO: 분리하기
     // 정보 레이블 가로 스택 생성
-    func setHorizontalInfoLabelStack(_ info: Description) -> UIStackView {
+    func setHorizontalInfoLabelStack(_ info: Description, of book: Book?) -> UIStackView {
         let title = info.rawValue
         let titleLabel = UILabel(
             text: title,
@@ -124,18 +141,15 @@ extension ViewController {
             color: .black
         )
         
-        var infoDetail = ""
-        if let book = getBook(num: 1) {
-            switch info {
-            case .author:
-                infoDetail = book.author
-            case .pages:
-                infoDetail = "\(book.pages)"
-            case .release_date:
-                infoDetail = formatDate(book.release_date)
-            default:
-                break
-            }
+        let infoDetail = switch info {
+        case .author:
+            book?.author ?? ""
+        case .pages:
+            "\(book?.pages ?? 0)"
+        case .release_date:
+            formatDate(book?.release_date ?? Date())
+        default:
+            ""
         }
         
         let infoLabel = UILabel(
@@ -152,7 +166,7 @@ extension ViewController {
     }
     
     // 정보 레이블 스택 생성
-    func setInfoLabelStack() -> UIStackView {
+    func setInfoLabelStack(of book: Book?) -> UIStackView {
         // 제목 레이블 생성
         let text = getBook(num: 1)?.title ?? ""
 
@@ -164,9 +178,9 @@ extension ViewController {
         titleLabel.numberOfLines  = 0
         
         // 저자, 발간일, 페이지 정보 레이블 스택 생성
-        let authorStack = setHorizontalInfoLabelStack(.author)
-        let releasedStack = setHorizontalInfoLabelStack(.release_date)
-        let pagesStack = setHorizontalInfoLabelStack(.pages)
+        let authorStack = setHorizontalInfoLabelStack(.author, of: book)
+        let releasedStack = setHorizontalInfoLabelStack(.release_date, of: book)
+        let pagesStack = setHorizontalInfoLabelStack(.pages, of: book)
         
         // 레이블 전체 스택 생성
         let stackView = UIStackView(arrangedSubviews: [titleLabel, authorStack, releasedStack, pagesStack])
@@ -179,9 +193,9 @@ extension ViewController {
     }
     
     // 정보 영역 스택 생성
-    func setInfoStack() -> UIStackView {
+    func setInfoStack(of book: Book?) -> UIStackView {
         let imageView = setBookImage()
-        let labels = setInfoLabelStack()
+        let labels = setInfoLabelStack(of: book)
         
         labels.setContentHuggingPriority(.required, for: .vertical)
         
@@ -236,6 +250,41 @@ extension ViewController {
         
         // June 26, 1997 형태의 문자열 반환
         return newFormatter.string(from: released)
+    }
+}
+
+//MARK: Dedication & Summary 영역
+extension ViewController {
+    func makeDedicationStack(_ info: Description, of book: Book?) -> UIStackView {
+        let title = UILabel(
+            text: info.rawValue,
+            font: .boldSystemFont(ofSize: 18),
+            color: .black
+        )
+        
+        let infoText = switch info {
+        case .dedication:
+            book?.dedication ?? ""
+        case .summary:
+            book?.summary ?? ""
+        default: ""
+        }
+        
+        let infoLabel = UILabel(
+            text: infoText,
+            font: .systemFont(ofSize: 14),
+            color: .darkGray
+        )
+        
+        infoLabel.numberOfLines = 0
+        
+        let stackView = UIStackView(arrangedSubviews: [title, infoLabel])
+        
+        stackView.axis = .vertical
+        stackView.alignment = .leading
+        stackView.spacing = 8
+        
+        return stackView
     }
 }
 

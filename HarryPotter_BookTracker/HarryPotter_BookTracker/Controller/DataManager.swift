@@ -11,13 +11,9 @@ class DataManager {
     
     func loadBooks() throws -> [Book] {
         // data.json 파일 주소 가져오기
-        guard let path = Bundle.main.path(forResource: "data9", ofType: "json") else {
+        guard let path = Bundle.main.path(forResource: "data", ofType: "json") else {
             throw DataError.fileNotFound
         }
-        
-//        guard let path = Bundle.main.path(forResource: "data", ofType: "json") else {
-//            throw DataError.fileNotFound
-//        }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd" // 날짜 형식 설정

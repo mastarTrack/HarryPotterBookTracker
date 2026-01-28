@@ -12,7 +12,9 @@ enum Description: String {
     case author = "Author"
     case pages = "Pages"
     case release_date = "Released"
-    //, dedication, summary, wiki, chapters
+    case dedication = "Dedication"
+    case summary = "Summary"
+    // wiki, chapters
 }
 
 enum DataError: Error {
