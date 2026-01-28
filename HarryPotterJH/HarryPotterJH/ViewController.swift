@@ -103,9 +103,12 @@ final class ViewController: UIViewController {
         $0.textColor = .darkGray
         $0.font = .systemFont(ofSize: 14)
         $0.numberOfLines = 0
+        $0.lineBreakMode = .byTruncatingTail
     }
     
-    let scrollView = UIScrollView()
+    let scrollView = UIScrollView().then {
+        $0.showsVerticalScrollIndicator = false // 수직 스크롤바 숨기기
+    }
     let contentView = UIView()
     
     let chapterStackView = UIStackView().then {
@@ -120,7 +123,18 @@ final class ViewController: UIViewController {
         $0.font = .systemFont(ofSize: 18, weight: .bold)
     }
     
+    let summaryButton = UIButton().then {
+        $0.backgroundColor = .white
+        $0.addTarget(self, action: #selector(summaryButtonTapped), for: .touchDown)
+        $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
+        $0.setTitleColor(.systemBlue, for: .normal)
+    }
     
+    var isExpanded = false
+    
+    private let expandedKey = "isSummaryExpanded"
+    
+
     // MARK: - viewDidLoad()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -131,6 +145,7 @@ final class ViewController: UIViewController {
         
         setupSubView()
         setupConstraints()
+
     }
     
     // MARK: -- function
@@ -141,7 +156,7 @@ final class ViewController: UIViewController {
         
         scrollView.addSubview(contentView)
         
-        [bookInfoStackView, dedicationStackView, summaryStackView, chapterStackView].forEach {
+        [bookInfoStackView, dedicationStackView, summaryStackView, chapterStackView, summaryButton].forEach {
             contentView.addSubview($0)
         }
         
@@ -208,11 +223,15 @@ final class ViewController: UIViewController {
             $0.top.equalTo(dedicationStackView.snp.bottom).offset(24)
         }
         
-        
         chapterStackView.snp.makeConstraints {
-            $0.top.equalTo(summaryStackView.snp.bottom).offset(24)
+            $0.top.equalTo(summaryButton.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview().inset(40) // contentView의 바닥과 연결시켜야함
+        }
+        
+        summaryButton.snp.makeConstraints {
+            $0.top.equalTo(summaryStackView.snp.bottom).offset(20)
+            $0.trailing.equalToSuperview().inset(20)
         }
     }
     
@@ -254,9 +273,15 @@ final class ViewController: UIViewController {
         return attrString
     }
     
+
+
     func updateUI() {
         guard books.indices.contains(count) else { return } // count가 books 안에 진짜 존재할 때만 실행
         let book = books[count]
+        
+        // 저장된 상태 불러오기 (디폴트값: false)
+        isExpanded = UserDefaults.standard.bool(forKey: "expandedKey_\(count)")
+        
         seriesButton.setTitle("\(count + 1)", for: .normal)
         titleLabel.text = book.title
         bookImageView.image = UIImage(named: "harrypotter\(count + 1)")
@@ -268,7 +293,6 @@ final class ViewController: UIViewController {
         pagesLabel.attributedText = createInfoText(title: "Pages", value: "\(book.pages)", titleSize: 14, valueSize: 14, valueColor: .gray)
         
         dedicationLabel.text = book.dedication
-        summaryLabel.text = book.summary
         
         chapterStackView.addArrangedSubview(chapterLabel)
         chapterStackView.subviews.forEach{ $0.removeFromSuperview() }
@@ -284,6 +308,27 @@ final class ViewController: UIViewController {
             }
             chapterStackView.addArrangedSubview(label)
         }
+        
+        summaryLabel.text = book.summary
+        
+        // 버튼의 초기 텍스트 수정
+        if book.summary.count > 450 {
+            // 줄 수 제한
+            summaryButton.isHidden = false
+            if isExpanded {
+                summaryLabel.text = book.summary
+                summaryButton.setTitle("접기", for: .normal)
+            } else {
+                summaryButton.setTitle("더 보기", for: .normal)                
+                // 450자에서 자르고 "..." 붙이기
+                let index = book.summary.index(book.summary.startIndex, offsetBy: 450)
+                summaryLabel.text = String(book.summary[..<index]) + "..."
+            }
+        } else {
+            summaryButton.isHidden = true // 450자가 넘으면 버튼 숨길필요없이 내용 전체 대입
+            summaryLabel.text = book.summary
+        }
+
     }
     
     private func formatDate(_ dateString: String) -> String {
@@ -308,6 +353,33 @@ final class ViewController: UIViewController {
         }
         updateUI()
     }
+    
+    @objc
+    private func summaryButtonTapped() {
+        isExpanded.toggle() // 상태 반전
+        
+        // UserDefault에 현재상태 저장하기
+        UserDefaults.standard.set(isExpanded, forKey: "expandedKey_\(count)")
+        
+        let book = books[count]
+        if isExpanded {
+            summaryLabel.text = book.summary
+            summaryButton.setTitle("접기", for: .normal)
+        }
+        else {
+            // 다시 450자로 자르기
+            let index = book.summary.index(book.summary.startIndex, offsetBy: 450)
+            summaryLabel.text = String(book.summary[..<index]) + "..."
+            summaryButton.setTitle("더 보기", for: .normal)
+        }
+        
+        // 레이아웃을 부드럽게 업데이트 (애니메이션)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded() // 중요! 이게 없으면 스크롤뷰가 안 늘어나요.
+            }
+    }
+    // 일단 들어왔을때 판정함수 실행 -> 버튼을 적절한 모양으로 만들기
+    // 버튼 눌럿을때의 로직 작성
     
     
 }
