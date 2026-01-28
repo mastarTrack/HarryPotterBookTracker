@@ -31,7 +31,9 @@ class ViewController: UIViewController {
     let labelInfoDedication = UILabel()
     /// 상세정보 개요 레이블
     let labelInfoSummary = UILabel()
-
+    /// 챕터 스택뷰
+    let stackChapters = UIStackView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -71,6 +73,7 @@ class ViewController: UIViewController {
         labelHeader.font = UIFont.boldSystemFont(ofSize: 24)
         labelHeader.numberOfLines = 0
         
+        // 임시 버튼 설정
         let buttonBookCount = UIButton()
         buttonBookCount.backgroundColor = .systemBlue
         buttonBookCount.setTitle("1", for: .normal)
@@ -78,21 +81,26 @@ class ViewController: UIViewController {
         buttonBookCount.setTitleColor(.white, for: .normal)
         buttonBookCount.layer.cornerRadius = 15
         
+        // 책 핵심 내용 스택뷰 설정
         let stackDetailMain = UIStackView()
         stackDetailMain.axis = .horizontal
         stackDetailMain.alignment = .top
         stackDetailMain.distribution = .fill
         stackDetailMain.spacing = 10
         
+        // 핵심내용 배치용 UIView
         let subView = UIView()
-        
+    
+        // 이미지 뷰 설정
         imageInfoImage.contentMode = .scaleAspectFit
     
+        // 책 제목 설정
         labelInfoHeader.numberOfLines = 0
         labelInfoHeader.adjustsFontSizeToFitWidth = true
         labelInfoHeader.font = UIFont.boldSystemFont(ofSize: 20)
         labelInfoHeader.textColor = .black
         
+        // 책 저자 설정
         let labelAuthor = UILabel()
         labelAuthor.font = UIFont.boldSystemFont(ofSize: 16)
         labelAuthor.textColor = .black
@@ -100,6 +108,7 @@ class ViewController: UIViewController {
         labelInfoAuthor.font = UIFont.systemFont(ofSize: 18)
         labelInfoAuthor.textColor = .darkGray
         
+        // 책 연도 설정
         let labelReleased = UILabel()
         labelReleased.font = UIFont.boldSystemFont(ofSize: 14)
         labelReleased.textColor = .black
@@ -107,6 +116,7 @@ class ViewController: UIViewController {
         labelInfoRelesed.font = UIFont.systemFont(ofSize: 14)
         labelInfoRelesed.textColor = .gray
 
+        // 책 페이지 설정
         let labelPage = UILabel()
         labelPage.font = UIFont.boldSystemFont(ofSize: 14)
         labelPage.textColor = .black
@@ -114,6 +124,7 @@ class ViewController: UIViewController {
         labelInfoPages.font = UIFont.systemFont(ofSize: 14)
         labelInfoPages.textColor = .gray
 
+        // 스택뷰 삽입
         view.addSubview(labelHeader)
         view.addSubview(buttonBookCount)
         subView.addSubview(labelInfoHeader)
@@ -125,7 +136,7 @@ class ViewController: UIViewController {
         subView.addSubview(labelInfoPages)
         stackDetailMain.addArrangedSubview(imageInfoImage)
         stackDetailMain.addArrangedSubview(subView)
-        view.addSubview(stackDetailMain)
+        //view.addSubview(stackDetailMain)
     
         
         /// 책 구성 스택뷰
@@ -146,6 +157,7 @@ class ViewController: UIViewController {
         stackSummary.alignment = .top
         stackSummary.spacing = 8
         
+        // 헌사 설정
         let labelDedication = UILabel()
         labelDedication.font = UIFont.boldSystemFont(ofSize: 18)
         labelDedication.textColor = .black
@@ -156,6 +168,7 @@ class ViewController: UIViewController {
         stackDedication.addArrangedSubview(labelDedication)
         stackDedication.addArrangedSubview(labelInfoDedication)
         
+        // 개요 설정
         let labelSummary = UILabel()
         labelSummary.font = UIFont.boldSystemFont(ofSize: 18)
         labelSummary.textColor = .black
@@ -166,40 +179,64 @@ class ViewController: UIViewController {
         stackSummary.addArrangedSubview(labelSummary)
         stackSummary.addArrangedSubview(labelInfoSummary)
         
+        // 챕터 스택뷰 설정
+        let stackChapter = UIStackView()
+        stackChapter.axis = .vertical
+        stackChapter.alignment = .top
+        stackChapter.distribution = .fill
+        stackChapter.spacing = 8
+        stackChapters.axis = .vertical
+        stackChapters.alignment = .top
+        stackChapters.distribution = .fill
+        stackChapters.spacing = 8
+        
+        // 책 챕터 라벨 설정
+        let labelChapter = UILabel()
+        labelChapter.font = UIFont.boldSystemFont(ofSize: 18)
+        labelChapter.textColor = .black
+        labelChapter.text = "Chapters"
+        
+        // 스택뷰에 책 헌사 및 개요 삽입
         stackMatter.addArrangedSubview(stackDedication)
         stackMatter.addArrangedSubview(stackSummary)
+        stackChapter.addArrangedSubview(labelChapter)
+        stackChapter.addArrangedSubview(stackChapters)
         
-        view.addSubview(stackMatter)
-        
+        // 스크롤 뷰에 컨트롤 삽입
+        let scrollViewInfo = UIScrollView()
+        scrollViewInfo.horizontalScrollIndicatorInsets = .zero
+        scrollViewInfo.addSubview(stackDetailMain)
+        scrollViewInfo.addSubview(stackMatter)
+        scrollViewInfo.addSubview(stackChapter)
+        view.addSubview(scrollViewInfo)
+
         // 오토 레이아웃 선언부
         labelHeader.snp.makeConstraints{
-            $0.height.equalTo(100)
             $0.centerX.equalToSuperview()
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
         
         buttonBookCount.snp.makeConstraints{
-            $0.height.equalTo(30)
             $0.top.equalTo(labelHeader.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
             $0.leading.greaterThanOrEqualToSuperview().offset(20)
             $0.trailing.lessThanOrEqualToSuperview().inset(20)
         }
         
-        imageInfoImage.snp.makeConstraints{
-            $0.width.equalTo(100)
-            $0.height.equalTo(imageInfoImage.snp.width).multipliedBy(1.5)
-        }
-        
+
         stackDetailMain.snp.makeConstraints{
-            $0.top.equalTo(buttonBookCount.snp.bottom).offset(20)
-            $0.trailing.leading.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.top.equalToSuperview()
+            $0.width.equalToSuperview().inset(20)
         }
-        
         
         labelInfoHeader.snp.makeConstraints{
             $0.leading.top.trailing.equalToSuperview()
+        }
+        
+        imageInfoImage.snp.makeConstraints{
+            $0.width.equalTo(100)
+            $0.height.equalTo(imageInfoImage.snp.width).multipliedBy(1.5)
         }
         
         labelAuthor.snp.makeConstraints{
@@ -232,12 +269,23 @@ class ViewController: UIViewController {
 
         stackMatter.snp.makeConstraints{
             $0.top.equalTo(stackDetailMain.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.width.equalToSuperview().inset(20)
         }
         
+        stackChapter.snp.makeConstraints{
+            $0.top.equalTo(stackMatter.snp.bottom).offset(24)
+            $0.bottom.equalToSuperview().inset(10)
+        }
+        
+        scrollViewInfo.snp.makeConstraints{
+            $0.top.equalTo(buttonBookCount.snp.bottom).offset(18)
+            $0.width.equalToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
     }
     
-    /// 경고 메소드
+    /// 경고 메시지 출력 메소드
     func showAlert(_ messageText: String) {
         let alert = UIAlertController(
             title: "경고",
@@ -261,6 +309,15 @@ class ViewController: UIViewController {
         labelInfoDedication.text = bookData[series-1].dedication
         labelInfoSummary.text = bookData[series-1].summary
         
+        stackChapters.arrangedSubviews.forEach{
+            $0.removeFromSuperview()
+        }
+        
+        bookData[series-1].chapters.forEach{
+            let label = getUILabelToChapter($0.title)
+            stackChapters.addArrangedSubview(label)
+        }
+        
         switch series {
         case 1:
             imageInfoImage.image = .harrypotter1
@@ -279,6 +336,15 @@ class ViewController: UIViewController {
         default:
             imageInfoImage.image = .none
         }
+    }
+    
+    /// 챕터에 배치될 라벨 생성 메소드
+    func getUILabelToChapter(_ Chapter: String)-> UILabel{
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        label.text = Chapter
+        return label
     }
 }
 
