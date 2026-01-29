@@ -17,6 +17,8 @@ class ViewController: UIViewController {
     let mainStackView = UIStackView()
     let scrollStackView = UIStackView()
     var isExpanded = false
+    var selectedVolume = 1
+    let coverImageView = UIImageView()
     
     let showMoreButton = {
         let button = UIButton()
@@ -99,7 +101,7 @@ class ViewController: UIViewController {
                 case .success(let books):
                     self.books = books
                     self.updateBookDetail(Volume: 1)
-                    self.updateSummary(Volume: 1)
+                    self.updateSummary(Volume: self.selectedVolume)
                     
                 case .failure(let error):
                     print(error)
@@ -123,7 +125,7 @@ class ViewController: UIViewController {
     
     @objc func didTapShowMore() {
         isExpanded.toggle()
-        updateSummary(Volume: 1)
+        updateSummary(Volume: selectedVolume)
     }
     
     private func makeButton(name: String) -> UIButton {
@@ -148,12 +150,41 @@ class ViewController: UIViewController {
     
     private func createButtons() {
         buttons = (1...7).map { i in
-            let b = makeButton(name: "\(i)")
-            b.tag = i
-            
-            return b
+            let button = makeButton(name: "\(i)")
+            button.tag = i
+            button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)
+            return button
         }
     }
+    
+    @objc func didTapVolumeButton(_ sender: UIButton) {
+        let volume = sender.tag
+        selectedVolume = volume
+        isExpanded = false
+        
+        updateInfo(volume: volume)
+    }
+    
+    func updateInfo(volume: Int)  {
+        guard books.indices.contains(volume - 1) else { return }
+        
+        resetChapters()
+        updateBookDetail(Volume: volume)
+        updateSummary(Volume: volume)
+    }
+    
+    func resetChapters() {
+        chapterStackView.arrangedSubviews.forEach {
+            chapterStackView.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+        
+        let chapterTitleLabel = UILabel()
+        chapterTitleLabel.text = "Chapters"
+        chapterTitleLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        chapterStackView.addArrangedSubview(chapterTitleLabel)
+    }
+    
     
     private func configureHeader() {
         view.addSubview(bookTitleLabel)
@@ -168,6 +199,7 @@ class ViewController: UIViewController {
         buttonStackView.distribution = .equalSpacing
         
         createButtons()
+        
         buttons.forEach { button in
             buttonStackView.addArrangedSubview(button)
         }
@@ -192,9 +224,9 @@ class ViewController: UIViewController {
     private func updateBookDetail(Volume: Int) {
         bookTitleLabel.text = books[Volume - 1].title
         mainTitleLabel.text = books[Volume - 1].title
+        coverImageView.image = UIImage(named: "harrypotter\(Volume)")
         releasedDateLabel.text = books[Volume - 1].releaseDate.changeToUSADate()
         pagesNumberLabel.text = String(books[Volume - 1].pages)
-        summaryInfoLabel.text = books[Volume - 1].summary
         dedicationInfoLabel.text = books[Volume - 1].dedication
         
         for ch in books[Volume - 1].chapters {
@@ -234,8 +266,6 @@ class ViewController: UIViewController {
         
         scrollStackView.addArrangedSubview(mainStackView)
         
-        let coverImageView = UIImageView()
-        coverImageView.image = UIImage(named: "harrypotter1")
         coverImageView.contentMode = .scaleAspectFit
         coverImageView.clipsToBounds = true
         
