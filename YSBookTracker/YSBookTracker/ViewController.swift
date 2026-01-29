@@ -8,17 +8,19 @@
 import UIKit
 import SnapKit
 
+// 뷰를 그리는 역할만 맡도록
 class ViewController: UIViewController {
-    private let dataService: BookServiceProtocol
-    private var books: [Book] = []
+    
+    private let dataService: BookServiceProtocol // 뷰모델
+    private var books: [Book] = [] // 뷰모델
     private var buttons: [UIButton] = []
     private let buttonStackView = UIStackView()
-    private let mainTitleLabel = UILabel()
+    private let mainTitleLabel = UILabel() //모델
     let mainStackView = UIStackView()
     let scrollStackView = UIStackView()
-    var isExpanded = false
-    var selectedVolume = 1
-    let coverImageView = UIImageView()
+    var isExpanded = false // 뷰 모델
+    var selectedVolume = 1 // 뷰 모델
+    let coverImageView = UIImageView() // 모델
     
     let showMoreButton = {
         let button = UIButton()
@@ -27,7 +29,7 @@ class ViewController: UIViewController {
         return button
     }()
     
-    let authorNameLabel = {
+    let authorNameLabel = { // 모델
         let label = UILabel()
         label.font = .systemFont(ofSize: 18)
         label.textColor = .darkGray
@@ -36,21 +38,21 @@ class ViewController: UIViewController {
         return label
     }()
     
-    let releasedDateLabel = {
+    let releasedDateLabel = { // 모델
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .gray
         return label
     }()
     
-    let pagesNumberLabel = {
+    let pagesNumberLabel = { // 모델
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .gray
         return label
     }()
     
-    let bookTitleLabel: UILabel = {
+    let bookTitleLabel: UILabel = { // 모델
         let label = UILabel()
         label.numberOfLines = 0
         label.font = .systemFont(ofSize: 24, weight: .bold)
@@ -58,7 +60,7 @@ class ViewController: UIViewController {
         return label
     }()
     
-    let dedicationInfoLabel = {
+    let dedicationInfoLabel = { // 모델
         let label = UILabel()
         label.numberOfLines = 0
         label.font = .systemFont(ofSize: 14)
@@ -66,7 +68,7 @@ class ViewController: UIViewController {
         return label
     }()
     
-    let summaryInfoLabel = {
+    let summaryInfoLabel = { // 모델
         let label = UILabel()
         label.numberOfLines = 0
         label.font = .systemFont(ofSize: 18)
@@ -106,7 +108,7 @@ class ViewController: UIViewController {
         ConfigureDetail()
     }
     
-    private func loadBooks() {
+    private func loadBooks() { //뷰모델
         dataService.loadBooks { [weak self] result in
             guard let self = self else { return }
             
@@ -126,7 +128,7 @@ class ViewController: UIViewController {
         }
     }
         
-    func updateSummary(Volume: Int) {
+    func updateSummary(Volume: Int) { // 뷰모델
         if isExpanded || books[Volume - 1].summary.count <= 450 {
             summaryInfoLabel.text = books[Volume - 1].summary
             showMoreButton.setTitle("접기", for: .normal)
@@ -138,17 +140,17 @@ class ViewController: UIViewController {
         showMoreButton.isHidden = books[Volume - 1].summary.count <= 450
     }
     
-    @objc func didTapShowMore() {
+    @objc func didTapShowMore() { // 뷰모델
         isExpanded.toggle()
         saveExpandedState()
         updateSummary(Volume: selectedVolume)
     }
     
-    func saveExpandedState() {
+    func saveExpandedState() { // 뷰모델
         UserDefaults.standard.set(isExpanded, forKey: DefaultsKey.isExpanded)
     }
 
-    private func restoreExpandedState() {
+    private func restoreExpandedState() { // 뷰모델
         isExpanded = UserDefaults.standard.bool(forKey: DefaultsKey.isExpanded)
     }
     
@@ -197,7 +199,7 @@ class ViewController: UIViewController {
         updateSummary(Volume: volume)
     }
     
-    func resetChapters() {
+    func resetChapters() { // 뷰컨???
         chapterStackView.arrangedSubviews.forEach {
             chapterStackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
