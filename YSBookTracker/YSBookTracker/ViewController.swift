@@ -159,7 +159,7 @@ class ViewController: UIViewController {
     }
     
     private func createButtons() {
-        buttons = (1...7).map { i in
+        buttons = (1...self.books.count).map { i in
             let button = makeButton(name: "\(i)")
             button.tag = i
             button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)
@@ -246,6 +246,7 @@ class ViewController: UIViewController {
     
     private func configureMain() {
         let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
         let contentView = UIView()
         
         view.addSubview(scrollView)
