@@ -102,6 +102,7 @@ class ViewController: UIViewController {
                     self.books = books
                     self.updateBookDetail(Volume: 1)
                     self.updateSummary(Volume: self.selectedVolume)
+                    self.restoreExpandedState()
                     
                 case .failure(let error):
                     print(error)
@@ -125,7 +126,16 @@ class ViewController: UIViewController {
     
     @objc func didTapShowMore() {
         isExpanded.toggle()
+        saveExpandedState()
         updateSummary(Volume: selectedVolume)
+    }
+    
+    func saveExpandedState() {
+        UserDefaults.standard.set(isExpanded, forKey: DefaultsKey.isExpanded)
+    }
+
+    private func restoreExpandedState() {
+        isExpanded = UserDefaults.standard.bool(forKey: DefaultsKey.isExpanded)
     }
     
     private func makeButton(name: String) -> UIButton {
@@ -431,4 +441,9 @@ class ViewController: UIViewController {
         present(alert, animated: true)
     }
 }
+
+enum DefaultsKey {
+    static let isExpanded = "summary.isExpanded"
+}
+
 
