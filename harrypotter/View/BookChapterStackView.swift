@@ -47,17 +47,31 @@ extension BookChapterStackView {
 }
 
 extension BookChapterStackView {
-    func config(with chapters: [Chapter]) {
-        chapterListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() } // 뷰를 삭제하는 로직 필요 : 스택뷰는 아래에 계속 쌓임.(addArrangedSubView를 사용하기에 덮어쓰지 않음)
+    func config(with chapters: [Chapter]) { // 수정 : 뷰를 삭제, 생성하는 것에는 많은 비용이 발생한다.
         
-        // 새로운 뷰를 생성 -> 적용 ( 덮어쓰기 x )
-        chapters.forEach { chapter in
-            let label = UILabel()
-            label.text = chapter.title
-            label.textColor = .darkGray
-            label.font = .systemFont(ofSize: 14)
-            chapterListStackView.addArrangedSubview(label)
-            
+        // 현재 뷰의 개수, 새로 받아올 뷰의 개수
+        let currentViewCount = chapterListStackView.arrangedSubviews.count
+        let newViewCount = chapters.count
+        
+        for i in 0..<newViewCount {
+            if i < currentViewCount {
+                if let label = chapterListStackView.arrangedSubviews[i] as? UILabel {
+                    label.text = chapters[i].title
+                    label.isHidden = false
+                }
+            } else {
+                let label = UILabel()
+                label.text = chapters[i].title
+                label.textColor = .darkGray
+                label.font = .systemFont(ofSize: 14)
+                chapterListStackView.addArrangedSubview(label)
+            }
+        }
+        
+        if newViewCount < currentViewCount {
+            for i in newViewCount..<currentViewCount {
+                chapterListStackView.arrangedSubviews[i].isHidden = true
+            }
         }
     }
 }
