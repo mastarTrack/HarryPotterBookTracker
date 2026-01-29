@@ -16,6 +16,14 @@ class ViewController: UIViewController {
     private let mainTitleLabel = UILabel()
     let mainStackView = UIStackView()
     let scrollStackView = UIStackView()
+    var isExpanded = false
+    
+    let showMoreButton = {
+        let button = UIButton()
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 14)
+        return button
+    }()
     
     let authorNameLabel = {
         let label = UILabel()
@@ -76,6 +84,7 @@ class ViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         loadBooks()
+        
         configureHeader()
         configureMain()
         ConfigureDetail()
@@ -90,6 +99,7 @@ class ViewController: UIViewController {
                 case .success(let books):
                     self.books = books
                     self.updateBookDetail(Volume: 1)
+                    self.updateSummary(Volume: 1)
                     
                 case .failure(let error):
                     print(error)
@@ -97,6 +107,23 @@ class ViewController: UIViewController {
                 }
             }
         }
+    }
+        
+    func updateSummary(Volume: Int) {
+        if isExpanded || books[Volume - 1].summary.count <= 450 {
+            summaryInfoLabel.text = books[Volume - 1].summary
+            showMoreButton.setTitle("접기", for: .normal)
+        } else {
+            let cutSummary = String(books[Volume - 1].summary.prefix(450))
+            summaryInfoLabel.text = cutSummary + "..."
+            showMoreButton.setTitle("더보기", for: .normal)
+        }
+        showMoreButton.isHidden = books[Volume - 1].summary.count <= 450
+    }
+    
+    @objc func didTapShowMore() {
+        isExpanded.toggle()
+        updateSummary(Volume: 1)
     }
     
     private func makeButton(name: String) -> UIButton {
@@ -184,7 +211,7 @@ class ViewController: UIViewController {
         contentView.addSubview(scrollStackView)
         
         scrollView.snp.makeConstraints {
-            $0.top.equalTo(buttonStackView.snp.bottom)
+            $0.top.equalTo(buttonStackView.snp.bottom).offset(24)
             $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
@@ -200,7 +227,6 @@ class ViewController: UIViewController {
         scrollStackView.axis = .vertical
         scrollStackView.spacing = 24
         scrollStackView.distribution = .fill
-        
         
         mainStackView.axis = .horizontal
         mainStackView.spacing = 10
@@ -327,6 +353,18 @@ class ViewController: UIViewController {
         scrollStackView.addArrangedSubview(summaryStackView)
         summaryStackView.addArrangedSubview(summaryTitleLabel)
         summaryStackView.addArrangedSubview(summaryInfoLabel)
+        
+        let buttonUIView = UIView()
+        
+        buttonUIView.addSubview(showMoreButton)
+        summaryStackView.addArrangedSubview(buttonUIView)
+        
+        showMoreButton.snp.makeConstraints {
+            $0.trailing.equalToSuperview().inset(20)
+            $0.top.bottom.equalToSuperview()
+        }
+        
+        showMoreButton.addTarget(self, action: #selector(didTapShowMore), for: .touchUpInside)
         
         let chapterTitleLabel: UILabel = {
             let label = UILabel()
