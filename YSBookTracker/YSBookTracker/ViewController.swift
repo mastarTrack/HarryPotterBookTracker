@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 class ViewController: UIViewController {
-    private let dataService = DataService()
+    private let dataService: BookServiceProtocol
     private var books: [Book] = []
     private var buttons: [UIButton] = []
     private let buttonStackView = UIStackView()
@@ -80,6 +80,20 @@ class ViewController: UIViewController {
         stackView.spacing = 8
         return stackView
     }()
+    
+    //필수 초기화 메서드, 테스트 할 시 mock 객체 만들어 주입
+    init(dataService: BookServiceProtocol = DataService()) {
+            self.dataService = dataService
+            // 코드로 생성시 필요한 init
+            super.init(nibName: nil, bundle: nil)
+        }
+    
+    // dataService: BookServiceProtocol 상수가 초기화 시점에 없음
+    // 부모 클래스 UIViewController에서 상속 받은 의무 구현 init이 호출
+    // 이 ViewController는 스토리보드로 생성하면 안 되고 코드로만 생성할 것임을 명시적으로 보여줌
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -159,7 +173,7 @@ class ViewController: UIViewController {
     }
     
     private func createButtons() {
-        buttons = (1...self.books.count).map { i in
+        buttons = (1...7).map { i in
             let button = makeButton(name: "\(i)")
             button.tag = i
             button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)

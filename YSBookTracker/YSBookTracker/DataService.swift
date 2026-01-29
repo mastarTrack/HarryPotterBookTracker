@@ -6,7 +6,7 @@
 //
 import Foundation
 
-class DataService {
+class DataService: BookServiceProtocol {
     enum DataError: Error {
         case fileNotFound
         case parsingFailed
@@ -28,4 +28,8 @@ class DataService {
             completion(.failure(DataError.parsingFailed))
         }
     }
+}
+
+protocol BookServiceProtocol {
+    func loadBooks(completion: @escaping (Result<[Book], Error>) -> Void)
 }
