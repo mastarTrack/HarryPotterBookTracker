@@ -60,7 +60,7 @@ extension ViewController {
                 self.books = books
                 mainView.setSeriesButton(with: books, target: self, action: #selector(seriesButtonTapped(_:))) // 기존 : ViewController 내부에서 실행하기 때문에 target을 self로 선언, action을 바로 사용가능했지만 mainView로 분리하여 매개변수로 넘겨줘야 함.
                 if let firstBook = books.first {
-                    self.infoUpdate(with: firstBook, idx: 0) // 업데이트 정보가 많아져서 함수로 분리
+                    self.updateInfo(with: firstBook, at: 0) // 업데이트 정보가 많아져서 함수로 분리
                     selectedSeriesButton(0) // 기본 앱 실행 시 1권 표시 : 1번 버튼 선택
                 }
             case .failure(let error):
@@ -77,11 +77,11 @@ extension ViewController {
     }
     
     // 정보 업데이트 함수 분리, config mainView에 통합
-    func infoUpdate(with book: Book, idx: Int) {
+    func updateInfo(with book: Book, at index: Int) {
         // isFolded_\(book.title) 상대로 저장하는 이유 : 다음 챕터에서 책에 따라 버튼 생성 시 개별적으로 상태 저장하기 위해
         let isSaved = UserDefaults.standard.object(forKey: "isFolded_\(book.title)") != nil // UserDefauls에 isFolded_isFolded_\(book.title) 상태로 저장된 값 유무 확인
         // mainView에서 UI 업데이트
-        mainView.config(with: book, idx: idx, isFolded: isSaved)
+        mainView.config(with: book, idx: index, isFolded: isSaved)
     }
 }
 
@@ -94,7 +94,7 @@ extension ViewController {
         let idx = sender.tag
         let book = books[idx]
         
-        infoUpdate(with: book, idx: idx) // infoUpdate에 idx 넘겨주기
+        updateInfo(with: book, at: idx) // infoUpdate에 idx 넘겨주기
         mainView.scrollView.setContentOffset(.zero, animated: false) // 스크롤 위치 초기화
         selectedSeriesButton(idx)
         
@@ -109,7 +109,7 @@ extension ViewController {
 // Delegate 사용
 extension ViewController: BookSummaryStackViewDelegate {
     
-    func onTapExtraButton(isFolded: Bool) {
+    func bookSummaryStackViewDidTapExtraButton(isFolded: Bool) {
         guard let title = mainView.titleText.text else { return }
         if isFolded {
             UserDefaults.standard.set(true, forKey: "isFolded_\(title)") // 접혀있는 상태일 경우, UserDefaults에 isFolded_\(title) 형태로 저장

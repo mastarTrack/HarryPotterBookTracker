@@ -10,7 +10,7 @@ import SnapKit
 
 // Delegate 생성, AnyObject 사용 : Class에서 사용할 경우로 제한 (weak 사용 가능)
 protocol BookSummaryStackViewDelegate: AnyObject {
-    func onTapExtraButton(isFolded: Bool)
+    func bookSummaryStackViewDidTapExtraButton(isFolded: Bool)
 }
 
 class BookSummaryStackView: UIStackView {
@@ -129,7 +129,7 @@ extension BookSummaryStackView {
     func extraButtonTapped() {
         isFolded.toggle()
         displaySummary()
-        delegate?.onTapExtraButton(isFolded: isFolded)
+        delegate?.bookSummaryStackViewDidTapExtraButton(isFolded: isFolded)
     }
     
 }
