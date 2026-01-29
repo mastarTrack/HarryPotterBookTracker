@@ -12,11 +12,14 @@ import SnapKit
 class ViewController: UIViewController {
     let viewModel = BookViewModel(dataService: DataService())
     private var buttons: [UIButton] = []
+    
     private let buttonStackView = UIStackView()
-    private let mainTitleLabel = UILabel() //모델
     let mainStackView = UIStackView()
     let scrollStackView = UIStackView()
-    let coverImageView = UIImageView() // 모델
+    
+    let coverImageView = UIImageView()
+    private let mainTitleLabel = UILabel()
+    let bookTitleLabel = UILabel()
     
     let showMoreButton = {
         let button = UIButton()
@@ -25,38 +28,29 @@ class ViewController: UIViewController {
         return button
     }()
     
-    let authorNameLabel = { // 모델
+    let authorNameLabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 18)
         label.textColor = .darkGray
-        label.text = "J. K. Rowling"
         label.textAlignment = .left
         return label
     }()
     
-    let releasedDateLabel = { // 모델
+    let releasedDateLabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .gray
         return label
     }()
     
-    let pagesNumberLabel = { // 모델
+    let pagesNumberLabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .gray
         return label
     }()
     
-    let bookTitleLabel: UILabel = { // 모델
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.font = .systemFont(ofSize: 24, weight: .bold)
-        label.textAlignment = .center
-        return label
-    }()
-    
-    let dedicationInfoLabel = { // 모델
+    let dedicationInfoLabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.font = .systemFont(ofSize: 14)
@@ -64,7 +58,7 @@ class ViewController: UIViewController {
         return label
     }()
     
-    let summaryInfoLabel = { // 모델
+    let summaryInfoLabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.font = .systemFont(ofSize: 18)
@@ -174,12 +168,7 @@ class ViewController: UIViewController {
     }
     
     private func configureHeader() {
-        view.addSubview(bookTitleLabel)
-        
-        bookTitleLabel.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
-        }
+        configureTitleLabel()
         
         buttonStackView.axis = .horizontal
         buttonStackView.spacing = 10
@@ -196,6 +185,18 @@ class ViewController: UIViewController {
             $0.centerX.equalToSuperview()
             $0.top.equalTo(bookTitleLabel.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(20)
+        }
+    }
+    
+    func configureTitleLabel() {
+        view.addSubview(bookTitleLabel)
+        bookTitleLabel.numberOfLines = 0
+        bookTitleLabel.font = .systemFont(ofSize: 24, weight: .bold)
+        bookTitleLabel.textAlignment = .center
+        
+        bookTitleLabel.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
     }
     
