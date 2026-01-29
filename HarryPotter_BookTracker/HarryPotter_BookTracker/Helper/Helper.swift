@@ -31,7 +31,7 @@ enum Description: String {
 enum DataError: Error {
     case fileNotFound
     case parsingFailed (Error)
-    case invalidNumberOfBooks
+    case emptyData
 }
 
 struct LabelSetting {

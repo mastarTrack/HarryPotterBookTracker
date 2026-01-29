@@ -10,11 +10,11 @@ import SnapKit
 
 class ViewController: UIViewController {
     private let dataManager = DataManager()
-    private var selected = 1
-    private var book: Book?
+    private var selected: Int = 1
+    private var books: [Book]?
     
     private var titleLabel = UILabel() // 최상단 제목 레이블
-    private var seriesButton = SeriesButton()
+    private var seriesButtons = [SeriesButton]()
     
     private var bookImageView = UIImageView()
     private var infoBookTitleLabel = UILabel()
@@ -29,36 +29,39 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        moreButton.isSelected = dataManager.setMoreStatus()
+        getBooks()
         
-        book = getBook(selected)
+        view.backgroundColor = .white
         
-        setTitleLabel(book)
-        setContentLabel(book)
-        setBookImage(num: selected)
         setMoreButton()
-        
+        setContents()
+
         setUI()
         
         setMoreButtonAction()
     }
     
+    func setContents() {
+        let book = books?[selected - 1]
+        setTitleLabel(book)
+        setContentLabel(book)
+        setBookImage(num: selected)
+    }
+    
     func setUI() {
-        view.backgroundColor = .white
+        let seriesButtonStack = setSeriesButtonStack()
+        let infoScroll = setInfoScroll()
         
-        let seriesButton = setSeriesButton()
-        let infoScroll = setInfoScroll(of: book)
-        
-        [titleLabel, seriesButton, infoScroll].forEach {
-            view.addSubview($0)
-        }
+        view.addSubview(titleLabel)
+        view.addSubview(seriesButtonStack)
+        view.addSubview(infoScroll)
         
         titleLabel.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.horizontalEdges.equalToSuperview().inset(20)
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
         
-        seriesButton.snp.makeConstraints {
+        seriesButtonStack.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.leading.greaterThanOrEqualToSuperview().offset(20)
             $0.trailing.lessThanOrEqualToSuperview().offset(-20)
@@ -67,12 +70,14 @@ class ViewController: UIViewController {
         
         infoScroll.snp.makeConstraints {
             $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
-            $0.top.equalTo(seriesButton.snp.bottom).offset(16)
+            $0.top.equalTo(seriesButtonStack.snp.bottom).offset(16)
         }
     }
     
     //TODO: contentView 없이는 못할까?
-    func setInfoScroll(of book: Book?) -> UIScrollView {
+    func setInfoScroll() -> UIScrollView {
+        let book = books?[selected - 1]
+        
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
         
@@ -128,6 +133,40 @@ extension ViewController {
         titleLabel.textColor = .black
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
+    }
+    
+    func setSeriesButtons() {
+        let num = books?.count ?? 0
+        
+        seriesButtons = (1...num).reduce(into: []) { arr, n in
+            let button = SeriesButton()
+            button.setTitle("\(n)", for: .normal)
+            button.titleLabel?.font = .systemFont(ofSize: 16)
+            button.titleLabel?.textColor = .white
+            button.backgroundColor = .systemBlue
+            setSeriesButtonAction(button)
+            
+            arr.append(button)
+        }
+    }
+    
+    func setSeriesButtonAction(_ button: SeriesButton) {
+        let selected = UIAction { [weak self] _ in
+            self?.seriesButtons.forEach { $0.isSelected = false }
+            self?.selected = Int(button.titleLabel?.text ?? "") ?? 1
+            
+            button.isSelected = true
+        }
+        button.addAction(selected, for: .touchUpInside)
+    }
+    
+    func setSeriesButtonStack() -> UIStackView {
+        setSeriesButtons()
+        seriesButtons.forEach { setSeriesButtonAction($0) }
+        
+        let stackView = UIStackView(arrangedSubviews: seriesButtons)
+        
+        return stackView
     }
     
     // 시리즈 버튼 생성
@@ -187,6 +226,7 @@ extension ViewController {
     
     // summary 내용 설정 함수
     func getSummaryText(_ type: Summary) -> String {
+        let book = books?[selected - 1]
         let text = book?.summary ?? ""
         
         switch type {
@@ -263,22 +303,20 @@ extension ViewController {
         }
     }
     
-    // 데이터(책) 가져오기
-    func getBook(_ num: Int) -> Book? {
-        var book: Book?
-        
+    // 데이터([Book]) 가져오기
+    func getBooks() {
         do {
-            book = try dataManager.fetchBook(num: num)
+            books = try dataManager.fetchBooks()
         } catch DataError.fileNotFound {
-            showAlert("⛔️ 파일을 찾을 수 없습니다.")
+            showAlert("⛔️ JSON 파일을 찾을 수 없습니다.")
         } catch DataError.parsingFailed(let error) {
             showAlert("⛔️ JSON 파싱 에러: \(error)")
-        } catch DataError.invalidNumberOfBooks {
-            showAlert("⛔️ 유효하지 않은 입력값입니다.")
-        } catch {
+        } catch DataError.emptyData {
+            showAlert("⛔️ 데이터가 비어있습니다.")
+        }
+        catch {
             showAlert("⛔️ 알 수 없는 오류: \(error)")
         }
-        return book
     }
     
     func formatDate(_ released: Date?) -> String {
@@ -315,6 +353,7 @@ extension ViewController {
     }
     
     func setMoreButton() {
+        moreButton.isSelected = dataManager.fetchMoreStatus()
         moreButton.delegate = dataManager // delegate 설정
         
         // configuration 설정
@@ -323,7 +362,8 @@ extension ViewController {
             var configuration = UIButton.Configuration.plain()
             
             switch button.state {
-            case .normal: configuration.title = "더보기" // 선택하지 않았을 경우
+            case .normal: // 선택하지 않았을 경우
+                configuration.title = "더보기"
             case .selected: // 선택했을 경우
                 configuration.title = "접기"
                 configuration.baseBackgroundColor = .clear
@@ -355,7 +395,6 @@ extension ViewController {
     func setMoreButtonAction() {
         let more = UIAction { [weak self] _ in
             self?.moreButton.isSelected.toggle()
-            
             guard let isSelected = self?.moreButton.isSelected else { return }
             
             // 요약 텍스트 재설정
@@ -363,7 +402,7 @@ extension ViewController {
             isSelected ? self?.getSummaryText(.origin)
             : self?.getSummaryText(.brief)
             
-            // isMore 상태 저장
+            // isSelected 상태 저장
             self?.moreButton.delegate?.saveStatus(isSelected)
         }
         

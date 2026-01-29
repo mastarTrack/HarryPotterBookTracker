@@ -7,7 +7,8 @@
 import Foundation
 
 class DataManager {
-    private var books: [Book] = []
+
+
     let isMoreKey = "isMore"
     
     func loadBooks() throws -> [Book] {
@@ -32,26 +33,21 @@ class DataManager {
         }
     }
     
-    func fetchBook(num: Int) throws -> Book {
-        // books 배열이 비었다면 가져오기
-        if books.isEmpty { books = try loadBooks() }
+    func fetchBooks() throws -> [Book] {
+        let books = try loadBooks()
+        if books.isEmpty { throw DataError.emptyData }
         
-        let i = num - 1
-        
-        if books.indices.contains(i) { // 인덱스가 유효할 경우
-            return books[i]
-        } else { // 유효하지 않을 경우
-            throw DataError.invalidNumberOfBooks
-        }
+        return books
     }
     
-    func setMoreStatus() -> Bool {
-        return UserDefaults.standard.bool(forKey: isMoreKey)
-    }
 }
 
 extension DataManager: MoreButtonDelegate {
     func saveStatus(_ isMore: Bool) {
         UserDefaults.standard.set(isMore, forKey: isMoreKey)
+    }
+    
+    func fetchMoreStatus() -> Bool {
+        return UserDefaults.standard.bool(forKey: isMoreKey)
     }
 }
