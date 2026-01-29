@@ -28,15 +28,34 @@ final class ViewController: UIViewController {
         $0.textAlignment = .center
     }
     
-    // 시리즈 버튼
-    let seriesButton = UIButton().then {
-        $0.setTitle("1", for:   .normal)
-        $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold) // Font 사이즈 16
-        $0.layer.cornerRadius = 20 // cornerRadius 이용해 원형으로 표시 크기 = size/ 2
-        $0.titleLabel?.textAlignment = .center
-        $0.backgroundColor = .systemBlue
-        $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown) // 왜 자꾸 에러?
+    let seriesButtonStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 5
+        $0.alignment = .center
     }
+    
+    // 시리즈 버튼 생성 함수 활용
+    lazy var seriesButton1 = makeSeriesButton(1)
+    lazy var seriesButton2 = makeSeriesButton(2)
+    lazy var seriesButton3 = makeSeriesButton(3)
+    lazy var seriesButton4 = makeSeriesButton(4)
+    lazy var seriesButton5 = makeSeriesButton(5)
+    lazy var seriesButton6 = makeSeriesButton(6)
+    lazy var seriesButton7 = makeSeriesButton(7)
+
+    
+    private func makeSeriesButton(_ title: Int) -> UIButton {
+        let button = UIButton().then {
+            $0.setTitle(String(title), for:   .normal)
+            $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+            $0.layer.cornerRadius = 20
+            $0.backgroundColor = .systemBlue
+            $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown) // 왜 자꾸 에러?
+        }
+        return button
+    }
+    
+    
     
     let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false // 수직 스크롤바 숨기기
@@ -147,7 +166,7 @@ final class ViewController: UIViewController {
         loadBooks()
         
         view.backgroundColor = .white
-        
+        seriesButton1.backgroundColor = .lightGray
         setupSubView()
         setupConstraints()
         
@@ -174,8 +193,12 @@ final class ViewController: UIViewController {
     
     // MARK: -- function
     private func setupSubView() {
-        [titleLabel, seriesButton, scrollView].forEach {
+        [titleLabel, seriesButtonStackView, scrollView].forEach {
             view.addSubview($0)
+        }
+        
+        [seriesButton1, seriesButton2, seriesButton3, seriesButton4, seriesButton5, seriesButton6, seriesButton7].forEach {
+            seriesButtonStackView.addArrangedSubview($0)
         }
         
         scrollView.addSubview(contentView)
@@ -208,17 +231,22 @@ final class ViewController: UIViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide).inset(10)
         }
         
-        seriesButton.snp.makeConstraints {
-            $0.size.equalTo(40)
-            $0.centerX.equalToSuperview()
+        seriesButtonStackView.snp.makeConstraints {
             $0.leading.greaterThanOrEqualToSuperview().inset(20)
             $0.trailing.lessThanOrEqualToSuperview().inset(20)
             $0.top.equalTo(titleLabel.snp.bottom).offset(16)
+            $0.centerX.equalToSuperview()
+        }
+        
+        [seriesButton1, seriesButton2, seriesButton3, seriesButton4, seriesButton5, seriesButton6, seriesButton7].forEach {
+            $0.snp.makeConstraints {
+                $0.width.height.equalTo(40)
+            }
         }
         
         scrollView.snp.makeConstraints {
             $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
-            $0.top.equalTo(seriesButton.snp.bottom).offset(20)
+            $0.top.equalTo(seriesButtonStackView.snp.bottom).offset(20)
         }
         
         contentView.snp.makeConstraints {
@@ -287,7 +315,8 @@ final class ViewController: UIViewController {
         // 저장된 상태 불러오기 (디폴트값: false)
         isExpanded = UserDefaults.standard.bool(forKey: "expandedKey_\(count)")
         
-        seriesButton.setTitle("\(count + 1)", for: .normal)
+        
+        
         titleLabel.text = book.title
         bookImageView.image = UIImage(named: "harrypotter\(count + 1)")
         titleLabel2.text = book.title
@@ -349,16 +378,20 @@ final class ViewController: UIViewController {
     }
     
     
-    // 시리즈 버튼 탭했을때 count +1
+    // 시리즈 버튼 탭했을때 count
     @objc
-    private func seriesButtonTapped() {
-        if count == books.count - 1 {
-            count = 0
-        } else {
-            count += 1
+    private func seriesButtonTapped(_ sender: UIButton) {
+        if let counting = sender.currentTitle {
+            [seriesButton1, seriesButton2, seriesButton3, seriesButton4, seriesButton5, seriesButton6, seriesButton7].forEach {$0.backgroundColor = .systemBlue}
+
+            count = (Int(counting) ?? 0 ) - 1
+            sender.backgroundColor = .lightGray
+            updateUI()
         }
-        updateUI()
     }
+
+    
+    
     
     // 요약 버튼 탭했을때 상태 변경
     @objc
@@ -380,28 +413,12 @@ final class ViewController: UIViewController {
             summaryButton.setTitle("더 보기", for: .normal)
         }
     }
+
+    
 }
-//     일단 들어왔을때 판정함수 실행 -> 버튼을 적절한 모양으로 만들기
-//     버튼 눌럿을때의 로직 작성
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @available(iOS 17.0, *)
 #Preview {
     ViewController()
 }
-
