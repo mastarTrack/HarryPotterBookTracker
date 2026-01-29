@@ -25,11 +25,11 @@ class ViewController: UIViewController {
     private var dedicationLabel = UILabel()
     private var summaryLabel = UILabel()
     
-    private var moreButton = UIButton()
-    private var isMore = false
+    private var moreButton = MoreButton()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        moreButton.isSelected = dataManager.setMoreStatus()
         
         book = getBook(selected)
         
@@ -117,7 +117,6 @@ class ViewController: UIViewController {
         
         return scrollView
     }
-
 }
 
 //MARK: 제목 영역
@@ -180,7 +179,7 @@ extension ViewController {
         dedicationLabel.textColor = .darkGray
         dedicationLabel.numberOfLines = 0
         
-        summaryLabel.text = isMore ? getSummaryText(.origin) : getSummaryText(.brief)
+        summaryLabel.text = moreButton.isSelected ? getSummaryText(.origin) : getSummaryText(.brief)
         summaryLabel.font = .systemFont(ofSize: 14)
         summaryLabel.textColor = .darkGray
         summaryLabel.numberOfLines = 0
@@ -194,6 +193,7 @@ extension ViewController {
         case .origin:
             return text
         case .brief:
+            if text.count < 450 { return text }
             let idx = text.index(text.startIndex, offsetBy: 450)
             return text[..<idx] + "..."
         }
@@ -315,12 +315,26 @@ extension ViewController {
     }
     
     func setMoreButton() {
-        var configuration = UIButton.Configuration.plain()
-        configuration.title = "더보기"
-        configuration.attributedTitle?.font = .systemFont(ofSize: 14)
-        configuration.attributedTitle?.foregroundColor = .systemBlue
+        moreButton.delegate = dataManager // delegate 설정
         
-        moreButton.configuration = configuration
+        // configuration 설정
+        moreButton.configurationUpdateHandler = { button in
+            
+            var configuration = UIButton.Configuration.plain()
+            
+            switch button.state {
+            case .normal: configuration.title = "더보기" // 선택하지 않았을 경우
+            case .selected: // 선택했을 경우
+                configuration.title = "접기"
+                configuration.baseBackgroundColor = .clear
+            default: break
+            }
+            
+            configuration.attributedTitle?.font = .systemFont(ofSize: 14)
+            configuration.attributedTitle?.foregroundColor = .systemBlue
+            
+            button.configuration = configuration
+        }
     }
     
     func setSummaryStack(of book: Book?) -> UIStackView {
@@ -333,7 +347,6 @@ extension ViewController {
         
         if summaryLabel.text?.count ?? 0 < 450 {
             moreButton.isHidden  = true
-            isMore = false
         }
         
         return stackView
@@ -341,14 +354,17 @@ extension ViewController {
     
     func setMoreButtonAction() {
         let more = UIAction { [weak self] _ in
-            self?.isMore.toggle()
-            guard let isMore = self?.isMore else { return }
+            self?.moreButton.isSelected.toggle()
             
-            self?.moreButton.configuration?.title = isMore ? "접기" : "더보기"
+            guard let isSelected = self?.moreButton.isSelected else { return }
             
+            // 요약 텍스트 재설정
             self?.summaryLabel.text =
-            isMore ? self?.getSummaryText(.origin)
+            isSelected ? self?.getSummaryText(.origin)
             : self?.getSummaryText(.brief)
+            
+            // isMore 상태 저장
+            self?.moreButton.delegate?.saveStatus(isSelected)
         }
         
         moreButton.addAction(more, for: .touchUpInside)

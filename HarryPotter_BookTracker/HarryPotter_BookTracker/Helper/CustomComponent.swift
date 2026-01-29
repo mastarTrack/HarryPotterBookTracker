@@ -29,3 +29,11 @@ class SeriesButton: UIButton {
         self.clipsToBounds = true
     }
 }
+
+class MoreButton: UIButton {
+    weak var delegate: MoreButtonDelegate?
+    
+    func saveStatus(_ isMore: Bool) {
+        delegate?.saveStatus(isMore)
+    }
+}

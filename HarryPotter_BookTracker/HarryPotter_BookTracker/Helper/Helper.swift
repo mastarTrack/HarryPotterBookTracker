@@ -16,17 +16,6 @@ enum Description: String {
     case summary = "Summary"
     // wiki, chapters
     
-    func getContentLabelSetting() -> LabelSetting? {
-        switch self {
-        case .author:
-            return LabelSetting(font: .systemFont(ofSize: 18), textColor: .darkGray)
-        case .pages, .release_date:
-            return LabelSetting(font: .systemFont(ofSize: 14), textColor: .gray)
-        case .dedication, .summary:
-            return LabelSetting(font: .systemFont(ofSize: 14), textColor: .darkGray)
-        }
-    }
-    
     func getTitleLabelSetting() -> LabelSetting {
         switch self {
         case .author:

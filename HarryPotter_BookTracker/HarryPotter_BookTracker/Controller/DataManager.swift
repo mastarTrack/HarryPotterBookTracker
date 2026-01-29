@@ -6,8 +6,9 @@
 //
 import Foundation
 
-class DataManager {    
+class DataManager {
     private var books: [Book] = []
+    let isMoreKey = "isMore"
     
     func loadBooks() throws -> [Book] {
         // data.json 파일 주소 가져오기
@@ -44,7 +45,13 @@ class DataManager {
         }
     }
     
-
-    
+    func setMoreStatus() -> Bool {
+        return UserDefaults.standard.bool(forKey: isMoreKey)
+    }
 }
 
+extension DataManager: MoreButtonDelegate {
+    func saveStatus(_ isMore: Bool) {
+        UserDefaults.standard.set(isMore, forKey: isMoreKey)
+    }
+}
