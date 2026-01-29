@@ -10,16 +10,12 @@ import SnapKit
 
 // 뷰를 그리는 역할만 맡도록
 class ViewController: UIViewController {
-    
-    private let dataService: BookServiceProtocol // 뷰모델
-    private var books: [Book] = [] // 뷰모델
+    let viewModel = BookViewModel(dataService: DataService())
     private var buttons: [UIButton] = []
     private let buttonStackView = UIStackView()
     private let mainTitleLabel = UILabel() //모델
     let mainStackView = UIStackView()
     let scrollStackView = UIStackView()
-    var isExpanded = false // 뷰 모델
-    var selectedVolume = 1 // 뷰 모델
     let coverImageView = UIImageView() // 모델
     
     let showMoreButton = {
@@ -83,75 +79,78 @@ class ViewController: UIViewController {
         return stackView
     }()
     
-    //필수 초기화 메서드, 테스트 할 시 mock 객체 만들어 주입
-    init(dataService: BookServiceProtocol = DataService()) {
-            self.dataService = dataService
-            // 코드로 생성시 필요한 init
-            super.init(nibName: nil, bundle: nil)
-        }
-    
-    // dataService: BookServiceProtocol 상수가 초기화 시점에 없음
-    // 부모 클래스 UIViewController에서 상속 받은 의무 구현 init이 호출
-    // 이 ViewController는 스토리보드로 생성하면 안 되고 코드로만 생성할 것임을 명시적으로 보여줌
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        
-        loadBooks()
+        pushInfo()
         
         configureHeader()
         configureMain()
         ConfigureDetail()
-    }
-    
-    private func loadBooks() { //뷰모델
-        dataService.loadBooks { [weak self] result in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let books):
-                    self.books = books
-                    self.updateBookDetail(Volume: 1)
-                    self.updateSummary(Volume: self.selectedVolume)
-                    self.restoreExpandedState()
-                    
-                case .failure(let error):
-                    print(error)
-                    self.showErrorAlert(error)
-                }
-            }
-        }
-    }
         
-    func updateSummary(Volume: Int) { // 뷰모델
-        if isExpanded || books[Volume - 1].summary.count <= 450 {
-            summaryInfoLabel.text = books[Volume - 1].summary
-            showMoreButton.setTitle("접기", for: .normal)
-        } else {
-            let cutSummary = String(books[Volume - 1].summary.prefix(450))
-            summaryInfoLabel.text = cutSummary + "..."
-            showMoreButton.setTitle("더보기", for: .normal)
+        viewModel.loadBooks()
+    }
+    
+    func pushInfo() {
+        viewModel.updateInfo = { [weak self] info in
+            self?.updateBookDetail(info: info)
         }
-        showMoreButton.isHidden = books[Volume - 1].summary.count <= 450
+        
+        viewModel.error = { [weak self] error in
+            self?.showErrorAlert(error)
+        }
+        
     }
     
-    @objc func didTapShowMore() { // 뷰모델
-        isExpanded.toggle()
-        saveExpandedState()
-        updateSummary(Volume: selectedVolume)
-    }
-    
-    func saveExpandedState() { // 뷰모델
-        UserDefaults.standard.set(isExpanded, forKey: DefaultsKey.isExpanded)
-    }
+    private func updateBookDetail(info: BookViewInfo) {
+        bookTitleLabel.text = info.title
+        mainTitleLabel.text = info.title
+        
+        coverImageView.image = UIImage(named: info.coverImageName)
+        
+        authorNameLabel.text = info.authorName
+        releasedDateLabel.text = info.releasedDate
+        pagesNumberLabel.text = info.pages
+        dedicationInfoLabel.text = info.dedication
+        
+        summaryInfoLabel.text = info.summary
+        showMoreButton.setTitle(info.showMoreTitle, for: .normal)
+        showMoreButton.isHidden = info.isShowMoreHidden
 
-    private func restoreExpandedState() { // 뷰모델
-        isExpanded = UserDefaults.standard.bool(forKey: DefaultsKey.isExpanded)
+        resetChapters()
+        info.chapterTitles.forEach { title in
+            chapterStackView.addArrangedSubview(makeChapterLabels(text: title))
+        }
+    }
+    
+    func resetChapters() {
+        chapterStackView.arrangedSubviews.forEach {
+            chapterStackView.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+        
+        let chapterTitleLabel = UILabel()
+        chapterTitleLabel.text = "Chapters"
+        chapterTitleLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        chapterStackView.addArrangedSubview(chapterTitleLabel)
+    }
+    
+    private func makeChapterLabels(text: String) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        return label
+    }
+    
+    private func createButtons() {
+        buttons = (1...7).map { i in
+            let button = makeButton(name: "\(i)")
+            button.tag = i
+            button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)
+            return button
+        }
     }
     
     private func makeButton(name: String) -> UIButton {
@@ -173,44 +172,6 @@ class ViewController: UIViewController {
         
         return button
     }
-    
-    private func createButtons() {
-        buttons = (1...7).map { i in
-            let button = makeButton(name: "\(i)")
-            button.tag = i
-            button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)
-            return button
-        }
-    }
-    
-    @objc func didTapVolumeButton(_ sender: UIButton) {
-        let volume = sender.tag
-        selectedVolume = volume
-        isExpanded = false
-        
-        updateInfo(volume: volume)
-    }
-    
-    func updateInfo(volume: Int)  {
-        guard books.indices.contains(volume - 1) else { return }
-        
-        resetChapters()
-        updateBookDetail(Volume: volume)
-        updateSummary(Volume: volume)
-    }
-    
-    func resetChapters() { // 뷰컨???
-        chapterStackView.arrangedSubviews.forEach {
-            chapterStackView.removeArrangedSubview($0)
-            $0.removeFromSuperview()
-        }
-        
-        let chapterTitleLabel = UILabel()
-        chapterTitleLabel.text = "Chapters"
-        chapterTitleLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        chapterStackView.addArrangedSubview(chapterTitleLabel)
-    }
-    
     
     private func configureHeader() {
         view.addSubview(bookTitleLabel)
@@ -238,26 +199,8 @@ class ViewController: UIViewController {
         }
     }
     
-    private func makeChapterLabels(text: String) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.numberOfLines = 0
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = .darkGray
-        return label
-    }
-    
-    private func updateBookDetail(Volume: Int) {
-        bookTitleLabel.text = books[Volume - 1].title
-        mainTitleLabel.text = books[Volume - 1].title
-        coverImageView.image = UIImage(named: "harrypotter\(Volume)")
-        releasedDateLabel.text = books[Volume - 1].releaseDate.changeToUSADate()
-        pagesNumberLabel.text = String(books[Volume - 1].pages)
-        dedicationInfoLabel.text = books[Volume - 1].dedication
-        
-        for ch in books[Volume - 1].chapters {
-            chapterStackView.addArrangedSubview(makeChapterLabels(text: ch.title))
-        }
+    @objc private func didTapVolumeButton(_ sender: UIButton) {
+        viewModel.selectBook(volume: sender.tag)
     }
     
     private func configureMain() {
@@ -432,6 +375,10 @@ class ViewController: UIViewController {
         
         scrollStackView.addArrangedSubview(chapterStackView)
         chapterStackView.addArrangedSubview(chapterTitleLabel)
+    }
+    
+    @objc private func didTapShowMore() {
+        viewModel.showSummary()
     }
     
     private func showErrorAlert(_ error: Error) {
