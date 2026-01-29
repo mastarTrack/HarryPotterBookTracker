@@ -14,13 +14,13 @@ import Then
 final class ViewController: UIViewController {
     
     var books: [Book] = []
-    var count = 0 // count = 0 먼저 초기화
+    var index = 0
     private let dataService = DataService() // 데이터 담당자 생성
     
     
     // MARK: -- UI Components
     
-    // 맨 위 제목
+    // 최상단 책 제목 레이블
     let titleLabel = UILabel().then {
         $0.textColor = .black
         $0.font = .systemFont(ofSize: 24, weight: .bold) // 시스템 볼드체, 사이즈 24
@@ -28,13 +28,14 @@ final class ViewController: UIViewController {
         $0.textAlignment = .center
     }
     
+    // 시리즈 순서 버튼 스택뷰
     let seriesButtonStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 5
         $0.alignment = .center
     }
     
-    // 시리즈 버튼 생성 함수 활용
+    // 시리즈 순서 버튼 생성 함수 활용
     lazy var seriesButton1 = makeSeriesButton(1)
     lazy var seriesButton2 = makeSeriesButton(2)
     lazy var seriesButton3 = makeSeriesButton(3)
@@ -42,25 +43,13 @@ final class ViewController: UIViewController {
     lazy var seriesButton5 = makeSeriesButton(5)
     lazy var seriesButton6 = makeSeriesButton(6)
     lazy var seriesButton7 = makeSeriesButton(7)
-
     
-    private func makeSeriesButton(_ title: Int) -> UIButton {
-        let button = UIButton().then {
-            $0.setTitle(String(title), for:   .normal)
-            $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-            $0.layer.cornerRadius = 20
-            $0.backgroundColor = .systemBlue
-            $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown) // 왜 자꾸 에러?
-        }
-        return button
-    }
-    
-    
-    
+    // 스크롤뷰
     let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false // 수직 스크롤바 숨기기
     }
     
+    // 스크롤뷰 내부에 담을 컨텐츠뷰
     let contentView = UIView()
     
     // 책 메인 정보 스택뷰 (이미지 + 텍스트)
@@ -72,68 +61,71 @@ final class ViewController: UIViewController {
     
     // 책 이미지 뷰
     let bookImageView = UIImageView().then {
-        $0.contentMode = .scaleToFill
-        $0.clipsToBounds = true
+        $0.contentMode = .scaleAspectFill
     }
     
     // 책 정보 텍스트 스택뷰
     let bookInfoTextStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 4
+        $0.spacing = 8
         $0.alignment = .leading
     }
     
-    // 소제목
+    // 책 정보 영역 제목 레이블
     let titleLabel2 = UILabel().then {
         $0.textColor = .black
         $0.font = .systemFont(ofSize: 20, weight: .bold)
         $0.numberOfLines = 0
     }
     
-    // 저자,날짜,페이지 레이블
+    // 저자, 출간일, 페이지 레이블
     let authorLabel = UILabel()
     let releasedLabel = UILabel()
     let pagesLabel = UILabel()
     
-    // dedication
+    // Dedication 스택뷰
     let dedicationStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 8
         $0.alignment = .leading
     }
     
+    // Dedication 타이틀 레이블
     let dedicationTitleLabel = UILabel().then {
         $0.textColor = .black
         $0.text = "Dedication"
         $0.font = .systemFont(ofSize: 18, weight: .bold)
     }
     
+    // Dedication 내용 레이블
     let dedicationLabel = UILabel().then {
         $0.textColor = .darkGray
         $0.font = .systemFont(ofSize: 14)
         $0.numberOfLines = 0
     }
     
-    // summary
+    // Summary 스택뷰
     let summaryStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 8
         $0.alignment = .leading
     }
     
+    // Summary 타이틀 레이블
     let summaryTitleLabel = UILabel().then {
         $0.textColor = .black
         $0.text = "Summary"
         $0.font = .systemFont(ofSize: 18, weight: .bold)
     }
     
+    // Summary 내용 레이블
     let summaryLabel = UILabel().then {
         $0.textColor = .darkGray
         $0.font = .systemFont(ofSize: 14)
         $0.numberOfLines = 0
-        $0.lineBreakMode = .byTruncatingTail
     }
     
+    // Summary 요약 버튼
     let summaryButton = UIButton().then {
         $0.backgroundColor = .white
         $0.addTarget(self, action: #selector(summaryButtonTapped), for: .touchDown)
@@ -141,14 +133,15 @@ final class ViewController: UIViewController {
         $0.setTitleColor(.systemBlue, for: .normal)
     }
     
-    // chapter
+    // Chapter 스택뷰
     let chapterStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 8
         $0.alignment = .leading
     }
     
-    let chapterLabel = UILabel().then {
+    // Chapter 타이틀 레이블
+    let chapterTitleLabel = UILabel().then {
         $0.textColor = .black
         $0.text = "Chapters"
         $0.font = .systemFont(ofSize: 18, weight: .bold)
@@ -160,19 +153,19 @@ final class ViewController: UIViewController {
     
     
     // MARK: - viewDidLoad()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        loadBooks()
-        
         view.backgroundColor = .white
+        loadBooks()
         seriesButton1.backgroundColor = .lightGray
         setupSubView()
         setupConstraints()
         
     }
     
-    // MARK: - JSON Data Loading
+    
+    // MARK: - JSON Books Data Loading
     func loadBooks() {
         dataService.loadBooks { [weak self] result in
             guard let self = self else { return }
@@ -191,7 +184,8 @@ final class ViewController: UIViewController {
         }
     }
     
-    // MARK: -- function
+    // MARK: -- add_Subview
+    
     private func setupSubView() {
         [titleLabel, seriesButtonStackView, scrollView].forEach {
             view.addSubview($0)
@@ -224,10 +218,13 @@ final class ViewController: UIViewController {
         }
     }
     
+    
+    // MARK: -- add_Constraints (SnapKit)
+    
     private func setupConstraints() {
         titleLabel.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.leading.trailing.equalToSuperview().inset(20)
             $0.top.equalTo(view.safeAreaLayoutGuide).inset(10)
         }
         
@@ -255,13 +252,17 @@ final class ViewController: UIViewController {
         }
         
         bookInfoStackView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
             $0.top.equalToSuperview()
         }
         
         bookImageView.snp.makeConstraints {
             $0.width.equalTo(100)
             $0.height.equalTo(bookImageView.snp.width).multipliedBy(1.5)
+        }
+        
+        bookInfoTextStackView.snp.makeConstraints {
+            $0.leading.equalTo(bookImageView.snp.trailing).offset(10)
         }
         
         dedicationStackView.snp.makeConstraints {
@@ -286,6 +287,9 @@ final class ViewController: UIViewController {
         }
     }
     
+    
+    // MARK: -- function
+    
     // 에러창 띄우는 함수
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(title: "에러 발생", message: message, preferredStyle: .alert)
@@ -293,7 +297,19 @@ final class ViewController: UIViewController {
         self.present(alert, animated: true)
     }
     
-    // 내용 텍스트 생성 함수
+    // 시리즈 순서 버튼 생성 함수
+    private func makeSeriesButton(_ title: Int) -> UIButton {
+        let button = UIButton().then {
+            $0.setTitle(String(title), for: .normal)
+            $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+            $0.layer.cornerRadius = 20
+            $0.backgroundColor = .systemBlue
+            $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown)
+        }
+        return button
+    }
+    
+    // 책 정보뷰 텍스트 생성 함수
     private func createInfoText(title: String, value: String, titleSize: CGFloat, valueSize: CGFloat, valueColor: UIColor) -> NSAttributedString {
         let attrString = NSMutableAttributedString(
             string: title,
@@ -309,16 +325,19 @@ final class ViewController: UIViewController {
     
     // UI 갱신 함수
     func updateUI() {
-        guard books.indices.contains(count) else { return } // count가 books 안에 진짜 존재할 때만 실행
-        let book = books[count]
+        guard books.indices.contains(index) else { return } // count가 books 안에 진짜 존재할 때만 실행
+        let book = books[index]
         
         // 저장된 상태 불러오기 (디폴트값: false)
-        isExpanded = UserDefaults.standard.bool(forKey: "expandedKey_\(count)")
+        isExpanded = UserDefaults.standard.bool(forKey: "expandedKey_\(index)")
         
-        
-        
+        // 최상위 책 제목 값 대입
         titleLabel.text = book.title
-        bookImageView.image = UIImage(named: "harrypotter\(count + 1)")
+        
+        // 책 표지 이미지 대입
+        bookImageView.image = UIImage(named: "harrypotter\(index + 1)")
+        
+        // 책 정보영역의 제목 대입
         titleLabel2.text = book.title
         
         // 가이드에 맞춘 속성 텍스트 설정 (간격8 포함)
@@ -328,9 +347,11 @@ final class ViewController: UIViewController {
         
         dedicationLabel.text = book.dedication
         
-        chapterStackView.addArrangedSubview(chapterLabel)
+        // 챕터 스택 뷰의 모든 서브뷰 초기화
         chapterStackView.subviews.forEach{ $0.removeFromSuperview() }
-        chapterStackView.addArrangedSubview(chapterLabel)
+        
+        // 챕터 스택뷰에 타이틀 레이블 재 삽입
+        chapterStackView.addArrangedSubview(chapterTitleLabel)
         
         // 챕터의 배열을 돌면서 레이블을 추가하기
         book.chapters.forEach { chapter in
@@ -340,9 +361,11 @@ final class ViewController: UIViewController {
                 $0.textColor = .darkGray
                 $0.numberOfLines = 0
             }
+            // 챕터 스탭뷰에 차례로 add
             chapterStackView.addArrangedSubview(label)
         }
         
+        // Summary 레이블에 값 대입
         summaryLabel.text = book.summary
         
         // 버튼의 초기 텍스트 수정
@@ -378,20 +401,21 @@ final class ViewController: UIViewController {
     }
     
     
+    // MARK: -- button Function
+    
     // 시리즈 버튼 탭했을때 count
     @objc
     private func seriesButtonTapped(_ sender: UIButton) {
-        if let counting = sender.currentTitle {
+        if let title = sender.currentTitle {
             [seriesButton1, seriesButton2, seriesButton3, seriesButton4, seriesButton5, seriesButton6, seriesButton7].forEach {$0.backgroundColor = .systemBlue}
-
-            count = (Int(counting) ?? 0 ) - 1
-            sender.backgroundColor = .lightGray
+            
+            // tap한 버튼의 title - 1값이 index
+            index = (Int(title) ?? 0 ) - 1
+            // 선택된 버튼의 배경색 변경
+            sender.backgroundColor = .systemGray4
             updateUI()
         }
     }
-
-    
-    
     
     // 요약 버튼 탭했을때 상태 변경
     @objc
@@ -399,21 +423,22 @@ final class ViewController: UIViewController {
         isExpanded.toggle() // 상태 반전
         
         // UserDefault에 현재상태 저장하기
-        UserDefaults.standard.set(isExpanded, forKey: "expandedKey_\(count)")
+        UserDefaults.standard.set(isExpanded, forKey: "expandedKey_\(index)")
         
-        let book = books[count]
+        let book = books[index]
+        // 펴져있을땐 요약 원본 대입, 버튼은 접기로
         if isExpanded {
             summaryLabel.text = book.summary
             summaryButton.setTitle("접기", for: .normal)
         }
         else {
-            // 다시 450자로 자르기
+            // 접혀있을땐 다시 450자로 자르기
             let index = book.summary.index(book.summary.startIndex, offsetBy: 450)
             summaryLabel.text = String(book.summary[..<index]) + "..."
             summaryButton.setTitle("더 보기", for: .normal)
         }
     }
-
+    
     
 }
 
