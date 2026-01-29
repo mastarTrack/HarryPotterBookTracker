@@ -10,18 +10,42 @@ import SnapKit
 
 class ViewController: UIViewController {
     private let dataManager = DataManager()
+    private var selected = 1
+    private var book: Book?
     
+    private var titleLabel = UILabel() // 최상단 제목 레이블
+    private var seriesButton = SeriesButton()
+    
+    private var bookImageView = UIImageView()
+    private var infoBookTitleLabel = UILabel()
+    private var authorLabel = UILabel()
+    private var releasedDateLabel = UILabel()
+    private var pagesLabel = UILabel()
+    
+    private var dedicationLabel = UILabel()
+    private var summaryLabel = UILabel()
+    
+    private var moreButton = UIButton()
+    private var isMore = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        book = getBook(selected)
+        
+        setTitleLabel(book)
+        setContentLabel(book)
+        setBookImage(num: selected)
+        setMoreButton()
+        
         setUI()
+        
+        setMoreButtonAction()
     }
     
     func setUI() {
         view.backgroundColor = .white
         
-        let book = getBook(num: 1)
-        
-        let titleLabel = setTitleLabel(of: book)
         let seriesButton = setSeriesButton()
         let infoScroll = setInfoScroll(of: book)
         
@@ -67,15 +91,16 @@ class ViewController: UIViewController {
             $0.leading.trailing.top.equalToSuperview()
         }
         
-        let dedicationStack = makeDedicationStack(.dedication, of: book)
-        let summaryStack = makeDedicationStack(.summary, of: book)
+        let dedicationStack = setSummaryLabelStack(of: book, info: .dedication)
         contentView.addSubview(dedicationStack)
-        contentView.addSubview(summaryStack)
         
         dedicationStack.snp.makeConstraints {
             $0.top.equalTo(infoStack.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview()
         }
+        
+        let summaryStack = setSummaryStack(of: book)
+        contentView.addSubview(summaryStack)
         
         summaryStack.snp.makeConstraints {
             $0.top.equalTo(dedicationStack.snp.bottom).offset(24)
@@ -97,20 +122,13 @@ class ViewController: UIViewController {
 
 //MARK: 제목 영역
 extension ViewController {
-    // TODO: 책 제목 레이블 생성 함수 분리하기?
-    // 책 제목 레이블 생성
-    func setTitleLabel(of book: Book?) -> UILabel {
-        let text = book?.title ?? ""
-
-        let label = UILabel(
-            text: text,
-            font:.boldSystemFont(ofSize: 24),
-            color: .black
-        )
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        
-        return label
+    // 책 제목 레이블 설정
+    func setTitleLabel(_ book: Book?) {
+        titleLabel.text = book?.title ?? ""
+        titleLabel.font = .boldSystemFont(ofSize: 24)
+        titleLabel.textColor = .black
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 0
     }
     
     // 시리즈 버튼 생성
@@ -127,73 +145,87 @@ extension ViewController {
 
 //MARK: 정보 영역
 extension ViewController {
-    // 책 이미지 생성
-    func setBookImage() -> UIImageView {
-        let imageView = UIImageView()
-        imageView.image = UIImage(resource: .harrypotter1)
-        imageView.contentMode = .scaleAspectFit
+    // 책 이미지 설정
+    func setBookImage(num: Int) {
+        bookImageView.image = UIImage(named: "harrypotter" + "\(num)")
+        bookImageView.contentMode = .scaleAspectFit
         
-        imageView.snp.makeConstraints {
+        bookImageView.snp.makeConstraints {
             $0.width.equalTo(100)
-            $0.height.equalTo(imageView.snp.width).multipliedBy(1.5)
+            $0.height.equalTo(bookImageView.snp.width).multipliedBy(1.5)
         }
-        
-        return imageView
     }
     
-    //TODO: 분리하기
-    // 정보 레이블 가로 스택 생성
-    func setHorizontalInfoLabelStack(_ info: Description, of book: Book?) -> UIStackView {
-        let title = info.rawValue
-        let titleLabel = UILabel(
-            text: title,
-            font: .boldSystemFont(ofSize: 16),
-            color: .black
-        )
+    // 정보 레이블 설정
+    func setContentLabel(_ book: Book?) {
+        infoBookTitleLabel.text = book?.title ?? ""
+        infoBookTitleLabel.font = .boldSystemFont(ofSize: 20)
+        infoBookTitleLabel.textColor = .black
+        infoBookTitleLabel.numberOfLines = 0
         
-        let infoDetail = switch info {
-        case .author:
-            book?.author ?? ""
-        case .pages:
-            "\(book?.pages ?? 0)"
-        case .release_date:
-            formatDate(book?.release_date ?? Date())
-        default:
-            ""
+        authorLabel.text = book?.author ?? ""
+        authorLabel.font = .systemFont(ofSize: 18)
+        authorLabel.textColor = .darkGray
+        
+        pagesLabel.text = "\(book?.pages ?? 0)"
+        pagesLabel.font = .systemFont(ofSize: 14)
+        pagesLabel.textColor = .gray
+
+        releasedDateLabel.text = formatDate(book?.release_date)
+        releasedDateLabel.font = .systemFont(ofSize: 14)
+        releasedDateLabel.textColor = .gray
+        
+        dedicationLabel.text = book?.dedication ?? ""
+        dedicationLabel.font = .systemFont(ofSize: 14)
+        dedicationLabel.textColor = .darkGray
+        dedicationLabel.numberOfLines = 0
+        
+        summaryLabel.text = isMore ? getSummaryText(.origin) : getSummaryText(.brief)
+        summaryLabel.font = .systemFont(ofSize: 14)
+        summaryLabel.textColor = .darkGray
+        summaryLabel.numberOfLines = 0
+    }
+    
+    // summary 내용 설정 함수
+    func getSummaryText(_ type: Summary) -> String {
+        let text = book?.summary ?? ""
+        
+        switch type {
+        case .origin:
+            return text
+        case .brief:
+            let idx = text.index(text.startIndex, offsetBy: 450)
+            return text[..<idx] + "..."
         }
+    }
+    
+    // 정보 타이틀 레이블 생성
+    func makeInfoTitleLabel(_ info: Description) -> UILabel {
+        let text = info.rawValue
+        let setting = info.getTitleLabelSetting()
         
-        let infoLabel = UILabel(
-            text: infoDetail,
-            font: .systemFont(ofSize: 18),
-            color: .darkGray
-        )
+        let label = UILabel(text: text, font: setting.font, color: setting.textColor)
         
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, infoLabel])
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        
-        return stackView
+        return label
     }
     
     // 정보 레이블 스택 생성
-    func setInfoLabelStack(of book: Book?) -> UIStackView {
-        // 제목 레이블 생성
-        let text = getBook(num: 1)?.title ?? ""
-
-        let titleLabel = UILabel(
-            text: text,
-            font: .boldSystemFont(ofSize: 20),
-            color: .black
-        )
-        titleLabel.numberOfLines  = 0
+    func setInfoLabelStack() -> UIStackView {
+        let authorTitle = makeInfoTitleLabel(.author)
+        let authorStack = UIStackView(arrangedSubviews: [authorTitle, authorLabel])
         
-        // 저자, 발간일, 페이지 정보 레이블 스택 생성
-        let authorStack = setHorizontalInfoLabelStack(.author, of: book)
-        let releasedStack = setHorizontalInfoLabelStack(.release_date, of: book)
-        let pagesStack = setHorizontalInfoLabelStack(.pages, of: book)
+        let releasedTitle = makeInfoTitleLabel(.release_date)
+        let releasedStack = UIStackView(arrangedSubviews: [releasedTitle, releasedDateLabel])
         
-        // 레이블 전체 스택 생성
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, authorStack, releasedStack, pagesStack])
+        let pagesTitle = makeInfoTitleLabel(.pages)
+        let pagesStack = UIStackView(arrangedSubviews: [pagesTitle, pagesLabel])
+        
+        [authorStack, releasedStack, pagesStack].forEach {
+            $0.axis = .horizontal
+            $0.spacing = 8
+        }
+        
+        let stackView = UIStackView(arrangedSubviews: [infoBookTitleLabel, authorStack, releasedStack, pagesStack])
         
         stackView.axis = .vertical
         stackView.spacing = 8
@@ -201,15 +233,12 @@ extension ViewController {
         
         return stackView
     }
-    
+        
     // 정보 영역 스택 생성
     func setInfoStack(of book: Book?) -> UIStackView {
-        let imageView = setBookImage()
-        let labels = setInfoLabelStack(of: book)
+        let labels = setInfoLabelStack()
         
-        labels.setContentHuggingPriority(.required, for: .vertical)
-        
-        let stackView = UIStackView(arrangedSubviews: [imageView, labels])
+        let stackView = UIStackView(arrangedSubviews: [bookImageView, labels])
         
         stackView.axis = .horizontal
         stackView.spacing = 16
@@ -217,7 +246,6 @@ extension ViewController {
         
         return stackView
     }
-    
 }
 
 //MARK: Alert
@@ -236,7 +264,7 @@ extension ViewController {
     }
     
     // 데이터(책) 가져오기
-    func getBook(num: Int) -> Book? {
+    func getBook(_ num: Int) -> Book? {
         var book: Book?
         
         do {
@@ -253,48 +281,77 @@ extension ViewController {
         return book
     }
     
-    func formatDate(_ released: Date) -> String {
+    func formatDate(_ released: Date?) -> String {
+        guard let date = released else { return "" }
+        
         // dateFormat 설정
         let newFormatter = DateFormatter()
         newFormatter.dateFormat = "MMMM dd, yyyy"
         
         // June 26, 1997 형태의 문자열 반환
-        return newFormatter.string(from: released)
+        return newFormatter.string(from: date)
     }
 }
 
 //MARK: Dedication & Summary 영역
 extension ViewController {
-    func makeDedicationStack(_ info: Description, of book: Book?) -> UIStackView {
-        let title = UILabel(
-            text: info.rawValue,
-            font: .boldSystemFont(ofSize: 18),
-            color: .black
-        )
+    func setSummaryLabelStack(of book: Book?, info: Description) -> UIStackView {
+        let title = makeInfoTitleLabel(info)
         
-        let infoText = switch info {
+        let stackView = switch info {
         case .dedication:
-            book?.dedication ?? ""
+            UIStackView(arrangedSubviews: [title, dedicationLabel])
         case .summary:
-            book?.summary ?? ""
-        default: ""
+            UIStackView(arrangedSubviews: [title, summaryLabel])
+        default:
+            UIStackView()
         }
-        
-        let infoLabel = UILabel(
-            text: infoText,
-            font: .systemFont(ofSize: 14),
-            color: .darkGray
-        )
-        
-        infoLabel.numberOfLines = 0
-        
-        let stackView = UIStackView(arrangedSubviews: [title, infoLabel])
         
         stackView.axis = .vertical
         stackView.alignment = .leading
         stackView.spacing = 8
         
         return stackView
+    }
+    
+    func setMoreButton() {
+        var configuration = UIButton.Configuration.plain()
+        configuration.title = "더보기"
+        configuration.attributedTitle?.font = .systemFont(ofSize: 14)
+        configuration.attributedTitle?.foregroundColor = .systemBlue
+        
+        moreButton.configuration = configuration
+    }
+    
+    func setSummaryStack(of book: Book?) -> UIStackView {
+        let labels = setSummaryLabelStack(of: book, info: .summary)
+        
+        let stackView = UIStackView(arrangedSubviews: [labels, moreButton])
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.alignment = .trailing
+        
+        if summaryLabel.text?.count ?? 0 < 450 {
+            moreButton.isHidden  = true
+            isMore = false
+        }
+        
+        return stackView
+    }
+    
+    func setMoreButtonAction() {
+        let more = UIAction { [weak self] _ in
+            self?.isMore.toggle()
+            guard let isMore = self?.isMore else { return }
+            
+            self?.moreButton.configuration?.title = isMore ? "접기" : "더보기"
+            
+            self?.summaryLabel.text =
+            isMore ? self?.getSummaryText(.origin)
+            : self?.getSummaryText(.brief)
+        }
+        
+        moreButton.addAction(more, for: .touchUpInside)
     }
 }
 
