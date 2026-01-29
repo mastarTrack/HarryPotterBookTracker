@@ -35,8 +35,14 @@ final class ViewController: UIViewController {
         $0.layer.cornerRadius = 20 // cornerRadius 이용해 원형으로 표시 크기 = size/ 2
         $0.titleLabel?.textAlignment = .center
         $0.backgroundColor = .systemBlue
-        $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown)
+        $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown) // 왜 자꾸 에러?
     }
+    
+    let scrollView = UIScrollView().then {
+        $0.showsVerticalScrollIndicator = false // 수직 스크롤바 숨기기
+    }
+    
+    let contentView = UIView()
     
     // 책 메인 정보 스택뷰 (이미지 + 텍스트)
     let bookInfoStackView = UIStackView().then {
@@ -45,6 +51,7 @@ final class ViewController: UIViewController {
         $0.alignment = .top
     }
     
+    // 책 이미지 뷰
     let bookImageView = UIImageView().then {
         $0.contentMode = .scaleToFill
         $0.clipsToBounds = true
@@ -64,11 +71,12 @@ final class ViewController: UIViewController {
         $0.numberOfLines = 0
     }
     
-    // 저자 레이블
+    // 저자,날짜,페이지 레이블
     let authorLabel = UILabel()
     let releasedLabel = UILabel()
     let pagesLabel = UILabel()
     
+    // dedication
     let dedicationStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 8
@@ -87,6 +95,7 @@ final class ViewController: UIViewController {
         $0.numberOfLines = 0
     }
     
+    // summary
     let summaryStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 8
@@ -106,11 +115,14 @@ final class ViewController: UIViewController {
         $0.lineBreakMode = .byTruncatingTail
     }
     
-    let scrollView = UIScrollView().then {
-        $0.showsVerticalScrollIndicator = false // 수직 스크롤바 숨기기
+    let summaryButton = UIButton().then {
+        $0.backgroundColor = .white
+        $0.addTarget(self, action: #selector(summaryButtonTapped), for: .touchDown)
+        $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
+        $0.setTitleColor(.systemBlue, for: .normal)
     }
-    let contentView = UIView()
     
+    // chapter
     let chapterStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 8
@@ -123,18 +135,11 @@ final class ViewController: UIViewController {
         $0.font = .systemFont(ofSize: 18, weight: .bold)
     }
     
-    let summaryButton = UIButton().then {
-        $0.backgroundColor = .white
-        $0.addTarget(self, action: #selector(summaryButtonTapped), for: .touchDown)
-        $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
-        $0.setTitleColor(.systemBlue, for: .normal)
-    }
-    
     var isExpanded = false
     
     private let expandedKey = "isSummaryExpanded"
     
-
+    
     // MARK: - viewDidLoad()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -145,7 +150,26 @@ final class ViewController: UIViewController {
         
         setupSubView()
         setupConstraints()
-
+        
+    }
+    
+    // MARK: - JSON Data Loading
+    func loadBooks() {
+        dataService.loadBooks { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let books):
+                self.books = books
+                self.updateUI()
+            case .failure(let error):
+                print("error: \(error)")
+                
+                DispatchQueue.main.async {
+                    self.showErrorAlert(message: error.localizedDescription)
+                }
+            }
+        }
     }
     
     // MARK: -- function
@@ -159,7 +183,6 @@ final class ViewController: UIViewController {
         [bookInfoStackView, dedicationStackView, summaryStackView, chapterStackView, summaryButton].forEach {
             contentView.addSubview($0)
         }
-        
         
         [bookImageView, bookInfoTextStackView].forEach {
             bookInfoStackView.addArrangedSubview($0)
@@ -223,43 +246,26 @@ final class ViewController: UIViewController {
             $0.top.equalTo(dedicationStackView.snp.bottom).offset(24)
         }
         
+        summaryButton.snp.makeConstraints {
+            $0.top.equalTo(summaryStackView.snp.bottom).offset(20)
+            $0.trailing.equalToSuperview().inset(20)
+        }
+        
         chapterStackView.snp.makeConstraints {
             $0.top.equalTo(summaryButton.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview().inset(40) // contentView의 바닥과 연결시켜야함
         }
-        
-        summaryButton.snp.makeConstraints {
-            $0.top.equalTo(summaryStackView.snp.bottom).offset(20)
-            $0.trailing.equalToSuperview().inset(20)
-        }
     }
     
-    // MARK: - JSON Data Loading
-    func loadBooks() {
-        dataService.loadBooks { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let books):
-                self.books = books
-                self.updateUI()
-            case .failure(let error):
-                print("error: \(error)")
-                DispatchQueue.main.async {
-                    self.showErrorAlert(message: error.localizedDescription)
-                }
-            }
-        }
-    }
-    
-    
+    // 에러창 띄우는 함수
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(title: "에러 발생", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         self.present(alert, animated: true)
     }
     
+    // 내용 텍스트 생성 함수
     private func createInfoText(title: String, value: String, titleSize: CGFloat, valueSize: CGFloat, valueColor: UIColor) -> NSAttributedString {
         let attrString = NSMutableAttributedString(
             string: title,
@@ -273,8 +279,7 @@ final class ViewController: UIViewController {
         return attrString
     }
     
-
-
+    // UI 갱신 함수
     func updateUI() {
         guard books.indices.contains(count) else { return } // count가 books 안에 진짜 존재할 때만 실행
         let book = books[count]
@@ -297,7 +302,7 @@ final class ViewController: UIViewController {
         chapterStackView.addArrangedSubview(chapterLabel)
         chapterStackView.subviews.forEach{ $0.removeFromSuperview() }
         chapterStackView.addArrangedSubview(chapterLabel)
-
+        
         // 챕터의 배열을 돌면서 레이블을 추가하기
         book.chapters.forEach { chapter in
             let label = UILabel().then {
@@ -319,7 +324,7 @@ final class ViewController: UIViewController {
                 summaryLabel.text = book.summary
                 summaryButton.setTitle("접기", for: .normal)
             } else {
-                summaryButton.setTitle("더 보기", for: .normal)                
+                summaryButton.setTitle("더 보기", for: .normal)
                 // 450자에서 자르고 "..." 붙이기
                 let index = book.summary.index(book.summary.startIndex, offsetBy: 450)
                 summaryLabel.text = String(book.summary[..<index]) + "..."
@@ -328,9 +333,10 @@ final class ViewController: UIViewController {
             summaryButton.isHidden = true // 450자가 넘으면 버튼 숨길필요없이 내용 전체 대입
             summaryLabel.text = book.summary
         }
-
+        
     }
     
+    // date 포멧 변경 함수
     private func formatDate(_ dateString: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -343,7 +349,7 @@ final class ViewController: UIViewController {
     }
     
     
-    
+    // 시리즈 버튼 탭했을때 count +1
     @objc
     private func seriesButtonTapped() {
         if count == books.count - 1 {
@@ -354,6 +360,7 @@ final class ViewController: UIViewController {
         updateUI()
     }
     
+    // 요약 버튼 탭했을때 상태 변경
     @objc
     private func summaryButtonTapped() {
         isExpanded.toggle() // 상태 반전
@@ -372,17 +379,11 @@ final class ViewController: UIViewController {
             summaryLabel.text = String(book.summary[..<index]) + "..."
             summaryButton.setTitle("더 보기", for: .normal)
         }
-        
-        // 레이아웃을 부드럽게 업데이트 (애니메이션)
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded() // 중요! 이게 없으면 스크롤뷰가 안 늘어나요.
-            }
     }
-    // 일단 들어왔을때 판정함수 실행 -> 버튼을 적절한 모양으로 만들기
-    // 버튼 눌럿을때의 로직 작성
-    
-    
 }
+//     일단 들어왔을때 판정함수 실행 -> 버튼을 적절한 모양으로 만들기
+//     버튼 눌럿을때의 로직 작성
+
 
 
 
