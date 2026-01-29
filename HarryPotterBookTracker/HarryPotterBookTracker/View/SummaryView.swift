@@ -9,8 +9,10 @@ import UIKit
 import Foundation
 import SnapKit
 
-class ViewSummary : UIView {
+class SummaryView : UIView {
 
+    /// 책 넘버 Int
+    private var bookNumber = 0
     /// 레이블
     private let label = UILabel()
     /// 더보기/접기 버튼
@@ -19,13 +21,11 @@ class ViewSummary : UIView {
     private var text = ""
     /// 더보기/접기 설정 값
     private var onOffFullText = false
-
+    /// 데이터저장소 선언
     private let userDef = UserDefaults.standard
     
-
     override init(frame: CGRect) {
         super.init(frame: frame)
-        onOffFullText = userDef.bool(forKey: "onOff")
         configureUI()
     }
     
@@ -34,8 +34,10 @@ class ViewSummary : UIView {
     }
     
     /// 레이블 텍스트 설정 메소드
-    func setLabelText(_ text:String)
+    func setLabelText(_ text:String, _ number: Int)
     {
+        bookNumber = number
+        onOffFullText = userDef.bool(forKey: "onOff_\(bookNumber)")
         self.text = text
         if text.count > 450 {
             button.isHidden = false
@@ -71,6 +73,7 @@ class ViewSummary : UIView {
         }
     }
     @objc
+    /// 버튼용 더보기/접기 메소드
     func switchDownBotton(){
         onOffFullText = onOffFullText ? false : true
         switchFullText()
@@ -81,12 +84,14 @@ class ViewSummary : UIView {
         if text.count > 450{
             label.text = !onOffFullText ? String(text.prefix(450)) + "..." : text
             button.setTitle( onOffFullText ? "접기" : "더 보기" , for: .normal)
+        } else {
+            label.text = text
         }
-        userDef.set(onOffFullText, forKey: "onOff")
+        userDef.set(onOffFullText, forKey: "onOff_\(bookNumber)")
         userDef.synchronize()
     }
 }
 
 #Preview{
-    ViewSummary()
+    SummaryView()
 }

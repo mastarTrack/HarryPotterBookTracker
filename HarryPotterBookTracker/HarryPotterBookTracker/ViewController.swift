@@ -30,7 +30,7 @@ class ViewController: UIViewController {
     /// 상세정보 헌사 레이블
     let labelInfoDedication = UILabel()
     /// 상세정보 개요 뷰
-    let viewInfoSummry = ViewSummary()
+    let viewInfoSummry = SummaryView()
     /// 챕터 스택뷰
     let stackChapters = UIStackView()
     
@@ -38,9 +38,11 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         view.backgroundColor = .white
-        
-        configureUI()
         loadBooks()
+        configureUI()
+        if bookData.count != 0{
+            setViewData(book: bookData[0],bookNumber: 0)
+        }
     }
     
     /// 책 정보 로드 메소드
@@ -50,7 +52,6 @@ class ViewController: UIViewController {
             switch result {
             case .success(let books):
                 bookData = books
-                setViewData(1)
             case .failure(let error):
                 if let dataError = error as? DataService.DataError {
                     switch dataError {
@@ -73,13 +74,28 @@ class ViewController: UIViewController {
         labelHeader.font = UIFont.boldSystemFont(ofSize: 24)
         labelHeader.numberOfLines = 0
         
-        // 임시 버튼 설정
-        let buttonBookCount = UIButton()
-        buttonBookCount.backgroundColor = .systemBlue
-        buttonBookCount.setTitle("1", for: .normal)
-        buttonBookCount.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        buttonBookCount.setTitleColor(.white, for: .normal)
-        buttonBookCount.layer.cornerRadius = 15
+        
+        let stackButtons = UIStackView()
+        stackButtons.axis = .horizontal
+        stackButtons.spacing = 10
+        stackButtons.alignment = .center
+        stackButtons.distribution = .fill
+        
+        /// 책 수 만큼 버튼 생성
+        bookData.enumerated().forEach{ (offset, element) in
+            let button = UIButton()
+            button.backgroundColor = .systemBlue
+            button.setTitle(String(offset+1), for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+            button.setTitleColor(.white, for: .normal)
+            button.layer.cornerRadius = 15
+            button.addAction(UIAction {[weak self] _ in  self?.setViewData(book: element, bookNumber: offset)}
+                             , for: .touchDown)
+            button.snp.makeConstraints{
+                $0.width.height.greaterThanOrEqualTo(30)
+            }
+            stackButtons.addArrangedSubview(button)
+        }
         
         // 책 핵심 내용 스택뷰 설정
         let stackDetailMain = UIStackView()
@@ -127,7 +143,7 @@ class ViewController: UIViewController {
 
         // 스택뷰 삽입
         view.addSubview(labelHeader)
-        view.addSubview(buttonBookCount)
+        view.addSubview(stackButtons)
         subView.addSubview(labelInfoHeader)
         subView.addSubview(labelAuthor)
         subView.addSubview(labelInfoAuthor)
@@ -208,15 +224,13 @@ class ViewController: UIViewController {
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
-        
-        buttonBookCount.snp.makeConstraints{
-            $0.width.height.equalTo(30)
+
+        stackButtons.snp.makeConstraints{
             $0.centerX.equalToSuperview()
             $0.top.equalTo(labelHeader.snp.bottom).offset(16)
             $0.leading.greaterThanOrEqualToSuperview().offset(20)
             $0.trailing.lessThanOrEqualToSuperview().inset(20)
         }
-        
 
         stackDetailMain.snp.makeConstraints{
             $0.top.equalToSuperview()
@@ -271,7 +285,7 @@ class ViewController: UIViewController {
         }
         
         scrollViewInfo.snp.makeConstraints{
-            $0.top.equalTo(buttonBookCount.snp.bottom).offset(18)
+            $0.top.equalTo(stackButtons.snp.bottom).offset(18)
             //$0.width.equalToSuperview().inset(20)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
@@ -290,26 +304,33 @@ class ViewController: UIViewController {
     }
 
     /// 뷰 데이터 변환 메소드
-    func setViewData(_ series: Int){
-        guard bookData.count != 0 else{
-            return
-        }
-        imageInfoImage.image = UIImage(named: "harrypotter\(series)")
-        labelHeader.text = bookData[series-1].title
-        labelInfoHeader.text = bookData[series-1].title
-        labelInfoAuthor.text = bookData[series-1].author
-        labelInfoRelesed.text = convertDateText(bookData[series-1].release_date)
-        labelInfoPages.text = "\(bookData[series-1].pages)"
-        labelInfoDedication.text = bookData[series-1].dedication
-        viewInfoSummry.setLabelText(bookData[series-1].summary)
+    func setViewData(book: Book, bookNumber: Int){
+        imageInfoImage.image = UIImage(named: "harrypotter\(bookNumber+1)")
+        labelHeader.text = book.title
+        labelInfoHeader.text = book.title
+        labelInfoAuthor.text = book.author
+        labelInfoRelesed.text = convertDateText(book.release_date)
+        labelInfoPages.text = "\(book.pages)"
+        labelInfoDedication.text = book.dedication
+        viewInfoSummry.setLabelText(book.summary, bookNumber)
         
-        stackChapters.arrangedSubviews.forEach{
-            $0.removeFromSuperview()
-        }
         
-        bookData[series-1].chapters.forEach{
-            let label = getUILabelToChapter($0.title)
-            stackChapters.addArrangedSubview(label)
+        if book.chapters.count > stackChapters.arrangedSubviews.count{
+            for _ in 1...(book.chapters.count - stackChapters.arrangedSubviews.count){
+                stackChapters.addArrangedSubview(getUILabelToChapter(""))
+            }
+        }
+        stackChapters.arrangedSubviews.enumerated().forEach{
+            guard let label = $0.element as? UILabel else {
+                return
+            }
+            if $0.offset < book.chapters.count{
+                label.text = book.chapters[$0.offset].title
+                label.isHidden = false
+            }
+            else{
+                label.isHidden = true
+            }
         }
     }
     
