@@ -21,7 +21,7 @@ extension UILabel {
     }
 }
 
-// 시리즈 버튼 원형 만들기
+// 원형 시리즈 버튼
 class SeriesButton: UIButton {
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -30,6 +30,7 @@ class SeriesButton: UIButton {
     }
 }
 
+// 더보기 버튼
 class MoreButton: UIButton {
     weak var delegate: MoreButtonDelegate?
     

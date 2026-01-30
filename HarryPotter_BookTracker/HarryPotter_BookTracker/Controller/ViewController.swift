@@ -140,10 +140,26 @@ extension ViewController {
         
         seriesButtons = (1...num).reduce(into: []) { arr, n in
             let button = SeriesButton()
-            button.setTitle("\(n)", for: .normal)
-            button.titleLabel?.font = .systemFont(ofSize: 16)
-            button.titleLabel?.textColor = .white
-            button.backgroundColor = .systemBlue
+            
+            button.configurationUpdateHandler = { button in
+                var configuration = UIButton.Configuration.filled()
+                
+                switch button.state {
+                case .normal: // 선택하지 않았을 경우
+                    configuration.baseForegroundColor = .systemBlue
+                    configuration.baseBackgroundColor = .systemGray5
+                case .selected: // 선택했을 경우
+                    configuration.baseBackgroundColor = .systemBlue
+                    configuration.attributedTitle?.foregroundColor = .white
+                default: break
+                }
+                configuration.title = "\(n)"
+                configuration.attributedTitle?.font = .systemFont(ofSize: 16)
+                
+                button.configuration = configuration
+            }
+        
+            n == 1 ? button.isSelected = true : ()
             setSeriesButtonAction(button)
             
             arr.append(button)
@@ -151,13 +167,17 @@ extension ViewController {
     }
     
     func setSeriesButtonAction(_ button: SeriesButton) {
-        let selected = UIAction { [weak self] _ in
+        let buttonSelected = UIAction { [weak self] _ in
             self?.seriesButtons.forEach { $0.isSelected = false }
             self?.selected = Int(button.titleLabel?.text ?? "") ?? 1
             
             button.isSelected = true
+            print(self?.selected) // 왜 두개 나옴..?
+            self?.setContents()
+            self?.moreButton.isHidden =
+            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false
         }
-        button.addAction(selected, for: .touchUpInside)
+        button.addAction(buttonSelected, for: .touchUpInside)
     }
     
     func setSeriesButtonStack() -> UIStackView {
@@ -165,19 +185,11 @@ extension ViewController {
         seriesButtons.forEach { setSeriesButtonAction($0) }
         
         let stackView = UIStackView(arrangedSubviews: seriesButtons)
+        stackView.alignment = .center
+        stackView.spacing = 8
+        stackView.distribution = .fillEqually
         
         return stackView
-    }
-    
-    // 시리즈 버튼 생성
-    func setSeriesButton() -> SeriesButton {
-        let button = SeriesButton()
-        button.setTitle("1", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16)
-        button.titleLabel?.textColor = .white
-        button.backgroundColor = .systemBlue
-        
-        return button
     }
 }
 
