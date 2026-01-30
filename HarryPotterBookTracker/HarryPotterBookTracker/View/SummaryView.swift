@@ -9,6 +9,7 @@ import UIKit
 import Foundation
 import SnapKit
 
+/// 개요 뷰 클래스
 class SummaryView : UIView {
 
     /// 책 넘버 Int
