@@ -54,6 +54,6 @@ struct Book: Decodable {
     
 }
 
-struct Chapter: Codable {
+struct Chapter: Decodable {
     let title: String
 }
