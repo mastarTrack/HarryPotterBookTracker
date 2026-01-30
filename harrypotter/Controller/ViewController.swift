@@ -19,21 +19,8 @@ class ViewController: UIViewController {
         self.view = mainView
     }
     
-    //    viewDidAppear에 loadBooks()를 사용해도 alert 처리됨.
-    //    override func viewDidAppear(_ animated: Bool) {
-    //        super.viewDidAppear(animated)
-    //
-    //        loadBooks()
-    //    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //        기존의 View 위에 덮어씌우기 (레이아웃 설정 필요)
-        //        view.addSubview(mainView)
-        //        mainView.snp.makeConstraints {
-        //            $0.edges.equalToSuperview()
-        //        }
         
         setDelegate()
         loadBooks()
@@ -115,10 +102,4 @@ extension ViewController: BookSummaryStackViewDelegate {
             UserDefaults.standard.removeObject(forKey: "isFolded_\(title)") // 더보기 상태일 경우, UserDefaults에 저장된 isFolded_\(title) 제거
         }
     }
-}
-
-
-@available(iOS 17.0, *)
-#Preview{
-    ViewController()
 }

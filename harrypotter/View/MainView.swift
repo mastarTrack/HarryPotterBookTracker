@@ -12,7 +12,6 @@ class MainView: UIView {
     
     let titleText = UILabel()
     
-    //    let seriesButton = SeriesButton()
     let seriesStackView = UIStackView()
     var seriesButtons: [SeriesButton] = []
     
@@ -42,17 +41,10 @@ extension MainView {
         
         self.backgroundColor = .white
         
-        //        titleText.text = "ASDFASDFASDFASDFSADFSADFASDFSADFSADFSADFSADS"
         titleText.textColor = .black
         titleText.font = .systemFont(ofSize: 24, weight: .bold)
         titleText.numberOfLines = 0 // 줄 바꿈 제한 x
         titleText.textAlignment = .center // 텍스트 중앙 정렬
-        
-        //        seriesButton.setTitle("1", for: .normal)
-        //        seriesButton.setTitleColor(.white , for: .normal)
-        //        seriesButton.titleLabel?.font = .systemFont(ofSize: 16)
-        //        seriesButton.backgroundColor = .systemBlue
-        //        seriesButton.layer.cornerRadius = 8
         
         seriesStackView.axis = .horizontal
         seriesStackView.spacing = 6
@@ -70,8 +62,6 @@ extension MainView {
         [titleText, seriesStackView, scrollView].forEach { self.addSubview($0) }
         scrollView.addSubview(contentView)
         
-        //        view.addSubview(bookInfoView) // bookInfoView 추가
-        //        view.addSubview(bookSummaryStackView) //bookSummaryStackView 추가
         [bookInfoStackView, bookSummaryStackView, bookChapterStackView].forEach {
             contentView.addArrangedSubview($0)
         }
@@ -82,11 +72,10 @@ extension MainView {
         }
         
         seriesStackView.snp.makeConstraints {
-            //            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.leading.trailing.greaterThanOrEqualToSuperview().inset(20).priority(.high) // leading, trailing 추가, stackView의 제약 조건을 .high(750)으로 변경 : 랜드스케이프에서 SuperView가 늘어나도 stackView는 버튼의 제약 조건에 걸림(.required)
+            $0.leading.greaterThanOrEqualToSuperview().inset(20)
+            $0.trailing.lessThanOrEqualToSuperview().inset(20)
             $0.centerX.equalToSuperview()
             $0.top.equalTo(titleText.snp.bottom).offset(16)
-            /*$0.width.equalTo(seriesButton.snp.height)*/ // height에 width 고정 -> 가로, 세로 비율 유지
         }
         
         //scrollView 속성 정의
@@ -101,16 +90,6 @@ extension MainView {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
-        
-        //        bookInfoView.snp.makeConstraints {
-        //            $0.top.equalTo(seriesButton.snp.bottom).offset(20)
-        //            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
-        //        }
-        //
-        //        bookSummaryStackView.snp.makeConstraints {
-        //            $0.top.equalTo(bookInfoView.snp.bottom).offset(24)
-        //            $0.leading.trailing.equalToSuperview().inset(20)
-        //        }
     }
 }
 
@@ -139,7 +118,7 @@ extension MainView {
             button.snp.makeConstraints {
                 $0.width.equalTo(button.snp.height)
             }
-            button.setContentHuggingPriority(.required, for: .horizontal) // 버튼의 크기는 글자 크기에 맞게 고정
+            
             self.seriesStackView.addArrangedSubview(button)
             self.seriesButtons.append(button)
         }

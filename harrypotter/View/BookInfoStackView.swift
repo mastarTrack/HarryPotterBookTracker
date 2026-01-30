@@ -48,8 +48,6 @@ extension BookInfoStackView {
         self.spacing = 20
         self.alignment = .top
         
-        //        titleImageView.image = UIImage(named: "harrypotter1")
-        //        titleImageView.backgroundColor = .systemBlue
         titleImageView.contentMode = .scaleAspectFill
         titleImageView.clipsToBounds = true // 원본 이미지와 맞지 않을 경우 바깥으로 빠져나감 -> 잘라내도록
         

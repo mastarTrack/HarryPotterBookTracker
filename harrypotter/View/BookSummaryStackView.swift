@@ -97,7 +97,6 @@ extension BookSummaryStackView {
     // folded 상태 추가
     func config(dedication: String, summary: String, folded: Bool) {
         dedicationValueLabel.text  = dedication
-        //        summaryValueLabel.text = summary
         self.summaryText = summary // displaySummary에서 사용할 summaryText에 summary 담기
         self.isFolded = folded // UserDefaults에서 읽은 데이터의 유무
         
