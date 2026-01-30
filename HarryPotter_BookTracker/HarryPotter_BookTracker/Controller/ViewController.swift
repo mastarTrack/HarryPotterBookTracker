@@ -10,45 +10,48 @@ import SnapKit
 
 class ViewController: UIViewController {
     private let dataManager = DataManager()
-    private var selected: Int = 1
-    private var books: [Book]?
+    private(set) var books: [Book]?
+    private(set) var isMore: Bool = false
     
-    private var titleLabel = UILabel() // 최상단 제목 레이블
-    private var seriesButtons = [SeriesButton]()
+    var titleLabel = UILabel() // 최상단 제목 레이블
+    var seriesButtons = [UIButton]()
+    var selected: Int = 0
     
-    private var bookImageView = UIImageView()
-    private var infoBookTitleLabel = UILabel()
-    private var authorLabel = UILabel()
-    private var releasedDateLabel = UILabel()
-    private var pagesLabel = UILabel()
+    var bookImageView = UIImageView()
+    var infoBookTitleLabel = UILabel()
+    var authorLabel = UILabel()
+    var releasedDateLabel = UILabel()
+    var pagesLabel = UILabel()
     
-    private var dedicationLabel = UILabel()
-    private var summaryLabel = UILabel()
+    var dedicationLabel = UILabel()
+    var summaryLabel = UILabel()
     
-    private var moreButton = MoreButton()
+    var moreButton = MoreButton()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //TODO: viewWillAppear에서 해야할까?
+        isMore = dataManager.fetchMoreStatus()
         getBooks()
         
         view.backgroundColor = .white
         
-        setMoreButton()
         setContents()
-
-        setUI()
+        setLayout()
         
+        setMoreButton()
         setMoreButtonAction()
     }
     
     func setContents() {
-        let book = books?[selected - 1]
+        let book = books?[selected]
         setTitleLabel(book)
         setContentLabel(book)
-        setBookImage(num: selected)
+        setBookImage(selected)
     }
     
-    func setUI() {
+    func setLayout() {
         let seriesButtonStack = setSeriesButtonStack()
         let infoScroll = setInfoScroll()
         
@@ -73,248 +76,7 @@ class ViewController: UIViewController {
             $0.top.equalTo(seriesButtonStack.snp.bottom).offset(16)
         }
     }
-    
-    //TODO: contentView 없이는 못할까?
-    func setInfoScroll() -> UIScrollView {
-        let book = books?[selected - 1]
-        
-        let scrollView = UIScrollView()
-        scrollView.showsVerticalScrollIndicator = false
-        
-        let contentView = UIView()
-        scrollView.addSubview(contentView)
-        
-        contentView.snp.makeConstraints {
-            $0.width.equalToSuperview()
-            $0.edges.equalTo(scrollView.contentLayoutGuide)
-        }
-        
-        let infoStack = setInfoStack(of: book)
-        contentView.addSubview(infoStack)
-        
-        infoStack.snp.makeConstraints {
-            $0.leading.trailing.top.equalToSuperview()
-        }
-        
-        let dedicationStack = setSummaryLabelStack(of: book, info: .dedication)
-        contentView.addSubview(dedicationStack)
-        
-        dedicationStack.snp.makeConstraints {
-            $0.top.equalTo(infoStack.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview()
-        }
-        
-        let summaryStack = setSummaryStack(of: book)
-        contentView.addSubview(summaryStack)
-        
-        summaryStack.snp.makeConstraints {
-            $0.top.equalTo(dedicationStack.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview()
-        }
-        
-        let chapterStack = makeChapterStack(of: book)
-        contentView.addSubview(chapterStack)
-        
-        chapterStack.snp.makeConstraints {
-            $0.top.equalTo(summaryStack.snp.bottom).offset(24)
-            $0.leading.trailing.bottom.equalToSuperview()
-        }
-        
-        return scrollView
-    }
-}
 
-//MARK: 제목 영역
-extension ViewController {
-    // 책 제목 레이블 설정
-    func setTitleLabel(_ book: Book?) {
-        titleLabel.text = book?.title ?? ""
-        titleLabel.font = .boldSystemFont(ofSize: 24)
-        titleLabel.textColor = .black
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
-    }
-    
-    func setSeriesButtons() {
-        let num = books?.count ?? 0
-        
-        seriesButtons = (1...num).reduce(into: []) { arr, n in
-            let button = SeriesButton()
-            
-            button.configurationUpdateHandler = { button in
-                var configuration = UIButton.Configuration.filled()
-                
-                switch button.state {
-                case .normal: // 선택하지 않았을 경우
-                    configuration.baseForegroundColor = .systemBlue
-                    configuration.baseBackgroundColor = .systemGray5
-                case .selected: // 선택했을 경우
-                    configuration.baseBackgroundColor = .systemBlue
-                    configuration.attributedTitle?.foregroundColor = .white
-                default: break
-                }
-                configuration.title = "\(n)"
-                configuration.attributedTitle?.font = .systemFont(ofSize: 16)
-                
-                button.configuration = configuration
-            }
-        
-            n == 1 ? button.isSelected = true : ()
-            setSeriesButtonAction(button)
-            
-            arr.append(button)
-        }
-    }
-    
-    func setSeriesButtonAction(_ button: SeriesButton) {
-        let buttonSelected = UIAction { [weak self] _ in
-            self?.seriesButtons.forEach { $0.isSelected = false }
-            self?.selected = Int(button.titleLabel?.text ?? "") ?? 1
-            
-            button.isSelected = true
-            print(self?.selected) // 왜 두개 나옴..?
-            self?.setContents()
-            self?.moreButton.isHidden =
-            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false
-        }
-        button.addAction(buttonSelected, for: .touchUpInside)
-    }
-    
-    func setSeriesButtonStack() -> UIStackView {
-        setSeriesButtons()
-        seriesButtons.forEach { setSeriesButtonAction($0) }
-        
-        let stackView = UIStackView(arrangedSubviews: seriesButtons)
-        stackView.alignment = .center
-        stackView.spacing = 8
-        stackView.distribution = .fillEqually
-        
-        return stackView
-    }
-}
-
-//MARK: 정보 영역
-extension ViewController {
-    // 책 이미지 설정
-    func setBookImage(num: Int) {
-        bookImageView.image = UIImage(named: "harrypotter" + "\(num)")
-        bookImageView.contentMode = .scaleAspectFit
-        
-        bookImageView.snp.makeConstraints {
-            $0.width.equalTo(100)
-            $0.height.equalTo(bookImageView.snp.width).multipliedBy(1.5)
-        }
-    }
-    
-    // 정보 레이블 설정
-    func setContentLabel(_ book: Book?) {
-        infoBookTitleLabel.text = book?.title ?? ""
-        infoBookTitleLabel.font = .boldSystemFont(ofSize: 20)
-        infoBookTitleLabel.textColor = .black
-        infoBookTitleLabel.numberOfLines = 0
-        
-        authorLabel.text = book?.author ?? ""
-        authorLabel.font = .systemFont(ofSize: 18)
-        authorLabel.textColor = .darkGray
-        
-        pagesLabel.text = "\(book?.pages ?? 0)"
-        pagesLabel.font = .systemFont(ofSize: 14)
-        pagesLabel.textColor = .gray
-
-        releasedDateLabel.text = formatDate(book?.release_date)
-        releasedDateLabel.font = .systemFont(ofSize: 14)
-        releasedDateLabel.textColor = .gray
-        
-        dedicationLabel.text = book?.dedication ?? ""
-        dedicationLabel.font = .systemFont(ofSize: 14)
-        dedicationLabel.textColor = .darkGray
-        dedicationLabel.numberOfLines = 0
-        
-        summaryLabel.text = moreButton.isSelected ? getSummaryText(.origin) : getSummaryText(.brief)
-        summaryLabel.font = .systemFont(ofSize: 14)
-        summaryLabel.textColor = .darkGray
-        summaryLabel.numberOfLines = 0
-    }
-    
-    // summary 내용 설정 함수
-    func getSummaryText(_ type: Summary) -> String {
-        let book = books?[selected - 1]
-        let text = book?.summary ?? ""
-        
-        switch type {
-        case .origin:
-            return text
-        case .brief:
-            if text.count < 450 { return text }
-            let idx = text.index(text.startIndex, offsetBy: 450)
-            return text[..<idx] + "..."
-        }
-    }
-    
-    // 정보 타이틀 레이블 생성
-    func makeInfoTitleLabel(_ info: Description) -> UILabel {
-        let text = info.rawValue
-        let setting = info.getTitleLabelSetting()
-        
-        let label = UILabel(text: text, font: setting.font, color: setting.textColor)
-        
-        return label
-    }
-    
-    // 정보 레이블 스택 생성
-    func setInfoLabelStack() -> UIStackView {
-        let authorTitle = makeInfoTitleLabel(.author)
-        let authorStack = UIStackView(arrangedSubviews: [authorTitle, authorLabel])
-        
-        let releasedTitle = makeInfoTitleLabel(.release_date)
-        let releasedStack = UIStackView(arrangedSubviews: [releasedTitle, releasedDateLabel])
-        
-        let pagesTitle = makeInfoTitleLabel(.pages)
-        let pagesStack = UIStackView(arrangedSubviews: [pagesTitle, pagesLabel])
-        
-        [authorStack, releasedStack, pagesStack].forEach {
-            $0.axis = .horizontal
-            $0.spacing = 8
-        }
-        
-        let stackView = UIStackView(arrangedSubviews: [infoBookTitleLabel, authorStack, releasedStack, pagesStack])
-        
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.alignment = .leading
-        
-        return stackView
-    }
-        
-    // 정보 영역 스택 생성
-    func setInfoStack(of book: Book?) -> UIStackView {
-        let labels = setInfoLabelStack()
-        
-        let stackView = UIStackView(arrangedSubviews: [bookImageView, labels])
-        
-        stackView.axis = .horizontal
-        stackView.spacing = 16
-        stackView.alignment = .top
-        
-        return stackView
-    }
-}
-
-//MARK: Alert
-extension ViewController {
-    // Alert 생성
-    func showAlert(_ message: String) {
-        let alert = UIAlertController(title: "오류 발생", message: message, preferredStyle: .alert)
-        let confirm = UIAlertAction(title: "확인", style: .default, handler: nil)
-        
-        alert.addAction(confirm)
-
-        DispatchQueue.main.async {
-            guard self.presentedViewController == nil else { return }
-            self.present(alert, animated: true, completion: nil)
-        }
-    }
-    
     // 데이터([Book]) 가져오기
     func getBooks() {
         do {
@@ -330,42 +92,70 @@ extension ViewController {
             showAlert("⛔️ 알 수 없는 오류: \(error)")
         }
     }
-    
-    func formatDate(_ released: Date?) -> String {
-        guard let date = released else { return "" }
+}
+
+//MARK: Alert
+extension ViewController {
+    // Alert 생성
+    func showAlert(_ message: String) {
+        let alert = UIAlertController(title: "오류 발생", message: message, preferredStyle: .alert)
+        let confirm = UIAlertAction(title: "확인", style: .default, handler: nil)
         
-        // dateFormat 설정
-        let newFormatter = DateFormatter()
-        newFormatter.dateFormat = "MMMM dd, yyyy"
-        
-        // June 26, 1997 형태의 문자열 반환
-        return newFormatter.string(from: date)
+        alert.addAction(confirm)
+
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
     }
 }
 
-//MARK: Dedication & Summary 영역
+//MARK: 스크롤뷰 설정
 extension ViewController {
-    func setSummaryLabelStack(of book: Book?, info: Description) -> UIStackView {
-        let title = makeInfoTitleLabel(info)
+    func setInfoScroll() -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false // 스크롤바 미표시
         
-        let stackView = switch info {
-        case .dedication:
-            UIStackView(arrangedSubviews: [title, dedicationLabel])
-        case .summary:
-            UIStackView(arrangedSubviews: [title, summaryLabel])
-        default:
-            UIStackView()
+        let book = books?[selected]
+        
+        let infoStack = setInfoStack()
+        let dedicationStack = setSummaryLabelStack(.dedication)
+        let summaryStack = setSummaryStack()
+        let chapterStack = makeChapterStack(of: book)
+        
+        [infoStack, dedicationStack, summaryStack, chapterStack].forEach {
+            scrollView.addSubview($0)
         }
         
-        stackView.axis = .vertical
-        stackView.alignment = .leading
-        stackView.spacing = 8
+        scrollView.contentLayoutGuide.snp.makeConstraints{
+            $0.width.equalTo(scrollView.frameLayoutGuide)
+        }
         
-        return stackView
+        infoStack.snp.makeConstraints {
+            $0.leading.trailing.top.equalTo(scrollView.contentLayoutGuide)
+        }
+        
+        dedicationStack.snp.makeConstraints {
+            $0.top.equalTo(infoStack.snp.bottom).offset(24)
+            $0.leading.trailing.equalTo(scrollView.contentLayoutGuide)
+        }
+        
+        summaryStack.snp.makeConstraints {
+            $0.top.equalTo(dedicationStack.snp.bottom).offset(24)
+            $0.leading.trailing.equalTo(scrollView.contentLayoutGuide)
+        }
+        
+        chapterStack.snp.makeConstraints {
+            $0.top.equalTo(summaryStack.snp.bottom).offset(24)
+            $0.leading.trailing.bottom.equalTo(scrollView.contentLayoutGuide)
+        }
+        
+        return scrollView
     }
-    
+}
+
+extension ViewController {
     func setMoreButton() {
-        moreButton.isSelected = dataManager.fetchMoreStatus()
+        moreButton.isSelected = isMore
         moreButton.delegate = dataManager // delegate 설정
         
         // configuration 설정
@@ -389,35 +179,20 @@ extension ViewController {
         }
     }
     
-    func setSummaryStack(of book: Book?) -> UIStackView {
-        let labels = setSummaryLabelStack(of: book, info: .summary)
-        
-        let stackView = UIStackView(arrangedSubviews: [labels, moreButton])
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.alignment = .trailing
-        
-        if summaryLabel.text?.count ?? 0 < 450 {
-            moreButton.isHidden  = true
-        }
-        
-        return stackView
-    }
-    
     func setMoreButtonAction() {
         let more = UIAction { [weak self] _ in
             self?.moreButton.isSelected.toggle()
-            guard let isSelected = self?.moreButton.isSelected else { return }
-            
-            // 요약 텍스트 재설정
-            self?.summaryLabel.text =
-            isSelected ? self?.getSummaryText(.origin)
-            : self?.getSummaryText(.brief)
+            guard let isSelected = self?.moreButton.isSelected else {
+                return
+            }
             
             // isSelected 상태 저장
             self?.moreButton.delegate?.saveStatus(isSelected)
+            self?.isMore = isSelected
+            
+            // 요약 텍스트 재설정
+            self?.summaryLabel.text = self?.getSummaryText()
         }
-        
         moreButton.addAction(more, for: .touchUpInside)
     }
 }

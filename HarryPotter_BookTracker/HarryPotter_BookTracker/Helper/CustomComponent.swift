@@ -21,15 +21,6 @@ extension UILabel {
     }
 }
 
-// 원형 시리즈 버튼
-class SeriesButton: UIButton {
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        self.layer.cornerRadius = self.frame.height / 2
-        self.clipsToBounds = true
-    }
-}
-
 // 더보기 버튼
 class MoreButton: UIButton {
     weak var delegate: MoreButtonDelegate?

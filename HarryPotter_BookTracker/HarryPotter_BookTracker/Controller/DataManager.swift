@@ -7,8 +7,6 @@
 import Foundation
 
 class DataManager {
-
-
     let isMoreKey = "isMore"
     
     func loadBooks() throws -> [Book] {
