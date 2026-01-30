@@ -15,6 +15,8 @@ class ViewController: UIViewController {
     
     var titleLabel = UILabel() // 최상단 제목 레이블
     var seriesButtons = [UIButton]()
+    let seriesButtonStack = SeriesButtonStack()
+    
     var selected: Int = 0
     
     var bookImageView = UIImageView()
@@ -25,6 +27,9 @@ class ViewController: UIViewController {
     
     var dedicationLabel = UILabel()
     var summaryLabel = UILabel()
+    
+    var chapterLabels = [UILabel]()
+    var chapterStack = UIStackView()
     
     var moreButton = MoreButton()
 
@@ -38,6 +43,7 @@ class ViewController: UIViewController {
         view.backgroundColor = .white
         
         setContents()
+        seriesButtonStack.set()
         setLayout()
         
         setMoreButton()
@@ -47,12 +53,15 @@ class ViewController: UIViewController {
     func setContents() {
         let book = books?[selected]
         setTitleLabel(book)
+        seriesButtonStack.setContents(num: books?.count ?? 1)
         setContentLabel(book)
         setBookImage(selected)
+        
+        setChapterLabels(book)
     }
     
     func setLayout() {
-        let seriesButtonStack = setSeriesButtonStack()
+//        let seriesButtonStack = setSeriesButtonStack()
         let infoScroll = setInfoScroll()
         
         view.addSubview(titleLabel)
@@ -115,12 +124,10 @@ extension ViewController {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false // 스크롤바 미표시
         
-        let book = books?[selected]
-        
         let infoStack = setInfoStack()
         let dedicationStack = setSummaryLabelStack(.dedication)
         let summaryStack = setSummaryStack()
-        let chapterStack = makeChapterStack(of: book)
+        setChapterLabelStack()
         
         [infoStack, dedicationStack, summaryStack, chapterStack].forEach {
             scrollView.addSubview($0)
@@ -199,33 +206,50 @@ extension ViewController {
 
 //MARK: 목차 영역
 extension ViewController {
-    func makeChapterStack(of book: Book?) -> UIStackView {
-        let title = UILabel(
-            text: "Chapter",
-            font: .boldSystemFont(ofSize: 18),
-            color: .black
-        )
-        
+    func setChapterLabelStack() {
+        let title = makeInfoTitleLabel(.chapter)
+        chapterStack = setVerticalLabelStack([title] + chapterLabels)
+    }
+    
+    func updateChapterStack() {
+        if chapterStack.subviews.count < chapterLabels.count {
+            let num = chapterLabels.count - chapterStack.subviews.count
+            for i in (chapterLabels.count - 1)..<(chapterLabels.count + num)  {
+                chapterStack.addSubview(chapterLabels[i])
+            }
+        }
+    }
+    
+    func setChapterLabels(_ book: Book?) {
         let chapters = book?.chapters ?? []
-        var chapterLabels: [UILabel] = [title]
         
-        for chapter in chapters {
-            let text = chapter.title
-            let label = UILabel(
-                text: text,
-                font: .systemFont(ofSize: 14),
-                color: .darkGray
-            )
-            chapterLabels.append(label)
+        // chapterLabels 배열 설정
+        for (i, chapter) in chapters.enumerated() {
+            if i < chapterLabels.count {
+                // 기존 chapterLabels보다 데이터가 적은 경우 - 텍스트 대체
+                chapterLabels[i].text = chapter.title
+            } else if i == chapterLabels.count {
+                // 기존 chapterLabels보다 데이터가 많은 경우 - 레이블 생성 및 추가
+                let text = chapter.title
+                let label = UILabel(
+                    text: text,
+                    font: .systemFont(ofSize: 14),
+                    color: .darkGray
+                )
+                chapterLabels.append(label)
+            }
         }
         
-        let stackView = UIStackView(arrangedSubviews: chapterLabels)
-        
-        stackView.axis = .vertical
-        stackView.alignment = .leading
-        stackView.spacing = 8
-        
-        return stackView
+        // chapterLabel 표시 여부 설정
+        for i in chapterLabels.indices {
+            if i >= chapters.count {
+                // chapterLabels가 데이터보다 많은 경우
+                chapterLabels[i].isHidden = true // 레이블 표시 x
+            } else {
+                // chapterLabels가 데이터보다 많지 않은 경우
+                chapterLabels[i].isHidden = false // 레이블 표시 o
+            }
+        }
     }
 }
 

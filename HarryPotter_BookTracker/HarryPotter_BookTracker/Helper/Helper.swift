@@ -14,6 +14,7 @@ enum Description: String {
     case release_date = "Released"
     case dedication = "Dedication"
     case summary = "Summary"
+    case chapter = "Chapter"
     // wiki, chapters
     
     func getTitleLabelSetting() -> LabelSetting {
@@ -22,7 +23,7 @@ enum Description: String {
             return LabelSetting(font: .boldSystemFont(ofSize: 16), textColor: .black)
         case .pages, .release_date:
             return LabelSetting(font: .boldSystemFont(ofSize: 14), textColor: .black)
-        case .dedication, .summary:
+        case .dedication, .summary, .chapter:
             return LabelSetting(font: .boldSystemFont(ofSize: 18), textColor: .black)
         }
     }
