@@ -7,15 +7,11 @@
 
 import Foundation
 
-struct BookResponse: Codable {
-    let data: [BookData]
+struct BookResponse: Decodable {
+    let data: [Book]
 }
 
-struct BookData: Codable {
-    let attributes: Book
-}
-
-struct Book: Codable {
+struct Book: Decodable {
     let title: String
     let author: String
     let pages: Int
@@ -24,8 +20,22 @@ struct Book: Codable {
     let dedication: String
     let chapters: [Chapter]
     
+    init(from decoder: any Decoder) throws {
+        let attributesContainer = try decoder.container(keyedBy: CodingKeys.self)
+        let bookContainer = try attributesContainer.nestedContainer(keyedBy: CodingKeys.self , forKey: .attributes)
+        title = try bookContainer.decode(String.self, forKey: .title)
+        author = try bookContainer.decode(String.self, forKey: .author)
+        pages = try bookContainer.decode(Int.self, forKey: .pages)
+        releaseDate = try bookContainer.decode(Date.self, forKey: .releaseDate)
+        summary = try bookContainer.decode(String.self, forKey: .summary)
+        dedication = try bookContainer.decode(String.self, forKey: .dedication)
+        chapters = try bookContainer.decode([Chapter].self, forKey: .chapters)
+        
+    }
+    
     // data.json 형식 맞추기 : releaseDate는 data.json의 release_date
     enum CodingKeys: String, CodingKey {
+        case attributes
         case title, author, pages, summary, dedication, chapters
         case releaseDate = "release_date"
     }

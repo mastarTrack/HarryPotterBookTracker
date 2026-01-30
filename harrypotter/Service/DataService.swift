@@ -30,7 +30,7 @@ class DataService {
             decoder.dateDecodingStrategy = .formatted(dateFormatter) // decoder에 형식을 주입
             
             let bookResponse = try decoder.decode(BookResponse.self, from: data) // 형식에 맞는 데이터 발견할 시 Date로 변환
-            let books = bookResponse.data.map { $0.attributes }
+            let books = bookResponse.data
             completion(.success(books))
         } catch {
             print("🚨 JSON 파싱 에러 : \(error)")
