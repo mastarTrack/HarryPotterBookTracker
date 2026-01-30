@@ -5,23 +5,23 @@
 //  Created by Yeseul Jang on 1/29/26.
 //
 import UIKit
-// 뷰에 들어갈 정보를 가공
-class BookViewModel {
-    // 전달해 줄 것
+// 뷰에 들어갈 정보를 가공헤서 전달
+final class BookViewModel {
+    // 뷰에 전달해 줄 것들
     var updateInfo: ((BookViewInfo) -> Void)?
     var error: ((Error) -> Void)?
     
-    let dataService: BookServiceProtocol
+    private let dataService: BookServiceProtocol
     
-    var books: [Book] = []
-    var selectedVolume = 1
-    var isExpanded = false
+    private var books: [Book] = []
+    private var selectedVolume = 1
+    private var isExpanded = false
     
     init(dataService: BookServiceProtocol) {
         self.dataService = dataService
     }
     
-    func loadBooks() { //뷰모델
+   func loadBooks() {
         dataService.loadBooks { [weak self] result in
             guard let self = self else { return }
             
@@ -45,11 +45,11 @@ class BookViewModel {
         updateBookInfo()
     }
     
-    func saveExpandedState() {
+    private func saveExpandedState() {
         UserDefaults.standard.set(isExpanded, forKey: DefaultsKey.isExpanded)
     }
 
-    func restoreExpandedState() { // 뷰모델
+    private func restoreExpandedState() {
         isExpanded = UserDefaults.standard.bool(forKey: DefaultsKey.isExpanded)
     }
     
@@ -60,7 +60,7 @@ class BookViewModel {
         updateBookInfo()
     }
     
-    func updateBookInfo() {
+    private func updateBookInfo() {
         guard books.indices.contains(selectedVolume - 1) else { return }
         let book = books[selectedVolume - 1]
         
