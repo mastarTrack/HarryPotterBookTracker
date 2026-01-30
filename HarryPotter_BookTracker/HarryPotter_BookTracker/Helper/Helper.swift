@@ -27,6 +27,17 @@ enum Description: String {
             return LabelSetting(font: .boldSystemFont(ofSize: 18), textColor: .black)
         }
     }
+    
+    func getContentLabelSetting() -> LabelSetting {
+        switch self {
+        case .author:
+            return LabelSetting(font: .systemFont(ofSize: 18), textColor: .darkGray)
+        case .pages, .release_date:
+            return LabelSetting(font: .systemFont(ofSize: 14), textColor: .gray)
+        case .dedication, .summary, .chapter:
+            return LabelSetting(font: .systemFont(ofSize: 14), textColor: .darkGray)
+        }
+    }
 }
 
 enum DataError: Error {

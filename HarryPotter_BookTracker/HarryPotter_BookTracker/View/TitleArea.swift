@@ -63,14 +63,6 @@ extension SeriesButtonStack {
 }
 
 extension ViewController {
-    // 책 제목 레이블 설정
-    func setTitleLabel(_ book: Book?) {
-        titleLabel.text = book?.title ?? ""
-        titleLabel.font = .boldSystemFont(ofSize: 24)
-        titleLabel.textColor = .black
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
-    }
 
     // 시리즈 버튼 액션 설정
     func setSeriesButtonAction(_ button: UIButton) {

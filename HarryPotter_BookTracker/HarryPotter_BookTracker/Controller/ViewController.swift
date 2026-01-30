@@ -19,11 +19,7 @@ class ViewController: UIViewController {
     
     var selected: Int = 0
     
-    var bookImageView = UIImageView()
-    var infoBookTitleLabel = UILabel()
-    var authorLabel = UILabel()
-    var releasedDateLabel = UILabel()
-    var pagesLabel = UILabel()
+    let infoStack = InfoStack()
     
     var dedicationLabel = UILabel()
     var summaryLabel = UILabel()
@@ -44,6 +40,7 @@ class ViewController: UIViewController {
         
         setContents()
         seriesButtonStack.set()
+        infoStack.set()
         setLayout()
         
         setMoreButton()
@@ -52,16 +49,14 @@ class ViewController: UIViewController {
     
     func setContents() {
         let book = books?[selected]
-        setTitleLabel(book)
         seriesButtonStack.setContents(num: books?.count ?? 1)
+        infoStack.setContents(book: book, idx: selected)
         setContentLabel(book)
-        setBookImage(selected)
         
         setChapterLabels(book)
     }
     
     func setLayout() {
-//        let seriesButtonStack = setSeriesButtonStack()
         let infoScroll = setInfoScroll()
         
         view.addSubview(titleLabel)
@@ -124,7 +119,6 @@ extension ViewController {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false // 스크롤바 미표시
         
-        let infoStack = setInfoStack()
         let dedicationStack = setSummaryLabelStack(.dedication)
         let summaryStack = setSummaryStack()
         setChapterLabelStack()
