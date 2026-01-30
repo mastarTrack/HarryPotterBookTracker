@@ -7,7 +7,7 @@
 import Foundation
 
 class DataManager {
-    let isMoreKey = "isMore"
+    let isMoreBaseKey = "isMore_"
     
     func loadBooks() throws -> [Book] {
         // data.json 파일 주소 가져오기
@@ -41,11 +41,11 @@ class DataManager {
 }
 
 extension DataManager: MoreButtonDelegate {
-    func saveStatus(_ isMore: Bool) {
-        UserDefaults.standard.set(isMore, forKey: isMoreKey)
+    func saveStatus(_ isMore: Bool, idx: Int) {
+        UserDefaults.standard.set(isMore, forKey: isMoreBaseKey + "\(idx)")
     }
     
-    func fetchMoreStatus() -> Bool {
-        return UserDefaults.standard.bool(forKey: isMoreKey)
+    func fetchMoreStatus(idx: Int) -> Bool {
+        return UserDefaults.standard.bool(forKey: isMoreBaseKey + "\(idx)")
     }
 }

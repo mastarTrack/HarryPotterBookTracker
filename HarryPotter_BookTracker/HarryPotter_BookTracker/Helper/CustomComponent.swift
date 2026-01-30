@@ -25,7 +25,7 @@ extension UILabel {
 class MoreButton: UIButton {
     weak var delegate: MoreButtonDelegate?
     
-    func saveStatus(_ isMore: Bool) {
-        delegate?.saveStatus(isMore)
+    func saveStatus(_ isMore: Bool, idx: Int) {
+        delegate?.saveStatus(isMore, idx: idx)
     }
 }

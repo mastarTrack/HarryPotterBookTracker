@@ -8,11 +8,11 @@ import UIKit
 import SnapKit
 
 class InfoStack: UIStackView, CustomStackHelper {
-    private var bookImageView = UIImageView()
-    private var titleLabel = UILabel()
-    private var authorLabel = UILabel()
-    private var releasedDateLabel = UILabel()
-    private var pagesLabel = UILabel()
+    private let bookImageView = UIImageView()
+    private let titleLabel = UILabel()
+    private let authorLabel = UILabel()
+    private let releasedDateLabel = UILabel()
+    private let pagesLabel = UILabel()
     
     func set() {
         setContentLabelConfigs()
@@ -96,53 +96,5 @@ extension InfoStack {
         let pages = setHorizontalLabelStack([pagesTitle, pagesLabel])
         
         return setVerticalLabelStack([titleLabel, author, releasedDate, pages])
-    }
-}
-
-
-extension ViewController {
-
-
-    
-    // 정보 레이블 설정
-    func setContentLabel(_ book: Book?) {
-
-        
-        dedicationLabel.text = book?.dedication ?? ""
-        dedicationLabel.font = .systemFont(ofSize: 14)
-        dedicationLabel.textColor = .darkGray
-        dedicationLabel.numberOfLines = 0
-        
-        summaryLabel.text = getSummaryText()
-        summaryLabel.font = .systemFont(ofSize: 14)
-        summaryLabel.textColor = .darkGray
-        summaryLabel.numberOfLines = 0
-    }
-    
-    // summary 내용 설정
-    func getSummaryText() -> String {
-        let book = books?[selected]
-        let text = book?.summary ?? ""
-        
-        if isMore { // 더보기 버튼이 선택되어있을 경우
-            return text
-        } else if text.count < 450 { // 더보기 버튼이 선택되어있고, 450자 미만일 경우
-            return text
-        } else { // 더보기 버튼이 선택되어있고, 450자 이상일 경우
-            let idx = text.index(text.startIndex, offsetBy: 450)
-            return text[..<idx] + "..."
-        }
-    }
-    
-    // 날짜 포맷 설정
-    func formatDate(_ released: Date?) -> String {
-        guard let date = released else { return "" }
-        
-        // dateFormat 설정
-        let newFormatter = DateFormatter()
-        newFormatter.dateFormat = "MMMM dd, yyyy"
-        
-        // June 26, 1997 형태의 문자열 반환
-        return newFormatter.string(from: date)
     }
 }

@@ -74,8 +74,8 @@ extension ViewController {
             button.isSelected = true
             self?.setContents() // 레이블 내용 변경
 //            self?.updateChapterStack()
-            self?.moreButton.isHidden =
-            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false // 더보기 버튼 표시 여부 설정
+//            self?.moreButton.isHidden =
+//            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false // 더보기 버튼 표시 여부 설정
         }
         
         // 버튼에 액션 추가

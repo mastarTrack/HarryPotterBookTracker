@@ -6,56 +6,57 @@
 //
 import UIKit
 
-// 정보 영역 스택 설정부
-extension ViewController {
-    //MARK: 기본 component 생성 메소드
-    // 정보 타이틀 레이블 생성
-    func makeInfoTitleLabel(_ info: Description) -> UILabel {
-        let text = info.rawValue
-        let setting = info.getTitleLabelSetting()
+class ChapterStack: UIStackView, CustomStackHelper {
+    private var chapterCount = 0
+    private var chapterLabels: [UILabel] = []
+    
+    func set() {
+        let title = makeInfoTitleLabel(.chapter)
         
-        let label = UILabel(text: text, font: setting.font, color: setting.textColor)
+        addArrangedSubview(title)
+        chapterLabels.forEach { addArrangedSubview($0) }
         
-        return label
+        axis = .vertical
+        alignment = .leading
+        spacing = 8
     }
     
-    // 수직 레이블 스택 생성
-    func setVerticalLabelStack(_ views: [UIView]) -> UIStackView {
-        let stackView = UIStackView(arrangedSubviews: views)
-        stackView.axis = .vertical
-        stackView.alignment = .leading
-        stackView.spacing = 8
-        return stackView
-    }
-    
-    //MARK: Summary & Dedication 영역 설정
-    // 레이블 스택 생성
-    func setSummaryLabelStack(_ info: Description) -> UIStackView {
-        let title = makeInfoTitleLabel(info)
+    func update() {
+        // - 1은 타이틀 레이블(Chapter)
+        let current = arrangedSubviews.count - 1
+
+        chapterLabels.forEach { $0.isHidden = false } // label 표시 상태 초기화
         
-        let stackView = switch info {
-        case .dedication:
-            setVerticalLabelStack([title, dedicationLabel])
-        case .summary:
-            setVerticalLabelStack([title, summaryLabel])
-        default:
-            UIStackView()
+        if chapterCount > current { // 데이터가 더 많을 때 -- label 추가 배치
+            for i in current..<chapterCount {
+                addArrangedSubview(chapterLabels[i])
+            }
+        } else if chapterCount < current { // 데이터가 더 적을 때 -- label 가리기
+            for i in chapterCount..<current {
+                chapterLabels[i].isHidden = true
+            }
         }
-        
-        return stackView
     }
-    
-    // Summary 스택 설정
-    func setSummaryStack() -> UIStackView {
-        let labels = setSummaryLabelStack(.summary)
+}
+
+//MARK: 컨텐츠 설정
+extension ChapterStack {
+    func setContents(_ book: Book?) {
+        let chapters = book?.chapters ?? []
         
-        let stackView = setVerticalLabelStack([labels, moreButton])
-        stackView.alignment = .trailing
+        chapterCount = chapters.count
         
-        if summaryLabel.text?.count ?? 0 < 450 {
-            moreButton.isHidden  = true
+        for (i, chapter) in chapters.enumerated() {
+            if i < chapterLabels.count {
+                chapterLabels[i].text = chapter.title
+            } else {
+                let label = UILabel(
+                    text: chapter.title,
+                    font: .systemFont(ofSize: 14),
+                    color: .darkGray
+                )
+                chapterLabels.append(label)
+            }
         }
-        
-        return stackView
     }
 }
