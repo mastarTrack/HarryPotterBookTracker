@@ -67,8 +67,9 @@ extension SummaryStack {
         if isMore { // 더보기 버튼이 선택되어있을 경우
             return text
         } else { // 더보기 버튼이 선택되어있고, 450자 이상일 경우
-            let idx = text.index(text.startIndex, offsetBy: 450)
-            return text[..<idx] + "..."
+            return text.prefix(450) + "..."
+//            let idx = text.index(text.startIndex, offsetBy: 450)
+//            return text[..<idx] + "..."
         }
     }
 }

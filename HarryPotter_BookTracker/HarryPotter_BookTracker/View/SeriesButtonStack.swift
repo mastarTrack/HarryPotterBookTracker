@@ -8,7 +8,7 @@ import UIKit
 
 // 제목 영역
 class SeriesButtonStack: UIStackView {
-    private var seriesButtons = [UIButton]()
+    private(set) var seriesButtons = [SeriesButton]()
     
     func set() {
         setButtons()
@@ -23,6 +23,7 @@ class SeriesButtonStack: UIStackView {
         seriesButtons.enumerated().forEach { idx, button in
             setButtonConfig(button, idx: idx)
             button.tag = idx
+            setButtonAction(button)
         }
         seriesButtons.first?.isSelected = true
     }
@@ -32,7 +33,7 @@ class SeriesButtonStack: UIStackView {
 extension SeriesButtonStack {
     func setContents(num: Int) {
         for _ in 0..<num {
-            seriesButtons.append(UIButton())
+            seriesButtons.append(SeriesButton())
         }
     }
 }
@@ -62,20 +63,18 @@ extension SeriesButtonStack {
     }
 }
 
-extension ViewController {
-
-    // 시리즈 버튼 액션 설정
-    func setSeriesButtonAction(_ button: UIButton) {
+//MARK: 버튼 액션 설정
+extension SeriesButtonStack {
+    func setButtonAction(_ button: SeriesButton) {
         // 버튼 액션 정의
         let buttonSelected = UIAction { [weak self] _ in
-            self?.seriesButtons.forEach { $0.isSelected = false } // 모든 버튼 isSelected 초기화
-            self?.selected = (Int(button.titleLabel?.text ?? "") ?? 1) - 1 // selected 변경
+            guard let self else { return }
+            let buttons = self.seriesButtons
             
-            button.isSelected = true
-            self?.setContents() // 레이블 내용 변경
-//            self?.updateChapterStack()
-//            self?.moreButton.isHidden =
-//            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false // 더보기 버튼 표시 여부 설정
+            buttons.forEach { $0.isSelected = false } // 모든 버튼 isSelected 초기화
+            button.isSelected = true // 선택된 버튼 상태 변경
+            
+            button.delegate?.update(idx: button.tag) // 레이블 내용 변경
         }
         
         // 버튼에 액션 추가

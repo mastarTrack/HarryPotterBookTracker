@@ -9,46 +9,48 @@ import UIKit
 import SnapKit
 
 class ViewController: UIViewController {
+    
     private let dataManager = DataManager()
     private(set) var books: [Book] = []
     private(set) var isMore: Bool = false
     
-    var titleLabel = UILabel() // 최상단 제목 레이블
-    var seriesButtons = [UIButton]()
+    private let titleLabel = UILabel() // 최상단 제목 레이블
     let seriesButtonStack = SeriesButtonStack()
     
     var selected: Int = 0
     
-    let infoStack = InfoStack()
-    let dedicationStack = SummaryStack()
-    let summaryStack = SummaryStack()
-    
-//    var chapterLabels = [UILabel]()
-//    var chapterStack = UIStackView()
-
-    let chapterStack = ChapterStack()
+    private let infoStack = InfoStack()
+    private let dedicationStack = SummaryStack()
+    private let summaryStack = SummaryStack()
+    private let chapterStack = ChapterStack()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //TODO: viewWillAppear에서 해야할까?
         isMore = dataManager.fetchMoreStatus(idx: selected)
         getBooks()
         
         view.backgroundColor = .white
         
         setContents()
-        
-        seriesButtonStack.set()
-        infoStack.set()
-        dedicationStack.set(info: .dedication)
-        summaryStack.set(info: .summary)
-        chapterStack.set()
+        setComponents()
         
         setLayout()
         
         setMoreButton()
         setMoreButtonAction()
+    }
+    
+    func setComponents() {
+        seriesButtonStack.set()
+        seriesButtonStack.seriesButtons.forEach {
+            $0.delegate = self
+        }
+        
+        infoStack.set()
+        dedicationStack.set(info: .dedication)
+        summaryStack.set(info: .summary)
+        chapterStack.set()
     }
     
     func setContents() {
@@ -60,8 +62,6 @@ class ViewController: UIViewController {
         dedicationStack.setContents(book: book, info: .dedication)
         summaryStack.setContents(book: book, info: .summary, isMore: isMore)
         chapterStack.setContents(book)
-        
-//        setChapterLabels(book)
     }
     
     func setLayout() {
@@ -133,8 +133,6 @@ extension ViewController {
     func setInfoScroll() -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false // 스크롤바 미표시
-
-//        setChapterLabelStack()
         
         [infoStack, dedicationStack, summaryStack, chapterStack].forEach {
             scrollView.addSubview($0)
@@ -192,51 +190,24 @@ extension ViewController {
     }
 }
 
-//MARK: 목차 영역
-//extension ViewController {
-//    func setChapterLabelStack() {
-////        let title = makeInfoTitleLabel(.chapter)
-////        chapterStack = setVerticalLabelStack([title] + chapterLabels)
-//    }
-//    
-//    func updateChapterStack() {
-//        if chapterStack.subviews.count < chapterLabels.count {
-//            let num = chapterLabels.count - chapterStack.subviews.count
-//            for i in (chapterLabels.count - 1)..<(chapterLabels.count + num)  {
-//                chapterStack.addSubview(chapterLabels[i])
-//            }
-//        }
-//    }
-//    
-//    func setChapterLabels(_ book: Book?) {
-//        let chapters = book?.chapters ?? []
-//        
-//        // chapterLabels 배열 설정
-//        for (i, chapter) in chapters.enumerated() {
-//            if i < chapterLabels.count {
-//                // 기존 chapterLabels보다 데이터가 적은 경우 - 텍스트 대체
-//                chapterLabels[i].text = chapter.title
-//            } else if i == chapterLabels.count {
-//                // 기존 chapterLabels보다 데이터가 많은 경우 - 레이블 생성 및 추가
-//                let text = chapter.title
-//                let label = UILabel(
-//                    text: text,
-//                    font: .systemFont(ofSize: 14),
-//                    color: .darkGray
-//                )
-//                chapterLabels.append(label)
-//            }
-//        }
-//        
-//        // chapterLabel 표시 여부 설정
-//        for i in chapterLabels.indices {
-//            if i >= chapters.count {
-//                // chapterLabels가 데이터보다 많은 경우
-//                chapterLabels[i].isHidden = true // 레이블 표시 x
-//            } else {
-//                // chapterLabels가 데이터보다 많지 않은 경우
-//                chapterLabels[i].isHidden = false // 레이블 표시 o
-//            }
-//        }
-//    }
-//}
+extension ViewController: SeriesButtonDelegate {
+    //TODO: isMore 변경
+    func update(idx: Int) {
+        selected = idx
+        let book = books[selected]
+        
+        setTitleLabel(book)
+        
+        infoStack.setContents(book: book, idx: selected)
+        
+        dedicationStack.setContents(book: book, info: .dedication)
+        summaryStack.setContents(book: book, info: .summary, isMore: isMore)
+        
+        chapterStack.setContents(book)
+        chapterStack.update() // chapterStack subview 재설정
+        
+        //            self?.updateChapterStack()
+        //            self?.moreButton.isHidden =
+        //            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false // 더보기 버튼 표시 여부 설정
+    }
+}

@@ -11,3 +11,6 @@ protocol MoreButtonDelegate: AnyObject {
     func saveStatus(_ isMore: Bool, idx: Int)
 }
 
+protocol SeriesButtonDelegate: AnyObject {
+    func update(idx: Int)
+}
