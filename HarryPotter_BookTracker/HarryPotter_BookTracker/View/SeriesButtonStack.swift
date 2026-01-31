@@ -67,8 +67,7 @@ extension SeriesButtonStack {
 extension SeriesButtonStack {
     func setButtonAction(_ button: SeriesButton) {
         // 버튼 액션 정의
-        let buttonSelected = UIAction { [weak self] _ in
-            guard let self else { return }
+        let buttonSelected = UIAction { [unowned self] _ in
             let buttons = self.seriesButtons
             
             buttons.forEach { $0.isSelected = false } // 모든 버튼 isSelected 초기화
