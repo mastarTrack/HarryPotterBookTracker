@@ -7,9 +7,10 @@
 import Foundation
 
 class DataManager {
-    let isMoreBaseKey = "isMore_"
+    private let isMoreBaseKey = "isMore_"
     
-    func loadBooks() throws -> [Book] {
+    // JSON 데이터 파싱
+    private func loadBooks() throws -> [Book] {
         // data.json 파일 주소 가져오기
         guard let path = Bundle.main.path(forResource: "data", ofType: "json") else {
             throw DataError.fileNotFound
@@ -31,21 +32,22 @@ class DataManager {
         }
     }
     
+    // 데이터(책 배열) 전달
     func fetchBooks() throws -> [Book] {
         let books = try loadBooks()
         if books.isEmpty { throw DataError.emptyData }
         
         return books
     }
-    
 }
 
-extension DataManager: MoreButtonDelegate {
-    func saveStatus(_ isMore: Bool, idx: Int) {
-        UserDefaults.standard.set(isMore, forKey: isMoreBaseKey + "\(idx)")
-    }
-    
+//MARK: UserDefault 데이터 관련
+extension DataManager {
     func fetchMoreStatus(idx: Int) -> Bool {
         return UserDefaults.standard.bool(forKey: isMoreBaseKey + "\(idx)")
+    }
+    
+    func saveMoreStatus(_ isMore: Bool, idx: Int) {
+        UserDefaults.standard.set(isMore, forKey: isMoreBaseKey + "\(idx)")
     }
 }

@@ -7,9 +7,7 @@
 
 import UIKit
 
-protocol CustomStackHelper {
-
-}
+protocol CustomStackHelper { }
 
 extension CustomStackHelper {
     // 정보 타이틀 레이블 생성

@@ -29,9 +29,9 @@ class SeriesButtonStack: UIStackView {
     }
 }
 
-//MARK: 컨텐츠 설정
+//MARK: 버튼 수 설정
 extension SeriesButtonStack {
-    func setContents(num: Int) {
+    func setButtonNum(num: Int) {
         for _ in 0..<num {
             seriesButtons.append(SeriesButton())
         }

@@ -15,8 +15,9 @@ enum Description: String {
     case dedication = "Dedication"
     case summary = "Summary"
     case chapter = "Chapter"
-    // wiki, chapters
+    // wiki
     
+    // 각 항목 타이틀 레이블 세팅
     func getTitleLabelSetting() -> LabelSetting {
         switch self {
         case .author:
@@ -28,6 +29,7 @@ enum Description: String {
         }
     }
     
+    // 각 항목 컨텐츠 레이블 세팅
     func getContentLabelSetting() -> LabelSetting {
         switch self {
         case .author:
@@ -49,9 +51,4 @@ enum DataError: Error {
 struct LabelSetting {
     var font: UIFont
     var textColor: UIColor
-}
-
-enum Summary {
-    case origin
-    case brief
 }

@@ -30,7 +30,7 @@ class InfoStack: UIStackView, CustomStackHelper {
 
 //MARK: 컨텐츠 설정
 extension InfoStack {
-    func setContents(book: Book?, idx: Int) {
+    func setContents(of book: Book?, idx: Int) {
         bookImageView.image = UIImage(named: "harrypotter" + "\(idx + 1)")
         titleLabel.text = book?.title
         authorLabel.text = book?.author

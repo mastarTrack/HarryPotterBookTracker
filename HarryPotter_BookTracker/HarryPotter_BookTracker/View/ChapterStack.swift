@@ -41,7 +41,7 @@ class ChapterStack: UIStackView, CustomStackHelper {
 
 //MARK: 컨텐츠 설정
 extension ChapterStack {
-    func setContents(_ book: Book?) {
+    func setContents(of book: Book?) {
         let chapters = book?.chapters ?? []
         
         chapterCount = chapters.count

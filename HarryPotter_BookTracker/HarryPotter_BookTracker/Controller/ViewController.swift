@@ -11,13 +11,12 @@ import SnapKit
 class ViewController: UIViewController {
     
     private let dataManager = DataManager()
-    private(set) var books: [Book] = []
-    private(set) var isMore: Bool = false
+    private var books: [Book] = []
+    private var isMore: Bool = false
+    private var selected: Int = 0
     
     private let titleLabel = UILabel() // 최상단 제목 레이블
-    let seriesButtonStack = SeriesButtonStack()
-    
-    var selected: Int = 0
+    private let seriesButtonStack = SeriesButtonStack()
     
     private let infoStack = InfoStack()
     private let dedicationStack = SummaryStack()
@@ -26,45 +25,50 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        isMore = dataManager.fetchMoreStatus(idx: selected)
-        getBooks()
-        
         view.backgroundColor = .white
         
+        setInitialData()
         setContents()
         setComponents()
         
         setLayout()
-        
-        setMoreButton()
-        setMoreButtonAction()
     }
     
-    func setComponents() {
-        seriesButtonStack.set()
-        seriesButtonStack.seriesButtons.forEach {
-            $0.delegate = self
-        }
-        
-        infoStack.set()
-        dedicationStack.set(info: .dedication)
-        summaryStack.set(info: .summary)
-        chapterStack.set()
+    // 데이터 초기값 설정
+    private func setInitialData() {
+        isMore = dataManager.fetchMoreStatus(idx: selected)
+        getBooks()
     }
     
-    func setContents() {
-        let book = books[selected]
+    // 컴포넌트 컨텐츠 설정
+    private func setContents() {
+        let book = books[selected] // 현재 선택된 책
         
         setTitleLabel(book)
-        seriesButtonStack.setContents(num: books.count)
-        infoStack.setContents(book: book, idx: selected)
-        dedicationStack.setContents(book: book, info: .dedication)
-        summaryStack.setContents(book: book, info: .summary, isMore: isMore)
-        chapterStack.setContents(book)
+        infoStack.setContents(of: book, idx: selected)
+        dedicationStack.setContents(of: book, info: .dedication)
+        summaryStack.setContents(of: book, info: .summary, isMore: isMore)
+        chapterStack.setContents(of: book)
     }
     
-    func setLayout() {
+    // 컴포넌트 config 설정
+    private func setComponents() {
+        // 시리즈 버튼 설정
+        seriesButtonStack.setButtonNum(num: books.count)
+        seriesButtonStack.set()
+        
+        // 책 정보 영역 설정
+        infoStack.set()
+        dedicationStack.setDedicationStack()
+        summaryStack.setSummaryStack()
+        chapterStack.set()
+        
+        // 각 버튼 delegate 설정
+        setDelegate()
+    }
+    
+    // 컴포넌트 레이아웃 설정
+    private func setLayout() {
         let infoScroll = setInfoScroll()
         
         view.addSubview(titleLabel)
@@ -88,9 +92,28 @@ class ViewController: UIViewController {
             $0.top.equalTo(seriesButtonStack.snp.bottom).offset(16)
         }
     }
+    
+    // 버튼 delegate 설정
+    private func setDelegate() {
+        seriesButtonStack.seriesButtons.forEach {
+            $0.delegate = self
+        }
+        summaryStack.moreButton.delegate = self
+    }
+    
+    // 타이틀 레이블 설정
+    private func setTitleLabel(_ book: Book?) {
+        titleLabel.text = book?.title ?? ""
+        titleLabel.font = .boldSystemFont(ofSize: 24)
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 0
+    }
+}
 
+//MARK: 책 데이터 가져오기
+extension ViewController {
     // 데이터([Book]) 가져오기
-    func getBooks() {
+    private func getBooks() {
         do {
             books = try dataManager.fetchBooks()
         } catch DataError.fileNotFound {
@@ -104,19 +127,12 @@ class ViewController: UIViewController {
             showAlert("⛔️ 알 수 없는 오류: \(error)")
         }
     }
-    
-    func setTitleLabel(_ book: Book?) {
-        titleLabel.text = book?.title ?? ""
-        titleLabel.font = .boldSystemFont(ofSize: 24)
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
-    }
 }
 
 //MARK: Alert
 extension ViewController {
     // Alert 생성
-    func showAlert(_ message: String) {
+    private func showAlert(_ message: String) {
         let alert = UIAlertController(title: "오류 발생", message: message, preferredStyle: .alert)
         let confirm = UIAlertAction(title: "확인", style: .default, handler: nil)
         
@@ -130,7 +146,7 @@ extension ViewController {
 
 //MARK: 스크롤뷰 설정
 extension ViewController {
-    func setInfoScroll() -> UIScrollView {
+    private func setInfoScroll() -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false // 스크롤바 미표시
         
@@ -165,49 +181,31 @@ extension ViewController {
     }
 }
 
-extension ViewController {
-    func setMoreButton() {
-        let button = summaryStack.moreButton
-        button.isSelected = isMore
-        button.delegate = dataManager // delegate 설정
-    }
-    
-    func setMoreButtonAction() {
-        let more = UIAction { [weak self] _ in
-            guard let self else { return }
-            
-            let button = self.summaryStack.moreButton
-            button.isSelected.toggle()
-            
-            // isSelected 상태 저장
-            button.delegate?.saveStatus(button.isSelected, idx: selected)
-            self.isMore = button.isSelected
-            
-            // 요약 텍스트 재설정
-            self.summaryStack.setContents(book: books[selected], info: .summary, isMore: self.isMore)
-        }
-        summaryStack.moreButton.addAction(more, for: .touchUpInside)
+//MARK: 버튼 delegate 동작 정의
+extension ViewController: SeriesButtonDelegate {
+    func update(idx: Int) {
+        // 속성 업데이트
+        selected = idx
+        isMore = dataManager.fetchMoreStatus(idx: selected)
+        
+        // 컴포넌트 컨텐츠 업데이트
+        setContents()
+        
+        // 컴포넌트 레이아웃 업데이트
+        summaryStack.updateMoreButtonIsHidden() // 더보기 버튼 표시 유무 재설정
+        chapterStack.update() // chapterStack subview 재설정
     }
 }
 
-extension ViewController: SeriesButtonDelegate {
-    //TODO: isMore 변경
-    func update(idx: Int) {
-        selected = idx
-        let book = books[selected]
-        
-        setTitleLabel(book)
-        
-        infoStack.setContents(book: book, idx: selected)
-        
-        dedicationStack.setContents(book: book, info: .dedication)
-        summaryStack.setContents(book: book, info: .summary, isMore: isMore)
-        
-        chapterStack.setContents(book)
-        chapterStack.update() // chapterStack subview 재설정
-        
-        //            self?.updateChapterStack()
-        //            self?.moreButton.isHidden =
-        //            self?.summaryLabel.text?.count ?? 0 < 450 ? true : false // 더보기 버튼 표시 여부 설정
+extension ViewController: MoreButtonDelegate {
+    // 권별 더보기 상태 저장
+    func saveStatus(_ status: Bool) {
+        self.isMore = status
+        dataManager.saveMoreStatus(status, idx: selected)
+    }
+    
+    // 요약 레이블 컨텐츠 변경
+    func updateSummaryStack() {
+        summaryStack.updateSummaryText(books[selected])
     }
 }
