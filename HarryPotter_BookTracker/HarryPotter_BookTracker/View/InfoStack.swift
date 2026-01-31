@@ -39,7 +39,7 @@ extension InfoStack {
     }
     
     private func formatDate(_ date: Date?) -> String {
-        guard let date = date else { return "" }
+        guard let date else { return "" }
         
         // dateFormat 설정
         let newFormatter = DateFormatter()

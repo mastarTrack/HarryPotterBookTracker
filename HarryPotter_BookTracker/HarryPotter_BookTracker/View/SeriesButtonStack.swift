@@ -65,7 +65,7 @@ extension SeriesButtonStack {
 
 //MARK: 버튼 액션 설정
 extension SeriesButtonStack {
-    func setButtonAction(_ button: SeriesButton) {
+    private func setButtonAction(_ button: SeriesButton) {
         // 버튼 액션 정의
         let buttonSelected = UIAction { [unowned self] _ in
             let buttons = self.seriesButtons
