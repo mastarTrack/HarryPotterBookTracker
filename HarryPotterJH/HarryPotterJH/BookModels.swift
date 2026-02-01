@@ -4,8 +4,9 @@
 //
 //  Created by 김주희 on 1/23/26.
 //
-
 import Foundation
+
+// MARK: -- Model: 데이터(Book, BookResponse 등)
 
 // 최상위 응답
 struct BookResponse: Decodable { // JSON 전체는 data라는 배열 하나를 가진다
