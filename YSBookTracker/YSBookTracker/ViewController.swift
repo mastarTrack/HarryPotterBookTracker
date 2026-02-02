@@ -34,7 +34,7 @@ final class ViewController: UIViewController {
         
         configureHeader() // 화면 구성
         configureMain()
-        ConfigureDetail()
+        configureDetail()
         
         viewModel.loadBooks() // 데이터 받아오기
     }
@@ -49,8 +49,8 @@ final class ViewController: UIViewController {
         configureScrollView()
     }
     
-    private func ConfigureDetail() {
-        ConfigureDedicationView()
+    private func configureDetail() {
+        configureDedicationView()
         configureSummaryView()
         configureChapterView()
     }
@@ -63,7 +63,6 @@ final class ViewController: UIViewController {
         viewModel.error = { [weak self] error in
             self?.showErrorAlert(error)
         }
-        
     }
     
     private func updateBookDetail(info: BookViewInfo) {
@@ -225,7 +224,7 @@ final class ViewController: UIViewController {
         mainDetailStackView.addArrangedSubview(pagesStackView)
     }
     
-    private func ConfigureDedicationView() {
+    private func configureDedicationView() {
         let dedicationStackView = makeStackView(axis: .vertical)
         
         let dedicationTitleLabel = makeLabel(text: "Dedication", config: .boldAnd18)
