@@ -162,7 +162,7 @@ class BookView: UIView {
             let button = UIButton().then {
                 $0.setTitle("\(i)", for: .normal)
                 $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-                $0.layer.cornerRadius = 20
+                $0.layer.cornerRadius = 10
                 $0.backgroundColor = .systemBlue
                 $0.setTitleColor(.white, for: .normal)
                 $0.tag = i // 태그로 시리즈 번호 구분
@@ -261,7 +261,7 @@ class BookView: UIView {
         }
         
         seriesButtons.forEach {
-            $0.snp.makeConstraints { $0.width.height.equalTo(40) }
+            $0.snp.makeConstraints { $0.width.height.equalTo(20) }
         }
         
         scrollView.snp.makeConstraints {
