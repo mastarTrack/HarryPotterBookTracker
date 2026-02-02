@@ -12,7 +12,6 @@ import Then
 
 final class ViewController: UIViewController {
     
-    
     // 1. View와 ViewModel 인스턴스
     private let mainView = BookView()
     private let viewModel = BookViewModel()
@@ -21,6 +20,7 @@ final class ViewController: UIViewController {
     override func loadView() {
         self.view = mainView
     }
+    
     
     // MARK: - viewDidLoad()
     
@@ -58,14 +58,14 @@ final class ViewController: UIViewController {
         
     }
     
-    // MARK: -- function
+    // MARK: -- update function
     
-
+    
     // UI 갱신 함수
     private func updateView() {
         guard let book = viewModel.currentBook else { return }
         
-        // BookView의 UI 요소에 값 대입
+        // BookView의 UI 요소에 업데이트 된 값 대입
         
         // 최상위 책 제목 값 대입
         mainView.titleLabel.text = book.title
@@ -77,9 +77,9 @@ final class ViewController: UIViewController {
         // VM에 있는 포맷팅 함수 활용
         
         // 가이드에 맞춘 속성 텍스트 설정
-        mainView.authorLabel.attributedText = viewModel.createInfoText(title: "Author", value: book.author, titleSize: 16, valueSize: 18, valueColor: .darkGray)
-        mainView.releasedLabel.attributedText = viewModel.createInfoText(title: "Released", value: viewModel.formatDate(book.releaseDate), titleSize: 14, valueSize: 14, valueColor: .gray)
-        mainView.pagesLabel.attributedText = viewModel.createInfoText(title: "Pages", value: "\(book.pages)", titleSize: 14, valueSize: 14, valueColor: .gray)
+        mainView.authorLabel.attributedText = mainView.createInfoText(title: "Author", value: book.author, titleSize: 16, valueSize: 18, valueColor: .darkGray)
+        mainView.releasedLabel.attributedText = mainView.createInfoText(title: "Released", value: viewModel.formatDate(book.releaseDate), titleSize: 14, valueSize: 14, valueColor: .gray)
+        mainView.pagesLabel.attributedText = mainView.createInfoText(title: "Pages", value: "\(book.pages)", titleSize: 14, valueSize: 14, valueColor: .gray)
         
         mainView.dedicationLabel.text = book.dedication
         
@@ -93,6 +93,7 @@ final class ViewController: UIViewController {
         updateChapters(chapters: book.chapters)
     }
     
+    // summary 갱신
     private func updateSummary(book: Book) {
         // 해당 책의 요약이 450자 이상일때
         if book.summary.count > 450 {
@@ -113,9 +114,9 @@ final class ViewController: UIViewController {
         }
     }
     
-    
+    // chapters 갱신
     private func updateChapters(chapters: [Chapter]) {
-        // 기존 챕터 뷰 제거
+        // 기존 챕터 뷰 제거하고 타이틀 재 삽입
         mainView.chapterStackView.subviews.forEach{ $0.removeFromSuperview() }
         mainView.chapterStackView.addArrangedSubview(mainView.chapterTitleLabel)
         
@@ -129,9 +130,8 @@ final class ViewController: UIViewController {
             }
             mainView.chapterStackView.addArrangedSubview(label)
         }
-        
-        
     }
+    
     // 에러창 띄우기
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(title: "에러 발생", message: message, preferredStyle: .alert)

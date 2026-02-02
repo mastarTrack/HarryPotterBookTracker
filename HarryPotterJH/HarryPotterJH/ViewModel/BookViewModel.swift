@@ -52,15 +52,15 @@ class BookViewModel {
     func selectSeries(at number: Int) {
         self.index = number - 1
         // 인덱스가 변경되면 요약 버튼 상태도 새로 불러와야함
-        self.isExpanded = UserDefaults.standard.bool(forKey: "isExpanded_\(number)")
-        self.onDataUpdated?()
+        self.isExpanded = UserDefaults.standard.bool(forKey: "isExpanded_\(index)")
+        self.onDataUpdated?()// 데이터가 변경됨을 vc에게 알림
     }
 
     // 요약 버튼 토글 로직
     func toggleSummary() {
         isExpanded.toggle()
         UserDefaults.standard.set(isExpanded, forKey: "isExpanded_\(index)")
-        onDataUpdated?()
+        onDataUpdated?() // 데이터가 변경됨을 vc에 알림
     }
     
     // date 포맷팅 함수
@@ -72,31 +72,5 @@ class BookViewModel {
             return formatter.string(from: date) // date를 문자열로 다시 변환
         }
         return dateString // 실패하면 원본 반환
-    }
-    
-    // 책 정보뷰 텍스트 생성 함수 (한 줄에 스타일 다른 글자 두 덩이 붙이기)
-    func createInfoText(
-        title: String,
-        value: String,
-        titleSize: CGFloat,
-        valueSize: CGFloat,
-        valueColor: UIColor
-    ) -> NSAttributedString {
-        
-        // 1. 타이틀 속성 지정(Mutable)
-        let inforesult = NSMutableAttributedString(
-            string: title,
-            attributes: [
-                .font: UIFont.systemFont(ofSize: titleSize, weight: .bold),
-                .foregroundColor: UIColor.black])
-        
-        // 2. 간격 8 추가
-        inforesult.append(NSAttributedString (string: " ", attributes: [.kern: 8]))
-        
-        // 3. 내용 속성 추가
-        inforesult.append(NSAttributedString (string: value, attributes: [
-            .font: UIFont.systemFont(ofSize: valueSize),
-            .foregroundColor: valueColor]))
-        return inforesult
     }
 }

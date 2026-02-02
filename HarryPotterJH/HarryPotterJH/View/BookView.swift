@@ -144,13 +144,13 @@ class BookView: UIView {
     // MARK: -- Initializer
     
     override init(frame: CGRect) {
-        super.init(frame: frame)
+        super.init(frame: frame) // 부모 UIView의 기본 세팅을 먼저 함
         self.backgroundColor = .white
         createSeriesButtons() // 시리즈 버튼 생성
         setupSubView()
         setupConstraints()
     }
-    
+    // 코드베이스로만 작업하겠다는 뜻
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -165,8 +165,8 @@ class BookView: UIView {
                 $0.layer.cornerRadius = 20
                 $0.backgroundColor = .systemBlue
                 $0.setTitleColor(.white, for: .normal)
-                $0.tag = i // 태그로 번호 구분
-                $0.addTarget(self, action: #selector(seriesButtonTapped(_:)), for: .touchDown)
+                $0.tag = i // 태그로 시리즈 번호 구분
+                $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown)
             }
             seriesButtons.append(button) // 시리즈 버튼 배열에 append
         }
@@ -195,9 +195,35 @@ class BookView: UIView {
                 // 선택된 버튼을 제외한 나머지 버튼들
                 button.backgroundColor = .systemBlue
                 button.setTitleColor(.white, for: .normal)
-            }}
+            }
+        }
     }
     
+    // 책 정보뷰 텍스트 생성 함수 (한 줄에 스타일 다른 글자 두 덩이 붙이기)
+    func createInfoText(
+        title: String,
+        value: String,
+        titleSize: CGFloat,
+        valueSize: CGFloat,
+        valueColor: UIColor
+    ) -> NSAttributedString {
+        
+        // 1. 타이틀 속성 지정(Mutable)
+        let inforesult = NSMutableAttributedString(
+            string: title,
+            attributes: [
+                .font: UIFont.systemFont(ofSize: titleSize, weight: .bold),
+                .foregroundColor: UIColor.black])
+        
+        // 2. 간격 8 추가
+        inforesult.append(NSAttributedString (string: " ", attributes: [.kern: 8]))
+        
+        // 3. 내용 속성 추가
+        inforesult.append(NSAttributedString (string: value, attributes: [
+            .font: UIFont.systemFont(ofSize: valueSize),
+            .foregroundColor: valueColor]))
+        return inforesult
+    }
     
     // MARK: -- add_Subview
     
