@@ -22,15 +22,15 @@ class MainViewController: UIViewController {
         // Do any additional setup after loading the view.
         view = mainView
         loadBooks()
-        if bookData.count != 0{
+        if bookData.count != 0 {
             mainView.setViewData(book: bookData[0],bookNumber: 0)
-            mainView.setBooksButtons(books: bookData)
+            mainView.makeBooksButtons(books: bookData)
         }
     }
     
     /// 메인 뷰 UI 설정
     func ConfigureUI(){
-        mainView.snp.makeConstraints{
+        mainView.snp.makeConstraints {
             $0.top.bottom.trailing.leading.equalToSuperview()
         }
     }

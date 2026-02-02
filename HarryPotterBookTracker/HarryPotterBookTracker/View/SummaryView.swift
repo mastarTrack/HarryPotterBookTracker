@@ -73,6 +73,7 @@ class SummaryView : UIView {
             $0.bottom.equalToSuperview()
         }
     }
+    
     @objc
     /// 버튼용 더보기/접기 메소드
     func switchDownBotton(){

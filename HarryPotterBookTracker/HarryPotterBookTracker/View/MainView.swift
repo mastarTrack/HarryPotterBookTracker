@@ -43,7 +43,7 @@ class MainView: UIView{
     }
     
     /// UI 초기 설정
-    private func configureUI(){
+    private func configureUI() {
         
         /// 핵심내용 배치용 UIView
         let subView = UIView()
@@ -131,14 +131,14 @@ class MainView: UIView{
         stackDetailMain.alignment = .top
         stackDetailMain.distribution = .fill
         stackDetailMain.spacing = 10
-        [stackMatter, stackDedication, stackSummary].forEach{
+        [stackMatter, stackDedication, stackSummary].forEach {
             $0.axis = .vertical
             $0.alignment = .top
             $0.spacing = 8
         }
         stackMatter.spacing = 24
         
-        [stackChapter, stackChapters].forEach{
+        [stackChapter, stackChapters].forEach {
             $0.axis = .vertical
             $0.alignment = .top
             $0.distribution = .fill
@@ -146,7 +146,7 @@ class MainView: UIView{
         }
         
         // 책 상세 내용 삽입
-        [labelInfoHeader, labelAuthor, labelInfoAuthor, labelReleased, labelInfoRelesed, labelPage, labelInfoPages].forEach{ subView.addSubview($0)}
+        [labelInfoHeader, labelAuthor, labelInfoAuthor, labelReleased, labelInfoRelesed, labelPage, labelInfoPages].forEach { subView.addSubview($0)}
         stackDetailMain.addArrangedSubview(imageInfoImage)
         stackDetailMain.addArrangedSubview(subView)
 
@@ -169,14 +169,14 @@ class MainView: UIView{
         addSubview(scrollViewInfo)
         
         // 오토 레이아웃 선언부
-        labelHeader.snp.makeConstraints{
+        labelHeader.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.height.width.greaterThanOrEqualTo(10)
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.top.equalTo(safeAreaLayoutGuide).offset(10)
         }
         
-        stackButtons.snp.makeConstraints{
+        stackButtons.snp.makeConstraints  {
             $0.centerX.equalToSuperview()
             $0.height.width.greaterThanOrEqualTo(10)
             $0.top.equalTo(labelHeader.snp.bottom).offset(16)
@@ -184,31 +184,31 @@ class MainView: UIView{
             $0.trailing.lessThanOrEqualToSuperview().inset(20)
         }
         
-        stackDetailMain.snp.makeConstraints{
+        stackDetailMain.snp.makeConstraints {
             $0.height.width.greaterThanOrEqualTo(10)
             $0.top.equalToSuperview()
             $0.width.equalToSuperview().inset(20)
         }
         
-        labelInfoHeader.snp.makeConstraints{
+        labelInfoHeader.snp.makeConstraints {
             $0.leading.top.trailing.equalToSuperview()
         }
         
-        imageInfoImage.snp.makeConstraints{
+        imageInfoImage.snp.makeConstraints {
             $0.width.equalTo(100)
             $0.height.equalTo(imageInfoImage.snp.width).multipliedBy(1.5)
         }
         
-        labelAuthor.snp.makeConstraints{
+        labelAuthor.snp.makeConstraints {
             $0.top.equalTo(labelInfoHeader.snp.bottom).offset(7)
         }
         
-        labelInfoAuthor.snp.makeConstraints{
+        labelInfoAuthor.snp.makeConstraints {
             $0.centerY.equalTo(labelAuthor)
             $0.leading.equalTo(labelAuthor.snp.trailing).offset(8)
         }
         
-        labelReleased.snp.makeConstraints{
+        labelReleased.snp.makeConstraints {
             $0.top.equalTo(labelAuthor.snp.bottom).offset(5)
         }
         
@@ -217,27 +217,27 @@ class MainView: UIView{
             $0.leading.equalTo(labelReleased.snp.trailing).offset(8)
         }
         
-        labelPage.snp.makeConstraints{
+        labelPage.snp.makeConstraints {
             $0.top.equalTo(labelReleased.snp.bottom).offset(5)
             $0.bottom.equalToSuperview().inset(10)
         }
         
-        labelInfoPages.snp.makeConstraints{
+        labelInfoPages.snp.makeConstraints {
             $0.centerY.equalTo(labelPage)
             $0.leading.equalTo(labelPage.snp.trailing).offset(8)
         }
         
-        stackMatter.snp.makeConstraints{
+        stackMatter.snp.makeConstraints {
             $0.top.equalTo(stackDetailMain.snp.bottom).offset(24)
             $0.width.equalToSuperview()
         }
         
-        stackChapter.snp.makeConstraints{
+        stackChapter.snp.makeConstraints {
             $0.top.equalTo(stackMatter.snp.bottom).offset(24)
             $0.bottom.equalToSuperview().inset(10)
         }
         
-        scrollViewInfo.snp.makeConstraints{
+        scrollViewInfo.snp.makeConstraints {
             $0.top.equalTo(stackButtons.snp.bottom).offset(18)
             //$0.width.equalToSuperview().inset(20)
             $0.leading.trailing.equalToSuperview().inset(20)
@@ -246,7 +246,7 @@ class MainView: UIView{
     }
     
     /// 책 권수 대비 버튼 및 버튼 액션 생성 메소드
-    func setBooksButtons(books:[Book]){
+    func makeBooksButtons(books:[Book]) {
         /// 책 수 만큼 버튼 생성
         books.enumerated().forEach{ (offset, element) in
             let button = UIButton()
@@ -255,9 +255,9 @@ class MainView: UIView{
             button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
             button.setTitleColor(.white, for: .normal)
             button.layer.cornerRadius = 15
-            button.addAction(UIAction {[weak self] _ in  self?.setViewData(book: element, bookNumber: offset)}
+            button.addAction(UIAction { [weak self] _ in  self?.setViewData(book: element, bookNumber: offset)}
                              , for: .touchDown)
-            button.snp.makeConstraints{
+            button.snp.makeConstraints {
                 $0.width.height.greaterThanOrEqualTo(30)
             }
             stackButtons.addArrangedSubview(button)
@@ -265,7 +265,7 @@ class MainView: UIView{
     }
     
     /// 뷰 데이터 변환 메소드
-    func setViewData(book: Book, bookNumber: Int){
+    func setViewData(book: Book, bookNumber: Int) {
         imageInfoImage.image = UIImage(named: "harrypotter\(bookNumber+1)")
         labelHeader.text = book.title
         labelInfoHeader.text = book.title
@@ -276,20 +276,19 @@ class MainView: UIView{
         viewInfoSummry.setLabelText(book.summary, bookNumber)
         
         
-        if book.chapters.count > stackChapters.arrangedSubviews.count{
-            for _ in 1...(book.chapters.count - stackChapters.arrangedSubviews.count){
+        if book.chapters.count > stackChapters.arrangedSubviews.count {
+            for _ in 1...(book.chapters.count - stackChapters.arrangedSubviews.count) {
                 stackChapters.addArrangedSubview(getUILabelToChapter(""))
             }
         }
-        stackChapters.arrangedSubviews.enumerated().forEach{
+        stackChapters.arrangedSubviews.enumerated().forEach {
             guard let label = $0.element as? UILabel else {
                 return
             }
-            if $0.offset < book.chapters.count{
+            if $0.offset < book.chapters.count {
                 label.text = book.chapters[$0.offset].title
                 label.isHidden = false
-            }
-            else{
+            } else {
                 label.isHidden = true
             }
         }
