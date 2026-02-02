@@ -103,6 +103,9 @@ final class BookViewModel {
 ```swift
 func configure(with viewModel: BookViewModel)
 ```
+
+---
+
 ### 5️⃣ ViewController (ViewController.swift)
 
 ```swift
@@ -114,6 +117,8 @@ viewModel.onDataChanged = { [weak self] in
 - 사용자 이벤트를 ViewModel로 전달
 - 비즈니스 로직을 직접 처리하지 않음
 - weak self를 사용하여 메모리 누수 방지
+
+---
 
 - ## 🔄 데이터 흐름 (MVVM)
 
