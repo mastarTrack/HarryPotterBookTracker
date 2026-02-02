@@ -81,7 +81,7 @@ extension MainView {
         //scrollView 속성 정의
         scrollView.snp.makeConstraints {
             $0.top.equalTo(seriesStackView.snp.bottom).offset(20) // seriesStackView 기준으로 변경
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalTo(safeAreaLayoutGuide).inset(20)
             $0.bottom.equalToSuperview()
         }
         
@@ -113,7 +113,7 @@ extension MainView {
             button.titleLabel?.font = .systemFont(ofSize: 16)
             button.backgroundColor = .systemGray5
             button.tag = idx
-            button.addTarget(target, action: action, for: .touchDown)
+            button.addTarget(target, action: action, for: .touchUpInside)
             
             button.snp.makeConstraints {
                 $0.width.equalTo(button.snp.height)

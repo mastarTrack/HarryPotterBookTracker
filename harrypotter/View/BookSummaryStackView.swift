@@ -77,7 +77,7 @@ private extension BookSummaryStackView {
         
         extraButton.setTitleColor(.systemBlue, for: .normal)
         extraButton.titleLabel?.font = .systemFont(ofSize: 14)
-        extraButton.addTarget(self, action: #selector(extraButtonTapped), for: .touchDown) // 함수 연결
+        extraButton.addTarget(self, action: #selector(extraButtonTapped), for: .touchUpInside) // 함수 연결
         extraButton.contentHorizontalAlignment = .trailing // 버튼 우측 배치
     }
     
