@@ -265,8 +265,9 @@ class BookView: UIView {
         }
         
         scrollView.snp.makeConstraints {
-            $0.leading.trailing.bottom.equalTo(safeAreaLayoutGuide)
+            $0.leading.trailing.equalTo(safeAreaLayoutGuide)
             $0.top.equalTo(seriesButtonStackView.snp.bottom).offset(20)
+            $0.bottom.equalToSuperview()
         }
         
         contentView.snp.makeConstraints {
