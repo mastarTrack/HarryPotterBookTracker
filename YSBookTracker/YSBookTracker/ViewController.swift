@@ -159,7 +159,7 @@ extension ViewController {
 extension ViewController {
     private func configureHeaderTitleLabel() {
         view.addSubview(bookTitleLabel)
-        bookTitleLabel.apply(.HeaderTitle)
+        bookTitleLabel.apply(.headerTitle)
         bookTitleLabel.textAlignment = .center
         
         bookTitleLabel.snp.makeConstraints {
@@ -183,7 +183,7 @@ extension ViewController {
         buttonStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.top.equalTo(bookTitleLabel.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.greaterThanOrEqualTo(view.safeAreaLayoutGuide).offset(30)
         }
     }
     
@@ -285,7 +285,8 @@ extension ViewController {
         
         scrollView.snp.makeConstraints {
             $0.top.equalTo(buttonStackView.snp.bottom).offset(24)
-            $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(view.snp.bottom)
         }
         
         contentView.snp.makeConstraints {
@@ -320,7 +321,7 @@ extension ViewController {
     private func configureSummaryView() {
         let summaryStackView = makeStackView(axis: .vertical)
         let summaryTitleLabel = UILabel(text: "Summary", config: .boldAnd18)
-        summaryInfoLabel.apply(.darkGrayAnd18)
+        summaryInfoLabel.apply(.darkGrayAnd14)
         
         scrollStackView.addArrangedSubview(summaryStackView)
         summaryStackView.addArrangedSubview(summaryTitleLabel)
@@ -349,11 +350,5 @@ extension ViewController {
         setStackView(chapterStackView, axis: .vertical)
         scrollStackView.addArrangedSubview(chapterStackView)
         chapterStackView.addArrangedSubview(chapterTitleLabel)
-    }
-}
-
-enum DefaultsKey {
-    static func isExpandedKey(volume: Int) -> String {
-        return "summary.isExpanded.volume.\(volume)"
     }
 }

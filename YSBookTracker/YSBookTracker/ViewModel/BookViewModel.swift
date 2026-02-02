@@ -29,8 +29,8 @@ final class BookViewModel {
                 switch result {
                 case .success(let books):
                     self.books = books
-                    self.updateBookInfo()
                     self.isExpanded = self.restoreExpandedState(volume: self.selectedVolume)
+                    self.updateBookInfo()
 
                 case .failure(let error):
                     self.error?(error)
