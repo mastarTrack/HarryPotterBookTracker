@@ -71,8 +71,6 @@ struct Book: Decodable {
 func loadBooks(completion: @escaping (Result<[Book], Error>) -> Void)
 ```
 
-### 2️⃣ Service (DataService.swift)
-
 - `data.json` 파일 **로드 및 파싱 담당**
 - 데이터 로직을 ViewModel과 분리하여 **단일 책임 원칙(SRP)** 적용
 - 향후 **네트워크 통신 구조로 확장 가능**
