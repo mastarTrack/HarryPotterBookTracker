@@ -58,7 +58,6 @@ class ViewController: UIViewController {
         seriesButtonStack.set()
         
         // 책 정보 영역 설정
-        infoStack.set()
         dedicationStack.setDedicationStack()
         summaryStack.setSummaryStack()
         chapterStack.set()
@@ -88,7 +87,8 @@ class ViewController: UIViewController {
         }
         
         infoScroll.snp.makeConstraints {
-            $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
             $0.top.equalTo(seriesButtonStack.snp.bottom).offset(16)
         }
     }
@@ -182,8 +182,8 @@ extension ViewController {
 }
 
 //MARK: 버튼 delegate 동작 정의
-extension ViewController: SeriesButtonDelegate {
-    func ContentsUpdate(to idx: Int) {
+extension ViewController: SeriesButtonDelegate {    
+    func seriesButtonContentsUpdate(to idx: Int) {
         // 속성 업데이트
         selected = idx
         isMore = dataManager.fetchMoreStatus(idx: selected)
@@ -199,13 +199,13 @@ extension ViewController: SeriesButtonDelegate {
 
 extension ViewController: MoreButtonDelegate {
     // 권별 더보기 상태 저장
-    func saveIsMoreStatus(_ status: Bool) {
+    func moreButtonSaveStatus(_ status: Bool) {
         self.isMore = status
         dataManager.saveMoreStatus(status, idx: selected)
     }
     
     // 요약 레이블 컨텐츠 변경
-    func summarySatackUpdate() {
+    func moreButtonUpdateSummaryStack() {
         summaryStack.updateSummaryText(books[selected])
     }
 }

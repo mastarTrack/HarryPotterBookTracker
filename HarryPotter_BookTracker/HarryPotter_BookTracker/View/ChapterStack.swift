@@ -55,6 +55,7 @@ extension ChapterStack {
                     font: .systemFont(ofSize: 14),
                     color: .darkGray
                 )
+                label.numberOfLines = 0
                 chapterLabels.append(label)
             }
         }

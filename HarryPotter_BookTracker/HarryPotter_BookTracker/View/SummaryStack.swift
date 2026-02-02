@@ -156,8 +156,8 @@ extension SummaryStack {
             guard let self else { return }
             
             moreButton.isSelected.toggle()
-            moreButton.delegate?.saveIsMoreStatus(moreButton.isSelected)
-            moreButton.delegate?.summarySatackUpdate()
+            moreButton.delegate?.moreButtonSaveStatus(moreButton.isSelected)
+            moreButton.delegate?.moreButtonUpdateSummaryStack()
         }
         
         moreButton.addAction(buttonPushed, for: .touchUpInside)

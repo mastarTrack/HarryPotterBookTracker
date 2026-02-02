@@ -9,7 +9,7 @@ import UIKit
 // 제목 영역
 class SeriesButtonStack: UIStackView {
     private(set) var seriesButtons = [SeriesButton]()
-    
+
     func set() {
         setButtons()
         seriesButtons.forEach { addArrangedSubview($0) }
@@ -73,7 +73,7 @@ extension SeriesButtonStack {
             buttons.forEach { $0.isSelected = false } // 모든 버튼 isSelected 초기화
             button.isSelected = true // 선택된 버튼 상태 변경
             
-            button.delegate?.ContentsUpdate(to: button.tag) // 레이블 내용 변경
+            button.delegate?.seriesButtonContentsUpdate(to: button.tag) // 레이블 내용 변경
         }
         
         // 버튼에 액션 추가

@@ -14,7 +14,16 @@ class InfoStack: UIStackView, CustomStackHelper {
     private let releasedDateLabel = UILabel()
     private let pagesLabel = UILabel()
     
-    func set() {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        set()
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func set() {
         setContentLabelConfigs()
         setImageViewConfig()
         
@@ -34,7 +43,7 @@ extension InfoStack {
         bookImageView.image = UIImage(named: "harrypotter" + "\(idx + 1)")
         titleLabel.text = book?.title
         authorLabel.text = book?.author
-        releasedDateLabel.text = formatDate(book?.release_date)
+        releasedDateLabel.text = formatDate(book?.releaseDate)
         pagesLabel.text = "\(book?.pages ?? 0)"
     }
     
