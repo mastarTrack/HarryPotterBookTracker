@@ -183,7 +183,7 @@ extension ViewController {
 
 //MARK: 버튼 delegate 동작 정의
 extension ViewController: SeriesButtonDelegate {
-    func update(idx: Int) {
+    func ContentsUpdate(to idx: Int) {
         // 속성 업데이트
         selected = idx
         isMore = dataManager.fetchMoreStatus(idx: selected)
@@ -199,13 +199,13 @@ extension ViewController: SeriesButtonDelegate {
 
 extension ViewController: MoreButtonDelegate {
     // 권별 더보기 상태 저장
-    func saveStatus(_ status: Bool) {
+    func saveIsMoreStatus(_ status: Bool) {
         self.isMore = status
         dataManager.saveMoreStatus(status, idx: selected)
     }
     
     // 요약 레이블 컨텐츠 변경
-    func updateSummaryStack() {
+    func summarySatackUpdate() {
         summaryStack.updateSummaryText(books[selected])
     }
 }

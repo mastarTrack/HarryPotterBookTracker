@@ -26,7 +26,7 @@ class MoreButton: UIButton {
     weak var delegate: MoreButtonDelegate?
     
     func saveStatus(_ isMore: Bool) {
-        delegate?.saveStatus(isMore)
+        delegate?.saveIsMoreStatus(isMore)
     }
 }
 
@@ -35,6 +35,6 @@ class SeriesButton: UIButton {
     weak var delegate: SeriesButtonDelegate?
     
     func update(idx: Int) {
-        delegate?.update(idx: idx)
+        delegate?.ContentsUpdate(to: idx)
     }
 }

@@ -8,10 +8,10 @@
 import Foundation
 
 protocol MoreButtonDelegate: AnyObject {
-    func saveStatus(_ isMore: Bool)
-    func updateSummaryStack()
+    func saveIsMoreStatus(_ isMore: Bool)
+    func summarySatackUpdate()
 }
 
 protocol SeriesButtonDelegate: AnyObject {
-    func update(idx: Int)
+    func ContentsUpdate(to idx: Int)
 }

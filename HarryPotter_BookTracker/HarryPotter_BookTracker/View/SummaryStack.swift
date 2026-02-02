@@ -43,6 +43,44 @@ class SummaryStack: UIStackView, CustomStackHelper {
             moreButton.isHidden = true
         }
     }
+    
+    // 하나의 함수로 구현시 -- 추후 Dedication과 Summary 객체의 완전한 분리가 필요할 경우, set 함수가 나뉘어 있는 경우가 분리하기 용이할 것 같아 분리 구현
+//    func setSummaryStack(info: Description) {
+//        switch info {
+//        case .dedication:
+//            let title = makeInfoTitleLabel(.dedication)
+//            setLabelConfig(label, with: .dedication)
+//            
+//            addArrangedSubview(title)
+//            addArrangedSubview(label)
+//            
+//        case .summary:
+//            let title = makeInfoTitleLabel(.summary)
+//            setLabelConfig(label, with: .summary)
+//            
+//            setButtonConfig()
+//            setButtonAction()
+//            
+//            addArrangedSubview(title)
+//            addArrangedSubview(label)
+//            addArrangedSubview(moreButton)
+//            
+//            moreButton.contentHorizontalAlignment = .trailing
+//            
+//            if label.text?.count ?? 0 < 450 {
+//                moreButton.isHidden = true
+//            }
+//        
+//        default:
+//            break
+//        }
+//        
+//        label.numberOfLines = 0
+//        
+//        axis = .vertical
+//        alignment = .fill
+//        spacing = 8
+//    }
 }
 
 //MARK: 컨텐츠 설정
@@ -118,8 +156,8 @@ extension SummaryStack {
             guard let self else { return }
             
             moreButton.isSelected.toggle()
-            moreButton.delegate?.saveStatus(moreButton.isSelected)
-            moreButton.delegate?.updateSummaryStack()
+            moreButton.delegate?.saveIsMoreStatus(moreButton.isSelected)
+            moreButton.delegate?.summarySatackUpdate()
         }
         
         moreButton.addAction(buttonPushed, for: .touchUpInside)
