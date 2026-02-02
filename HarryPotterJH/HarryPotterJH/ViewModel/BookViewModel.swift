@@ -91,14 +91,21 @@ class BookViewModel {
         onDataUpdated?() // 데이터가 변경됨을 vc에 알림
     }
     
-    // date 포맷팅 함수
-    func formatDate(_ dateString: String) -> String {
+    var releaseDateText: String {
+        // 1. 현재 책 데이터가 있는지 확인
+        guard let book = currentBook else { return "" }
+            
+        let dateString = book.releaseDate
+            
+        // 2. 기존 포맷팅 로직 적용
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        if let date = formatter.date(from: dateString) { // 문자열을 date형식으로 변환
-            formatter.dateStyle = .long // 출력용 날짜 스타일
-            return formatter.string(from: date) // date를 문자열로 다시 변환
+            
+        if let date = formatter.date(from: dateString) {
+            formatter.dateStyle = .long
+            return formatter.string(from: date)
         }
-        return dateString // 실패하면 원본 반환
+            
+        return dateString // 변환 실패시 원본 그대로 반환
     }
 }

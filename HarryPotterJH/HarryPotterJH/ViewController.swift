@@ -79,7 +79,7 @@ final class ViewController: UIViewController {
         
         // 가이드에 맞춘 속성 텍스트 설정
         mainView.authorLabel.attributedText = mainView.createInfoText(title: "Author", value: book.author, titleSize: 16, valueSize: 18, valueColor: .darkGray)
-        mainView.releasedLabel.attributedText = mainView.createInfoText(title: "Released", value: viewModel.formatDate(book.releaseDate), titleSize: 14, valueSize: 14, valueColor: .gray)
+        mainView.releasedLabel.attributedText = mainView.createInfoText(title: "Released", value: viewModel.releaseDateText, titleSize: 14, valueSize: 14, valueColor: .gray)
         mainView.pagesLabel.attributedText = mainView.createInfoText(title: "Pages", value: "\(book.pages)", titleSize: 14, valueSize: 14, valueColor: .gray)
         
         mainView.dedicationLabel.text = book.dedication
