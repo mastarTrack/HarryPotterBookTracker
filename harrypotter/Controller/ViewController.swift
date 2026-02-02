@@ -66,7 +66,7 @@ extension ViewController {
         // isFolded_\(book.title) 상대로 저장하는 이유 : 다음 챕터에서 책에 따라 버튼 생성 시 개별적으로 상태 저장하기 위해
         let isSaved = UserDefaults.standard.object(forKey: "isFolded_\(book.title)") != nil // UserDefauls에 isFolded_isFolded_\(book.title) 상태로 저장된 값 유무 확인
         // mainView에서 UI 업데이트
-        mainView.config(with: book, idx: index, isFolded: isSaved)
+        mainView.config(with: book, index: index, isFolded: isSaved)
     }
 }
 
@@ -76,18 +76,18 @@ extension ViewController {
     // 버튼을 눌렀을 때, 동작하는 메서드 정의
     @objc
     private func seriesButtonTapped(_ sender: SeriesButton) {
-        let idx = sender.tag
-        let book = books[idx]
+        let index = sender.tag
+        let book = books[index]
         
-        updateInfo(with: book, at: idx) // infoUpdate에 idx 넘겨주기
+        updateInfo(with: book, at: index) // infoUpdate에 index 넘겨주기
         mainView.scrollView.setContentOffset(.zero, animated: false) // 스크롤 위치 초기화
-        selectedSeriesButton(idx)
+        selectedSeriesButton(index)
         
     }
     
     // 버튼 선택 시 색상 변경 MainView로 분리
-    private func selectedSeriesButton(_ selectedSeriesIdx: Int) {
-        mainView.updateButtonColor(selectedSeriesIdx)
+    private func selectedSeriesButton(_ selectedSeriesindex: Int) {
+        mainView.updateButtonColor(selectedSeriesindex)
     }
 }
 

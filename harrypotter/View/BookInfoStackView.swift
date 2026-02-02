@@ -107,11 +107,11 @@ extension BookInfoStackView {
 
 // 데이터 불러오기
 extension BookInfoStackView {
-    func config(with book: Book, idx: Int) {
+    func config(with book: Book, index: Int) {
         titleLabel.text = book.title
         authorValueLabel.text = book.author
         releaseDateValueLabel.text = book.releaseDateFormatted // releaseDate를 형식 변경한 releaseDateFormatted로 변경
         pageValueLabel.text = "\(book.pages)"
-        titleImageView.image = UIImage(named: "harrypotter\(idx + 1)") // 이미지 로딩 추가
+        titleImageView.image = UIImage(named: "harrypotter\(index + 1)") // 이미지 로딩 추가
     }
 }

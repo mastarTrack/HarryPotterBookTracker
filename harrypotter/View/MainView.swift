@@ -94,9 +94,9 @@ extension MainView {
 }
 
 extension MainView {
-    func config(with book: Book, idx: Int, isFolded: Bool) {
+    func config(with book: Book, index: Int, isFolded: Bool) {
         titleText.text = book.title
-        bookInfoStackView.config(with: book, idx: idx) // bookInfoView.config 함수에 idx 넘겨주기
+        bookInfoStackView.config(with: book, index: index) // bookInfoView.config 함수에 index 넘겨주기
         bookSummaryStackView.config(dedication: book.dedication, summary: book.summary, folded: isFolded)
         bookChapterStackView.config(with: book.chapters)
     }
@@ -106,13 +106,13 @@ extension MainView {
     // 기존 : 버튼 1개 생성 -> 배열로 받아와서 개수만큼 버튼 생성
     func setSeriesButton(with books: [Book], target: Any, action: Selector) { // 시리즈 버튼 생성 함수 분리 : private 안됨
         // 기본 버튼 생성, 속성 정의
-        for idx in books.indices {
+        for index in books.indices {
             let button = SeriesButton()
-            button.setTitle("\(idx + 1)", for: .normal)
+            button.setTitle("\(index + 1)", for: .normal)
             button.setTitleColor(.systemBlue, for: .normal)
             button.titleLabel?.font = .systemFont(ofSize: 16)
             button.backgroundColor = .systemGray5
-            button.tag = idx
+            button.tag = index
             button.addTarget(target, action: action, for: .touchUpInside)
             
             button.snp.makeConstraints {
@@ -125,11 +125,11 @@ extension MainView {
     }
     
     // 버튼 눌렸을 때 상태 변화 메서드 정의
-    func updateButtonColor(_ selectedSeriesIdx: Int) {
-        for (idx, btn) in self.seriesButtons.enumerated() {
-            btn.backgroundColor = (idx == selectedSeriesIdx) ? .systemBlue : .systemGray5
+    func updateButtonColor(_ selectedSeriesindex: Int) {
+        for (index, btn) in self.seriesButtons.enumerated() {
+            btn.backgroundColor = (index == selectedSeriesindex) ? .systemBlue : .systemGray5
             
-            let titleColor: UIColor = (idx == selectedSeriesIdx) ? .white : .systemBlue
+            let titleColor: UIColor = (index == selectedSeriesindex) ? .white : .systemBlue
             btn.setTitleColor(titleColor, for: .normal)
         }
     }
