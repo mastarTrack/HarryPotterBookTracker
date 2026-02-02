@@ -1,0 +1,111 @@
+//
+//  BookViewModel.swift
+//  HarryPotterJH
+//
+//  Created by 김주희 on 1/30/26.
+//
+import Foundation
+import UIKit
+
+// MARK: -- (데이터 계산, 날짜 변환, 클릭 로직 등)
+
+class BookViewModel {
+    
+    // 프로퍼티
+    private let dataService = DataService() // 데이터서비스 인스턴스 생성
+    
+    private var books: [Book] = []
+    private(set) var index = 0
+    private var isExpanded = false
+    
+    // 데이터가 변경되었음을 ViewController에게 알리기 위한 클로저
+    var onDataUpdated: (() -> Void)?
+    var onError: ((String) -> Void)?
+    
+    
+    // MARK: - Logic Methods
+    
+    // 책 데이터 불러오기
+    func loadBooks() {
+        dataService.loadBooks { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let books):
+                self.books = books
+                self.onDataUpdated?() // VC에게 데이터가 왔으니 화면 갱신하라는 알림
+            case .failure(let error):
+                self.onError?(error.localizedDescription)
+            }
+        }
+    }
+    
+    // 현재 보여줄 책 데이터 반환
+    var currentBook: Book? {
+        guard books.indices.contains(index) else { return nil } // index가 books 안에 진짜 존재할 때만 실행
+        return books[index]
+    }
+    
+    // 책 이미지
+    var currentImage: UIImage? {
+        return UIImage(named: "harrypotter\(index + 1)")
+    }
+    
+    
+    // MARK: -- button Function
+    
+    // 시리즈 버튼 클릭시 인덱스 변경 로직
+    func selectSeries(at number: Int) {
+        self.index = number - 1
+        // 인덱스가 변경되면 요약 버튼 상태도 새로 불러와야함
+        self.isExpanded = UserDefaults.standard.bool(forKey: "isExpanded_\(index)")
+        self.onDataUpdated?()// 데이터가 변경됨을 vc에게 알림
+    }
+    
+    // MARK: - Summary Output (View가 바로 쓰는 값들)
+
+    var summaryText: String {
+        guard let book = currentBook else { return "" }
+
+        if book.summary.count > 450 && !isExpanded {
+            let index = book.summary.index(book.summary.startIndex, offsetBy: 450)
+            return String(book.summary[..<index]) + "..."
+        } else {
+            return book.summary
+        }
+    }
+
+    var summaryButtonTitle: String {
+        isExpanded ? "접기" : "더 보기"
+    }
+
+    var isSummaryButtonHidden: Bool {
+        guard let book = currentBook else { return true }
+        return book.summary.count <= 450
+    }
+
+
+    // 요약 버튼 토글 로직
+    func toggleSummary() {
+        isExpanded.toggle()
+        UserDefaults.standard.set(isExpanded, forKey: "isExpanded_\(index)")
+        onDataUpdated?() // 데이터가 변경됨을 vc에 알림
+    }
+    
+    var releaseDateText: String {
+        // 1. 현재 책 데이터가 있는지 확인
+        guard let book = currentBook else { return "" }
+            
+        let dateString = book.releaseDate
+            
+        // 2. 기존 포맷팅 로직 적용
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+            
+        if let date = formatter.date(from: dateString) {
+            formatter.dateStyle = .long
+            return formatter.string(from: date)
+        }
+            
+        return dateString // 변환 실패시 원본 그대로 반환
+    }
+}
