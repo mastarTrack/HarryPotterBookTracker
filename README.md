@@ -54,7 +54,7 @@
 - 변경 포인트를 한 곳으로 집중시켜 유지보수 용이
 
 # 🛠 트러블 슈팅
-### ❌ 문제 1: ViewController가 너무 비대해짐
+## ❌ 문제 1️⃣ : ViewController가 너무 비대해짐
 
 - 초기에는 모든 로직이 ViewController에 집중됨
 - 기능 추가 시 코드 가독성과 유지보수성 저하
@@ -63,6 +63,40 @@
 
 - 데이터 로딩, 권 선택, 요약 펼침 로직을 ViewModel로 이동
 - ViewController는 update 클로저만 처리
+
+## ❌ 문제 2️⃣ : viewDidLoad에서 호출 순서
+- `viewModel.loadBooks()`정보를 가공하는 함수 뒤에 `pushInfo()`를 호출하자 의도한대로 앱이 작동하지 않음
+```swift
+private func pushInfo() {
+        viewModel.updateInfo = { [weak self] info in
+            self?.updateBookDetail(info: info)
+        }
+        
+        viewModel.error = { [weak self] error in
+            self?.showErrorAlert(error)
+        }
+    }
+```
+- 처음에는 정보를 가져오는 작업이 오래 걸리니까 제일 먼저 호출해야한다고 생각했다.
+- 하지만 `loadBooks()`가 완료되어 `updateInfo?(...)`를 호출하는 시점에, 아직 `pushInfo()`가 실행되지 않았다면 `updateInfo` 클로저가 `nil`인 상태라서 UI 업데이트가 전달되지 않는 문제가 발생할 수 있다.
+- 정리하자면 `ViewModel`이 업데이트하라고 신호를 보냈는데 `ViewController`가 그 신호를 받을 준비(바인딩) 를 하기 전에 데이터 로딩이 끝나버린 상황이었다.
+
+### ✅ 해결
+- `pushInfo()`는 “데이터를 가져오는 함수”가 아니라 `ViewModel`에서 `ViewController`로 상태를 전달하는 통로(바인딩)를 연결하는 작업이다.
+- 따라서 `viewDidLoad`에서 코드를 수정했다.
+```swift
+override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        pushInfo() // 데이터 받아서 갱신할 방법 설정
+        
+        configureHeader() // 화면 구성
+        configureMain()
+        configureDetail()
+        
+        viewModel.loadBooks() // 데이터 받아오기
+    }
+```
 
 # ✨ 회고 및 배운 점
 
