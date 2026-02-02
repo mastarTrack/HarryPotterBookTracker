@@ -86,34 +86,6 @@ final class ViewController: UIViewController {
         }
     }
     
-    private func configureScrollView() {
-        let scrollView = UIScrollView()
-        scrollView.showsVerticalScrollIndicator = false
-        let contentView = UIView()
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(scrollStackView)
-        
-        scrollView.snp.makeConstraints {
-            $0.top.equalTo(buttonStackView.snp.bottom).offset(24)
-            $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
-        }
-        
-        contentView.snp.makeConstraints {
-            $0.edges.equalTo(scrollView.contentLayoutGuide)
-            $0.width.equalTo(scrollView.frameLayoutGuide)
-        }
-        
-        scrollStackView.snp.makeConstraints {
-            $0.leading.trailing.top.bottom.equalToSuperview().inset(24)
-        }
-        
-        scrollStackView.axis = .vertical
-        scrollStackView.spacing = 24
-        scrollStackView.distribution = .fill
-    }
-    
     private func resetChapters() {
         chapterStackView.arrangedSubviews.forEach {
             chapterStackView.removeArrangedSubview($0)
@@ -126,12 +98,73 @@ final class ViewController: UIViewController {
         chapterStackView.addArrangedSubview(chapterTitleLabel)
     }
     
-    private func createButtons() {
-        buttons = (1...7).map { i in
-            let button = makeButton(name: "\(i)")
-            button.tag = i
-            button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)
-            return button
+    @objc private func didTapVolumeButton(_ sender: UIButton) {
+        viewModel.selectBook(volume: sender.tag)
+    }
+        
+    @objc private func didTapShowMore() {
+        viewModel.showSummary()
+    }
+    
+    private func showErrorAlert(_ error: Error) {
+        let message: String
+
+        switch error {
+        case DataService.DataError.fileNotFound:
+            message = "데이터 파일을 찾을 수 없습니다."
+
+        case DataService.DataError.parsingFailed:
+            message = "데이터 형식이 올바르지 않습니다."
+
+        default:
+            message = "알 수 없는 오류가 발생했습니다."
+        }
+
+        let alert = UIAlertController(
+            title: "오류",
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+// 스택/라벨 생성 메서드
+extension ViewController {
+    private func makeStackView(axis: NSLayoutConstraint.Axis) -> UIStackView {
+        let stackView = UIStackView()
+        stackView.axis = axis
+        stackView.spacing = 8
+        return stackView
+    }
+    
+    private func setStackView(_ stackView: UIStackView, axis: NSLayoutConstraint.Axis) {
+        stackView.axis = axis
+        stackView.spacing = 8
+    }
+    
+    private func makeChapterLabels(text: String) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        return label
+    }
+}
+
+// 헤더 부분 뷰 레이아웃
+extension ViewController {
+    private func configureHeaderTitleLabel() {
+        view.addSubview(bookTitleLabel)
+        bookTitleLabel.apply(.HeaderTitle)
+        bookTitleLabel.textAlignment = .center
+        
+        bookTitleLabel.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
     }
     
@@ -154,33 +187,43 @@ final class ViewController: UIViewController {
         }
     }
     
-    private func configureHeaderTitleLabel() {
-        view.addSubview(bookTitleLabel)
-        
-        setLabel(bookTitleLabel, config: .HeaderTitle)
-        bookTitleLabel.textAlignment = .center
-        
-        bookTitleLabel.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+    private func createButtons() {
+        buttons = (1...7).map { i in
+            let button = makeButton(name: "\(i)")
+            button.tag = i
+            button.addTarget(self, action: #selector(didTapVolumeButton(_:)), for:.touchUpInside)
+            return button
         }
     }
     
-    @objc private func didTapVolumeButton(_ sender: UIButton) {
-        viewModel.selectBook(volume: sender.tag)
-    }
-    
-    private func setMainLabels() {
-        setLabel(mainTitleLabel, config: .boldAnd20)
-        setLabel(authorNameLabel, config: .darkGrayAnd18)
-        setLabel(releasedDateLabel, config: .grayAnd14)
-        setLabel(pagesNumberLabel, config: .grayAnd14)
-    }
+    private func makeButton(name: String) -> UIButton {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .systemBlue
+        config.baseForegroundColor = .white
+        config.cornerStyle = .capsule
 
+        var attri = AttributedString(name)
+        attri.font = .systemFont(ofSize: 16)
+        config.attributedTitle = attri
+
+        let button = UIButton(configuration: config)
+        button.clipsToBounds = true
+
+        button.snp.makeConstraints {
+            $0.height.equalTo(button.snp.width)
+        }
+        
+        return button
+    }
+}
+
+// 메인 부분 뷰 레이아웃
+extension ViewController {
     private func configureMainBookPart() {
-        let authorLabel = makeLabel(text: "Author", config: .boldAnd16)
-        let releasedLabel = makeLabel(text: "Released", config: .boldAnd14)
-        let pagesLabel = makeLabel(text: "Pages" , config: .boldAnd14)
+        let authorLabel = UILabel(text: "Author", config: .boldAnd16)
+        let releasedLabel = UILabel(text: "Released", config: .boldAnd14)
+        let pagesLabel = UILabel(text: "Pages" , config: .boldAnd14)
+        
         setMainLabels()
         
         coverImageView.contentMode = .scaleAspectFit
@@ -224,11 +267,50 @@ final class ViewController: UIViewController {
         mainDetailStackView.addArrangedSubview(pagesStackView)
     }
     
+    private func setMainLabels() {
+        mainTitleLabel.apply(.boldAnd20)
+        authorNameLabel.apply(.darkGrayAnd18)
+        releasedDateLabel.apply(.grayAnd14)
+        pagesNumberLabel.apply(.grayAnd14)
+    }
+    
+    private func configureScrollView() {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        let contentView = UIView()
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(scrollStackView)
+        
+        scrollView.snp.makeConstraints {
+            $0.top.equalTo(buttonStackView.snp.bottom).offset(24)
+            $0.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
+        }
+        
+        scrollStackView.snp.makeConstraints {
+            $0.leading.trailing.top.bottom.equalToSuperview().inset(24)
+        }
+        
+        scrollStackView.axis = .vertical
+        scrollStackView.spacing = 24
+        scrollStackView.distribution = .fill
+    }
+}
+
+
+// 디테일 부분 뷰 레이아웃
+extension ViewController {
     private func configureDedicationView() {
         let dedicationStackView = makeStackView(axis: .vertical)
         
-        let dedicationTitleLabel = makeLabel(text: "Dedication", config: .boldAnd18)
-        setLabel(dedicationInfoLabel, config: .darkGrayAnd14)
+        let dedicationTitleLabel = UILabel(text: "Dedication", config: .boldAnd18)
+        dedicationInfoLabel.apply(.darkGrayAnd14)
         
         scrollStackView.addArrangedSubview(dedicationStackView)
         dedicationStackView.addArrangedSubview(dedicationTitleLabel)
@@ -237,8 +319,8 @@ final class ViewController: UIViewController {
     
     private func configureSummaryView() {
         let summaryStackView = makeStackView(axis: .vertical)
-        let summaryTitleLabel = makeLabel(text: "Summary", config: .boldAnd18)
-        setLabel(summaryInfoLabel, config: .darkGrayAnd18)
+        let summaryTitleLabel = UILabel(text: "Summary", config: .boldAnd18)
+        summaryInfoLabel.apply(.darkGrayAnd18)
         
         scrollStackView.addArrangedSubview(summaryStackView)
         summaryStackView.addArrangedSubview(summaryTitleLabel)
@@ -262,102 +344,14 @@ final class ViewController: UIViewController {
     }
     
     private func configureChapterView() {
-        let chapterTitleLabel = makeLabel(text: "Chapters", config: .boldAnd18)
+        let chapterTitleLabel = UILabel(text: "Chapters", config: .boldAnd18)
         
         setStackView(chapterStackView, axis: .vertical)
         scrollStackView.addArrangedSubview(chapterStackView)
         chapterStackView.addArrangedSubview(chapterTitleLabel)
-    }
-    
-    @objc private func didTapShowMore() {
-        viewModel.showSummary()
-    }
-    
-    private func showErrorAlert(_ error: Error) {
-        let message: String
-
-        switch error {
-        case DataService.DataError.fileNotFound:
-            message = "데이터 파일을 찾을 수 없습니다."
-
-        case DataService.DataError.parsingFailed:
-            message = "데이터 형식이 올바르지 않습니다."
-
-        default:
-            message = "알 수 없는 오류가 발생했습니다."
-        }
-
-        let alert = UIAlertController(
-            title: "오류",
-            message: message,
-            preferredStyle: .alert
-        )
-
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
-        present(alert, animated: true)
-    }
-}
-
-extension ViewController {
-    private func makeLabel(text: String?, config: LabelConfiguration) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.font = config.font
-        label.textColor = config.color
-        label.numberOfLines = config.lines
-        return label
-    }
-    
-    private func setLabel(_ label: UILabel,config: LabelConfiguration) {
-        label.font = config.font
-        label.textColor = config.color
-        label.numberOfLines = config.lines
-    }
-    
-    private func makeStackView(axis: NSLayoutConstraint.Axis) -> UIStackView {
-        let stackView = UIStackView()
-        stackView.axis = axis
-        stackView.spacing = 8
-        return stackView
-    }
-    
-    private func setStackView(_ stackView: UIStackView, axis: NSLayoutConstraint.Axis) {
-        stackView.axis = axis
-        stackView.spacing = 8
-    }
-    
-    private func makeChapterLabels(text: String) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.numberOfLines = 0
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = .darkGray
-        return label
-    }
-    
-    private func makeButton(name: String) -> UIButton {
-        var config = UIButton.Configuration.filled()
-        config.baseBackgroundColor = .systemBlue
-        config.baseForegroundColor = .white
-        config.cornerStyle = .capsule
-
-        var attri = AttributedString(name)
-        attri.font = .systemFont(ofSize: 16)
-        config.attributedTitle = attri
-
-        let button = UIButton(configuration: config)
-        button.clipsToBounds = true
-
-        button.snp.makeConstraints {
-            $0.height.equalTo(button.snp.width)
-        }
-        
-        return button
     }
 }
 
 enum DefaultsKey {
     static let isExpanded = "summary.isExpanded"
 }
-
-
