@@ -89,8 +89,6 @@ final class BookViewModel {
 - Model 데이터를 View에 필요한 형태로 **가공**
 - 현재 선택된 책 인덱스 및 **상태 관리**
 - Closure를 통해 ViewController에 **변경 사항 전달**
-- `UIKit`을 import하지 않아  
-  → **ViewModel 단위 테스트가 가능한 구조**
 
 ---
 
@@ -100,9 +98,6 @@ final class BookViewModel {
 - SnapKit을 활용한 **오토레이아웃 구성**
 - 데이터는 직접 처리하지 않고 **외부에서 주입받음**
 
-```swift
-func configure(with viewModel: BookViewModel)
-```
 
 ---
 
