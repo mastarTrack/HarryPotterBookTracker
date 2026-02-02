@@ -9,13 +9,19 @@ import UIKit
 import SnapKit
 
 class MainViewController: UIViewController {
-
+    
     /// json 파싱 클래스
     private let dataService = DataService()
     /// 메인 뷰
     private let mainView = MainView()
     /// 해리포터 책 정보 배열
     private var bookData: [Book] = []
+    /// 데이터저장소 선언
+    private let userDef = UserDefaults.standard
+    /// 현재 보여지고있는 책 넘버링
+    private var currentBookNumber = 0
+    
+    private var summaryIsFull = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,8 +29,13 @@ class MainViewController: UIViewController {
         view = mainView
         loadBooks()
         if bookData.count != 0 {
-            mainView.setViewData(book: bookData[0],bookNumber: 0)
-            mainView.makeBooksButtons(books: bookData)
+            summaryIsFull = userDef.bool(forKey: "onOff_\(currentBookNumber)")
+            mainView.makeBooksButtons(booksCount: bookData.count)
+            mainView.setViewData(book: bookData[0]
+                                 ,bookNumber: 0)
+            mainView.refreshSummay(text: bookData[0].summary, onOff: summaryIsFull)
+            setButtonClosure()
+            setSummaryClousre()
         }
     }
     
@@ -55,9 +66,31 @@ class MainViewController: UIViewController {
         }
     }
   
+    func setButtonClosure() {
+        mainView.bookButtonClosure = { bookNumber in
+            self.userDef.set(self.summaryIsFull, forKey: "onOff_\(self.currentBookNumber)")
+            self.userDef.synchronize()
+            self.summaryIsFull = self.userDef.bool(forKey: "onOff_\(bookNumber)")
+            self.currentBookNumber = bookNumber
+            self.mainView.setViewData(
+                book: self.bookData[bookNumber]
+                , bookNumber: bookNumber)
+            self.mainView.refreshSummay(text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
+                                        , onOff: self.summaryIsFull)
+        }
+    }
     
+    func setSummaryClousre() {
+        mainView.setSummaryBottonAction{
+            self.summaryIsFull = self.summaryIsFull ? false : true
+            self.mainView.refreshSummay(
+                text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
+                , onOff: self.summaryIsFull)
+        }
+    }
+
     /// 경고 메시지 출력 메소드
-    func showAlert(_ messageText: String) {
+    private func showAlert(_ messageText: String) {
         let alert = UIAlertController(
             title: "경고",
             message: messageText,
@@ -66,6 +99,8 @@ class MainViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         self.present(alert, animated: true)
     }
+    
+
 
 }
 

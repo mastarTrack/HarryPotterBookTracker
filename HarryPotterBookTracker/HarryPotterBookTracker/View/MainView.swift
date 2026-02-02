@@ -32,6 +32,9 @@ class MainView: UIView{
     /// 챕터 스택뷰
     private let stackChapters = UIStackView()
     
+    var bookButtonClosure: ((Int) -> Void)?
+
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .white
@@ -42,6 +45,57 @@ class MainView: UIView{
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// 뷰 데이터 변환 메소드
+    func setViewData(book: Book, bookNumber: Int) {
+        imageInfoImage.image = UIImage(named: "harrypotter\(bookNumber+1)")
+        labelHeader.text = book.title
+        labelInfoHeader.text = book.title
+        labelInfoAuthor.text = book.author
+        labelInfoRelesed.text = convertDateText(book.release_date)
+        labelInfoPages.text = "\(book.pages)"
+        labelInfoDedication.text = book.dedication
+        
+        if book.chapters.count > stackChapters.arrangedSubviews.count {
+            for _ in 1...(book.chapters.count - stackChapters.arrangedSubviews.count) {
+                stackChapters.addArrangedSubview(getUILabelToChapter(""))
+            }
+        }
+        stackChapters.arrangedSubviews.enumerated().forEach {
+            guard let label = $0.element as? UILabel else {
+                return
+            }
+            if $0.offset < book.chapters.count {
+                label.text = book.chapters[$0.offset].title
+                label.isHidden = false
+            } else {
+                label.isHidden = true
+            }
+        }
+    }
+    
+    func refreshSummay(text: String, onOff: Bool){
+        viewInfoSummry.switchSummaryText(text: text, onOff: onOff)
+    }
+    
+    func setSummaryBottonAction(closure: @escaping ()->Void){
+        viewInfoSummry.onOffClosure = closure
+    }
+    
+    
+    /// 챕터에 배치될 라벨 생성 메소드
+    func getUILabelToChapter(_ Chapter: String)-> UILabel{
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = .darkGray
+        label.numberOfLines = 0
+        label.text = Chapter
+        
+        return label
+    }
+}
+
+
+extension MainView {
     /// UI 초기 설정
     private func configureUI() {
         
@@ -246,68 +300,25 @@ class MainView: UIView{
     }
     
     /// 책 권수 대비 버튼 및 버튼 액션 생성 메소드
-    func makeBooksButtons(books:[Book]) {
+    func makeBooksButtons(booksCount: Int) {
         /// 책 수 만큼 버튼 생성
-        books.enumerated().forEach{ (offset, element) in
+        for i in 0..<booksCount {
             let button = UIButton()
             button.backgroundColor = .systemBlue
-            button.setTitle(String(offset+1), for: .normal)
+            button.setTitle(String(i+1), for: .normal)
             button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
             button.setTitleColor(.white, for: .normal)
             button.layer.cornerRadius = 15
-            button.addAction(UIAction { [weak self] _ in  self?.setViewData(book: element, bookNumber: offset)}
-                             , for: .touchDown)
+            button.addAction(UIAction { [weak self] _ in
+                self?.bookButtonClosure?(i)
+            }, for: .touchUpInside)
             button.snp.makeConstraints {
                 $0.width.height.greaterThanOrEqualTo(30)
             }
             stackButtons.addArrangedSubview(button)
         }
     }
-    
-    /// 뷰 데이터 변환 메소드
-    func setViewData(book: Book, bookNumber: Int) {
-        imageInfoImage.image = UIImage(named: "harrypotter\(bookNumber+1)")
-        labelHeader.text = book.title
-        labelInfoHeader.text = book.title
-        labelInfoAuthor.text = book.author
-        labelInfoRelesed.text = convertDateText(book.release_date)
-        labelInfoPages.text = "\(book.pages)"
-        labelInfoDedication.text = book.dedication
-        viewInfoSummry.setLabelText(book.summary, bookNumber)
-        
-        
-        if book.chapters.count > stackChapters.arrangedSubviews.count {
-            for _ in 1...(book.chapters.count - stackChapters.arrangedSubviews.count) {
-                stackChapters.addArrangedSubview(getUILabelToChapter(""))
-            }
-        }
-        stackChapters.arrangedSubviews.enumerated().forEach {
-            guard let label = $0.element as? UILabel else {
-                return
-            }
-            if $0.offset < book.chapters.count {
-                label.text = book.chapters[$0.offset].title
-                label.isHidden = false
-            } else {
-                label.isHidden = true
-            }
-        }
-    }
-    
-    
-    /// 챕터에 배치될 라벨 생성 메소드
-    func getUILabelToChapter(_ Chapter: String)-> UILabel{
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .darkGray
-        label.numberOfLines = 0
-        label.text = Chapter
-        
-        return label
-    }
 }
-
-
 
 #Preview{
   MainView()

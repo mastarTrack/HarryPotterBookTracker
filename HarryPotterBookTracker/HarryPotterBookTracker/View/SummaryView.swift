@@ -12,18 +12,12 @@ import SnapKit
 /// 개요 뷰 클래스
 class SummaryView : UIView {
 
-    /// 책 넘버 Int
-    private var bookNumber = 0
     /// 레이블
     private let label = UILabel()
     /// 더보기/접기 버튼
     private let button = UIButton()
-    /// 레이블 표기 텍스트
-    private var text = ""
-    /// 더보기/접기 설정 값
-    private var onOffFullText = false
-    /// 데이터저장소 선언
-    private let userDef = UserDefaults.standard
+    
+    var onOffClosure: (() -> Void) = {}
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,20 +28,6 @@ class SummaryView : UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /// 레이블 텍스트 설정 메소드
-    func setLabelText(_ text:String, _ number: Int)
-    {
-        bookNumber = number
-        onOffFullText = userDef.bool(forKey: "onOff_\(bookNumber)")
-        self.text = text
-        if text.count > 450 {
-            button.isHidden = false
-        } else {
-            button.isHidden = true
-        }
-        switchFullText()
-    }
-    
     /// UI 설정 메소드
     private func configureUI()
     {
@@ -55,10 +35,9 @@ class SummaryView : UIView {
         label.font = UIFont.systemFont(ofSize: 14)
         label.textColor = .darkGray
         label.numberOfLines = 0
-        button.setTitle( onOffFullText ? "접기" : "더 보기" , for: .normal)
         button.setTitleColor(.blue, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        button.addTarget(self, action: #selector(switchDownBotton), for: .touchDown)
+        button.addAction(UIAction {[weak self] _ in self?.onOffClosure()}, for: .touchDown)
         button.isHidden = true
         
         addSubview(label)
@@ -74,23 +53,17 @@ class SummaryView : UIView {
         }
     }
     
-    @objc
-    /// 버튼용 더보기/접기 메소드
-    func switchDownBotton(){
-        onOffFullText = onOffFullText ? false : true
-        switchFullText()
-    }
     
     /// 레이블 더보기/접기 메소드
-    func switchFullText(){
+    func switchSummaryText(text: String, onOff: Bool){
         if text.count > 450{
-            label.text = !onOffFullText ? String(text.prefix(450)) + "..." : text
-            button.setTitle( onOffFullText ? "접기" : "더 보기" , for: .normal)
+            label.text = text
+            button.setTitle( onOff ? "접기" : "더 보기" , for: .normal)
+            button.isHidden = false
         } else {
             label.text = text
+            button.isHidden = true
         }
-        userDef.set(onOffFullText, forKey: "onOff_\(bookNumber)")
-        userDef.synchronize()
     }
 }
 

@@ -23,6 +23,10 @@ struct Book : Codable {
     var wiki: String
     /// 책 목차
     var chapters: [Chapter]
+    
+    func changeSummaryText(_ isFull: Bool) -> String {
+        return isFull ? summary : String(summary.prefix(450)) + "..."
+    }
 }
 
 /// 목차 모델
