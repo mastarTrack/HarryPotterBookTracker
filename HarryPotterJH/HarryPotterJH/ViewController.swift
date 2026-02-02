@@ -84,7 +84,9 @@ final class ViewController: UIViewController {
         mainView.dedicationLabel.text = book.dedication
         
         // 요약 업데이트
-        updateSummary(book: book)
+        mainView.summaryLabel.text = viewModel.summaryText
+        mainView.summaryButton.isHidden = viewModel.isSummaryButtonHidden
+        mainView.summaryButton.setTitle(viewModel.summaryButtonTitle, for: .normal)
         
         // 버튼 색상 업데이트
         mainView.updateSeriesButtons(selectedIndex: viewModel.index)
@@ -93,26 +95,6 @@ final class ViewController: UIViewController {
         updateChapters(chapters: book.chapters)
     }
     
-    // summary 갱신
-    private func updateSummary(book: Book) {
-        // 해당 책의 요약이 450자 이상일때
-        if book.summary.count > 450 {
-            mainView.summaryButton.isHidden = false
-            // 요약이 펴져있을때
-            if viewModel.isExpanded {
-                mainView.summaryLabel.text = book.summary
-                mainView.summaryButton.setTitle("접기", for: .normal)
-                // 요약이 접혀있을때
-            } else {
-                mainView.summaryButton.setTitle("더 보기", for: .normal)
-                let indexing = book.summary.index(book.summary.startIndex, offsetBy: 450)
-                mainView.summaryLabel.text = String(book.summary[..<indexing]) + "..."
-            }
-        } else {
-            mainView.summaryButton.isHidden = true
-            mainView.summaryLabel.text = book.summary
-        }
-    }
     
     // chapters 갱신
     private func updateChapters(chapters: [Chapter]) {

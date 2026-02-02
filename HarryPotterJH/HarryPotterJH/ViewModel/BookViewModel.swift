@@ -5,7 +5,6 @@
 //  Created by 김주희 on 1/30/26.
 //
 import Foundation
-import UIKit
 
 // MARK: -- (데이터 계산, 날짜 변환, 클릭 로직 등)
 
@@ -55,6 +54,29 @@ class BookViewModel {
         self.isExpanded = UserDefaults.standard.bool(forKey: "isExpanded_\(index)")
         self.onDataUpdated?()// 데이터가 변경됨을 vc에게 알림
     }
+    
+    // MARK: - Summary Output (View가 바로 쓰는 값들)
+
+    var summaryText: String {
+        guard let book = currentBook else { return "" }
+
+        if book.summary.count > 450 && !isExpanded {
+            let index = book.summary.index(book.summary.startIndex, offsetBy: 450)
+            return String(book.summary[..<index]) + "..."
+        } else {
+            return book.summary
+        }
+    }
+
+    var summaryButtonTitle: String {
+        isExpanded ? "접기" : "더 보기"
+    }
+
+    var isSummaryButtonHidden: Bool {
+        guard let book = currentBook else { return true }
+        return book.summary.count <= 450
+    }
+
 
     // 요약 버튼 토글 로직
     func toggleSummary() {
