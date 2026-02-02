@@ -5,6 +5,7 @@
 //  Created by 김주희 on 1/30/26.
 //
 import Foundation
+import UIKit
 
 // MARK: -- (데이터 계산, 날짜 변환, 클릭 로직 등)
 
@@ -13,9 +14,9 @@ class BookViewModel {
     // 프로퍼티
     private let dataService = DataService() // 데이터서비스 인스턴스 생성
     
-    var books: [Book] = []
-    var index = 0
-    var isExpanded = false
+    private var books: [Book] = []
+    private(set) var index = 0
+    private var isExpanded = false
     
     // 데이터가 변경되었음을 ViewController에게 알리기 위한 클로저
     var onDataUpdated: (() -> Void)?
@@ -42,6 +43,11 @@ class BookViewModel {
     var currentBook: Book? {
         guard books.indices.contains(index) else { return nil } // index가 books 안에 진짜 존재할 때만 실행
         return books[index]
+    }
+    
+    // 책 이미지
+    var currentImage: UIImage? {
+        return UIImage(named: "harrypotter\(index + 1)")
     }
     
     
