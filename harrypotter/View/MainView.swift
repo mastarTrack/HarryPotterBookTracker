@@ -126,11 +126,11 @@ extension MainView {
     
     // 버튼 눌렸을 때 상태 변화 메서드 정의
     func updateButtonColor(_ selectedSeriesindex: Int) {
-        for (index, btn) in self.seriesButtons.enumerated() {
-            btn.backgroundColor = (index == selectedSeriesindex) ? .systemBlue : .systemGray5
+        for (index, button) in self.seriesButtons.enumerated() {
+            button.backgroundColor = (index == selectedSeriesindex) ? .systemBlue : .systemGray5
             
             let titleColor: UIColor = (index == selectedSeriesindex) ? .white : .systemBlue
-            btn.setTitleColor(titleColor, for: .normal)
+            button.setTitleColor(titleColor, for: .normal)
         }
     }
 }
