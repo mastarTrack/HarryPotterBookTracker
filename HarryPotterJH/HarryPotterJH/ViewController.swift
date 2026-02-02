@@ -34,7 +34,7 @@ final class ViewController: UIViewController {
     // MARK: -- Binding (연결하기)
     
     private func setupBinding() {
-        // 1. View에서 버튼이 눌렸을때 VM에게 알림
+        // 1. View에서 (시리즈,요약)버튼이 눌렸을때 VM에게 알림
         mainView.onSeriesButtonTapped = { [weak self] index in
             self?.viewModel.selectSeries(at: index)
         }
@@ -58,6 +58,7 @@ final class ViewController: UIViewController {
         
     }
     
+    
     // MARK: -- update function
     
     
@@ -70,7 +71,7 @@ final class ViewController: UIViewController {
         // 최상위 책 제목 값 대입
         mainView.titleLabel.text = book.title
         // 책 표지 이미지 대입
-        mainView.bookImageView.image = UIImage(named: "harrypotter\(viewModel.index + 1)")
+        mainView.bookImageView.image = viewModel.currentImage
         // 책 정보영역의 제목 대입
         mainView.titleLabel2.text = book.title
         
