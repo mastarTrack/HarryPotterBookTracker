@@ -1,17 +1,112 @@
-# 해리포터 소설책 정보 뷰어 어플
+# 📚 Harry Potter Book Tracker (iOS)
 
-Swift 문법 과정을 끝까지 완수했으니 이제 우리는 앱 개발을 위한 기초체력이 생긴 것이죠! 
+Swift로 개발한 **해리포터 책 정보 조회 iOS 애플리케이션**입니다.  
+로컬에 저장된 JSON 파일을 읽어 책 정보를 파싱하고,  
+사용자에게 책 목록과 요약 정보를 화면에 표시합니다.
 
-입문 강의에서 배운 내용을 복습하며 Autolayout과 View 간의 제약 관계를 익혀 UI가 포함된 해리포터 책 시리즈 앱을 완성해 봅시다.
+---
 
-> 이 과제에서는 해리포터 책의 정보를 볼 수 있는 해리포터 시리즈 책 앱을 개발합니다.
-가변적인 데이터에 유연하게 대응하는 UI를 구성하는 것을 목표로 구현해봅시다.
-> 
-> 
->    - 해리포터 시리즈 책에 대한 데이터는 data.json파일로 제공되며 책 커버 이미지 또한 zip 파일로 제공됩니다. Xcode에 파일을 추가하여 사용하면 됩니다.
->    - 필수적으로 1권의 책에 대한 상세 화면을 만듭니다. 이후 도전 구현으로 해리포터 시리즈의 7권의 책에 대해서 모두 확인할 수 있도록 구현합니다.
->    - UILabel, UIButton, UIImageView, UIStackView, UIScrollView를 활용합니다.
->    - Autolayout과 Constraints에 익숙해져 봅시다.
->    - iOS 16.0과 호환 가능한 iPhone 모델(SE 2세대, 16 Pro Max 등)의 다양한 디바이스 사이즈에 대응하여 구현해봅시다.
->       - iOS 16.0 호환 모델 확인: [https://support.apple.com/ko-kr/guide/iphone/iphe3fa5df43/16.0/ios/16.0](https://support.apple.com/ko-kr/guide/iphone/iphe3fa5df43/18.0/ios/18.0)
->
+## 🧙‍♂️ 프로젝트 소개
+
+이 프로젝트는 **iOS 개발 입문 및 구조 설계 연습**을 목적으로 제작되었습니다.
+
+- 네트워크 통신 없이 **로컬 JSON 데이터**를 활용
+- **SnapKit**을 이용한 Auto Layout 구성
+- View / Model / Service 역할 분리를 통한 구조적 설계
+
+---
+
+## 🛠 기술 스택
+
+- **Language**: Swift
+- **UI Framework**: UIKit
+- **Layout**: SnapKit
+- **Data Source**: Local JSON
+- **Architecture**: MVC 기반 구조
+
+---
+
+## 📁 프로젝트 구조
+
+```
+project
+├── Data
+│   └── data.json
+│
+├── Model
+│   └── Book.swift
+│
+├── Service
+│   └── DataService.swift
+│
+├── Util
+│   └── UtilCommon.swift
+│
+├── View
+│   ├── MainView.swift
+│   └── SummaryView.swift
+│
+└── ViewController
+    └── MainViewController.swift
+```
+
+### 구조 설명
+
+- **Data**
+  - 앱에서 사용하는 로컬 JSON 데이터 파일
+
+- **Model**
+  - `Book`
+    - 책 정보를 표현하는 모델 객체
+
+- **Service**
+  - `DataService`
+    - JSON 파일 로드 및 디코딩 담당
+
+- **Util**
+  - `UtilCommon`
+    - 공통으로 사용되는 유틸성 기능 모음
+
+- **View**
+  - `MainView`
+    - 책 목록 및 기본 UI 구성
+  - `SummaryView`
+    - 책 요약 정보 표시 뷰
+
+- **ViewController**
+  - `MainViewController`
+    - View와 Service를 연결하고 화면 흐름 제어
+
+---
+
+## 🔄 데이터 흐름
+
+1. 앱 실행
+2. DataService 에서 로컬 JSON 파일 로드
+3. JSON 데이터를 `Book` 모델로 디코딩
+4. MainViewController 를 통해 View에 데이터 전달
+5. MainView / SummaryView 에서 화면 출력
+
+---
+
+## ✨ 주요 기능
+
+- 로컬 JSON 파일 기반 책 정보 로딩
+- 해리포터 시리즈 책 목록 표시
+- 커스텀 뷰를 통한 책 요약 정보 표시
+- SnapKit을 활용한 코드 기반 UI 구성
+
+---
+
+## 🎯 구현 포인트
+
+- SnapKit을 이용한 **코드 기반 Auto Layout**
+- View와 ViewController의 책임 분리
+- 재사용 가능한 View 컴포넌트 설계
+
+---
+
+## 👤 Author
+
+- **Hanjuheon**
+- iOS Developer (Swift)
