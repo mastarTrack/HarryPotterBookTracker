@@ -119,7 +119,7 @@ class BookView: UIView {
     }
     
     // Summary 요약 버튼
-    let summaryButton = UIButton().then {
+    lazy var summaryButton = UIButton().then {
         $0.backgroundColor = .white
         $0.addTarget(self, action: #selector(summaryTapped), for: .touchUpInside)
         $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
