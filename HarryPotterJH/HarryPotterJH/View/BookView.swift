@@ -121,7 +121,7 @@ class BookView: UIView {
     // Summary 요약 버튼
     let summaryButton = UIButton().then {
         $0.backgroundColor = .white
-        $0.addTarget(self, action: #selector(summaryTapped), for: .touchDown)
+        $0.addTarget(self, action: #selector(summaryTapped), for: .touchUpInside)
         $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
         $0.setTitleColor(.systemBlue, for: .normal)
     }
@@ -150,13 +150,13 @@ class BookView: UIView {
         setupSubView()
         setupConstraints()
     }
+    
     // 코드베이스로만 작업하겠다는 뜻
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     // 시리즈 버튼 만드는 함수
-    
     private func createSeriesButtons() {
         for i in 1...7 {
             let button = UIButton().then {
@@ -166,7 +166,7 @@ class BookView: UIView {
                 $0.backgroundColor = .systemBlue
                 $0.setTitleColor(.white, for: .normal)
                 $0.tag = i // 태그로 시리즈 번호 구분
-                $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchDown)
+                $0.addTarget(self, action: #selector(seriesButtonTapped), for: .touchUpInside)
             }
             seriesButtons.append(button) // 시리즈 버튼 배열에 append
         }
