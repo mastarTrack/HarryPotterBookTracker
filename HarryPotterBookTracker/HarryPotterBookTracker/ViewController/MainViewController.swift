@@ -55,8 +55,8 @@ extension MainViewController{
                                          bookNumber: 0)
                     mainView.changeSummay(text: bookData[0].changeSummaryText(summaryIsFull),
                                           onOff: summaryIsFull)
-                    setButtonClosure()
-                    setSummaryClousre()
+                    setBookListButtonClosure()
+                    setSummaryIsFullButtonClousre()
                 }
             case .failure(let error):
                 if let dataError = error as? DataService.DataError {
@@ -89,7 +89,7 @@ extension MainViewController{
 // MARK: - METHOD: 클로저 관련
 extension MainViewController{
     /// 메인 뷰 책 리스트 버튼 이벤트 클로저 세팅 메소드
-    func setButtonClosure() {
+    func setBookListButtonClosure() {
         mainView.bookButtonClosure = { [weak self] bookNumber in
             guard let self else { return }
             self.summaryIsFull = self.userDefaults.bool(forKey: "onOff_\(bookNumber)")
@@ -102,7 +102,7 @@ extension MainViewController{
         }
     }
     /// 개요 뷰 버튼 이벤트 클로저 세팅 메소드
-    func setSummaryClousre() {
+    func setSummaryIsFullButtonClousre() {
         mainView.setSummaryBottonAction{ [weak self] in
             guard let self else { return }
             self.summaryIsFull = self.summaryIsFull ? false : true

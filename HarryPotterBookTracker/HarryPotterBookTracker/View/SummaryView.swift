@@ -18,7 +18,7 @@ class SummaryView : UIView {
     /// 더보기/접기 버튼
     private let button = UIButton()
     /// 개요 버튼 이벤트 전용 클로저
-    var onOffClosure: (() -> Void) = {}
+    var textIsFullonOffClosure: (() -> Void) = {}
     
     // MARK: - Init
     override init(frame: CGRect) {
@@ -55,7 +55,7 @@ extension SummaryView {
         label.numberOfLines = 0
         button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        button.addAction(UIAction { [weak self] _ in self?.onOffClosure() }, for: .touchDown)
+        button.addAction(UIAction { [weak self] _ in self?.textIsFullonOffClosure() }, for: .touchDown)
         button.isHidden = true
         
         addSubview(label)

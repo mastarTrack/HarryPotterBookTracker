@@ -33,7 +33,7 @@ class MainView: UIView{
     /// 챕터 스택뷰
     private let stackChapters = UIStackView()
     /// 책 리스트 버튼 이벤트 전용 클로저
-    var bookButtonClosure: ((Int) -> Void)?
+    var bookListButtonClosure: ((Int) -> Void)?
 
     // MARK: - Init
     override init(frame: CGRect) {
@@ -52,7 +52,7 @@ class MainView: UIView{
 extension MainView{
     /// 개요 내 버튼 이벤트 클로져 할당 함수
     func setSummaryBottonAction(closure: @escaping ()->Void) {
-        viewInfoSummry.onOffClosure = closure
+        viewInfoSummry.textIsFullonOffClosure = closure
     }
     /// 개요 뷰 텍스트 및 버튼 설정 변경 함수
     func changeSummay(text: String, onOff: Bool) {
@@ -121,7 +121,7 @@ extension MainView {
             button.setTitleColor(.white, for: .normal)
             button.layer.cornerRadius = 16
             button.addAction(UIAction { [weak self] _ in
-                             self?.bookButtonClosure?(i)},
+                             self?.bookListButtonClosure?(i)},
                              for: .touchUpInside)
             button.snp.makeConstraints {
                 $0.width.height.greaterThanOrEqualTo(32)
