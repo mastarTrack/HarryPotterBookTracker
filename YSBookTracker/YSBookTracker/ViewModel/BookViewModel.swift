@@ -30,7 +30,7 @@ final class BookViewModel {
                 case .success(let books):
                     self.books = books
                     self.updateBookInfo()
-                    self.restoreExpandedState()
+                    self.isExpanded = self.restoreExpandedState(volume: self.selectedVolume)
 
                 case .failure(let error):
                     self.error?(error)
@@ -41,16 +41,16 @@ final class BookViewModel {
     
     func showSummary() {
         isExpanded.toggle()
-        saveExpandedState()
+        saveExpandedState(volume: selectedVolume)
         updateBookInfo()
     }
     
-    private func saveExpandedState() {
-        UserDefaults.standard.set(isExpanded, forKey: DefaultsKey.isExpanded)
+    private func saveExpandedState(volume: Int) {
+        UserDefaults.standard.set(isExpanded, forKey: DefaultsKey.isExpandedKey(volume: volume))
     }
 
-    private func restoreExpandedState() {
-        isExpanded = UserDefaults.standard.bool(forKey: DefaultsKey.isExpanded)
+    private func restoreExpandedState(volume: Int) -> Bool {
+        UserDefaults.standard.bool(forKey: DefaultsKey.isExpandedKey(volume: volume))
     }
     
     func selectBook(volume: Int) {

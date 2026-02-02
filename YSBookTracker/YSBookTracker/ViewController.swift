@@ -353,5 +353,7 @@ extension ViewController {
 }
 
 enum DefaultsKey {
-    static let isExpanded = "summary.isExpanded"
+    static func isExpandedKey(volume: Int) -> String {
+        return "summary.isExpanded.volume.\(volume)"
+    }
 }
