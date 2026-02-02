@@ -11,7 +11,7 @@ import SnapKit
 /// 메인 뷰 클래스
 class MainView: UIView{
     
-    // MARK: - Properties
+    // MARK: - Components
     /// 제목 헤더 레이블
     private let labelHeader = UILabel()
     /// 책 권수 버튼을 담기위한 스택 뷰
@@ -48,7 +48,7 @@ class MainView: UIView{
     
 }
 
-// MARK: - 개요 뷰 관련 함수
+// MARK: - METHOD: 개요 뷰 관련 함수
 extension MainView{
     /// 개요 내 버튼 이벤트 클로져 할당 함수
     func setSummaryBottonAction(closure: @escaping ()->Void){
@@ -60,8 +60,7 @@ extension MainView{
     }
 }
 
-
-// MARK: - 뷰 데이터 업데이트 관련 함수
+// MARK: - METHOD: 뷰 데이터 업데이트 관련
 extension MainView{
     /// 뷰 데이터 변환 메소드
     func setViewData(book: Book, bookNumber: Int) {
@@ -93,7 +92,7 @@ extension MainView{
 }
 
 
-// MARK: - Chapter 목록 라벨 생성 함수
+// MARK: - METHOD: Chapter 목록 라벨 생성
 extension MainView{
     /// 챕터에 배치될 라벨 생성 메소드
     func getUILabelToChapter(_ Chapter: String)-> UILabel{
@@ -108,9 +107,30 @@ extension MainView{
 }
 
 
-// MARK: - UI Draw 함수
+// MARK: - METHOD: UI Draw
 extension MainView {
-    /// UI 초기 설정
+    
+    /// 책 권수 대비 버튼 및 버튼 액션 생성 메소드
+    func makeBooksButtons(booksCount: Int) {
+        /// 책 수 만큼 버튼 생성
+        for i in 0..<booksCount {
+            let button = UIButton()
+            button.backgroundColor = .systemBlue
+            button.setTitle(String(i+1), for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+            button.setTitleColor(.white, for: .normal)
+            button.layer.cornerRadius = 15
+            button.addAction(UIAction { [weak self] _ in
+                self?.bookButtonClosure?(i)
+            }, for: .touchUpInside)
+            button.snp.makeConstraints {
+                $0.width.height.greaterThanOrEqualTo(30)
+            }
+            stackButtons.addArrangedSubview(button)
+        }
+    }
+    
+    /// UI 초기 설정 메소드
     private func configureUI() {
         
         /// 핵심내용 배치용 UIView
@@ -312,26 +332,7 @@ extension MainView {
             $0.bottom.equalTo(safeAreaLayoutGuide)
         }
     }
-    
-    /// 책 권수 대비 버튼 및 버튼 액션 생성 메소드
-    func makeBooksButtons(booksCount: Int) {
-        /// 책 수 만큼 버튼 생성
-        for i in 0..<booksCount {
-            let button = UIButton()
-            button.backgroundColor = .systemBlue
-            button.setTitle(String(i+1), for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-            button.setTitleColor(.white, for: .normal)
-            button.layer.cornerRadius = 15
-            button.addAction(UIAction { [weak self] _ in
-                self?.bookButtonClosure?(i)
-            }, for: .touchUpInside)
-            button.snp.makeConstraints {
-                $0.width.height.greaterThanOrEqualTo(30)
-            }
-            stackButtons.addArrangedSubview(button)
-        }
-    }
+
 }
 
 #Preview{

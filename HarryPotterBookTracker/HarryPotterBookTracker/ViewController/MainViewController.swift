@@ -10,11 +10,13 @@ import SnapKit
 
 class MainViewController: UIViewController {
     
+    // MARK: - Components
+    /// 메인 뷰
+    private let mainView = MainView()
+    
     // MARK: - Properties
     /// json 파싱 클래스
     private let dataService = DataService()
-    /// 메인 뷰
-    private let mainView = MainView()
     /// 해리포터 책 정보 배열
     private var bookData: [Book] = []
     /// 데이터저장소 선언
@@ -83,7 +85,8 @@ extension MainViewController{
 extension MainViewController{
     /// 메인 뷰 책 리스트 버튼 이벤트 클로저 세팅 메소드
     func setButtonClosure() {
-        mainView.bookButtonClosure = { bookNumber in
+        mainView.bookButtonClosure = { [weak self] bookNumber in
+            guard let self else { return }
             self.userDef.set(self.summaryIsFull, forKey: "onOff_\(self.currentBookNumber)")
             self.userDef.synchronize()
             self.summaryIsFull = self.userDef.bool(forKey: "onOff_\(bookNumber)")
@@ -97,7 +100,8 @@ extension MainViewController{
     }
     /// 개요 뷰 버튼 이벤트 클로저 세팅 메소드
     func setSummaryClousre() {
-        mainView.setSummaryBottonAction{
+        mainView.setSummaryBottonAction{ [weak self] in
+            guard let self else { return }
             self.summaryIsFull = self.summaryIsFull ? false : true
             self.mainView.changeSummay(
                 text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)

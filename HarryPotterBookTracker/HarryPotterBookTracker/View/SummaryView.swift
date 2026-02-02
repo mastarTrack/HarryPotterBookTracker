@@ -12,7 +12,7 @@ import SnapKit
 /// 개요 뷰 클래스
 class SummaryView : UIView {
 
-    // MARK: - Properties
+    // MARK: - Components
     /// 레이블
     private let label = UILabel()
     /// 더보기/접기 버튼
