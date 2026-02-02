@@ -32,10 +32,10 @@ class SummaryView : UIView {
 }
 
 // MARK: - METHOD: UI 설정값 변경 관련
-extension SummaryView{
+extension SummaryView {
     /// 레이블/버튼 텍스트 설정 메소드
-    func setSummaryText(text: String, onOff: Bool){
-        if text.count > 450{
+    func setSummaryText(text: String, onOff: Bool) {
+        if text.count > 450 {
             label.text = text
             button.setTitle( onOff ? "접기" : "더 보기" , for: .normal)
             button.isHidden = false
@@ -47,26 +47,24 @@ extension SummaryView{
 }
 
 // MARK: - METHOD: UI 설정
-extension SummaryView{
+extension SummaryView {
     /// UI 설정 메소드
-    private func configureUI()
-    {
-        //label.text = "ssssssss"
+    private func configureUI() {
         label.font = UIFont.systemFont(ofSize: 14)
         label.textColor = .darkGray
         label.numberOfLines = 0
-        button.setTitleColor(.blue, for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        button.addAction(UIAction {[weak self] _ in self?.onOffClosure()}, for: .touchDown)
+        button.addAction(UIAction { [weak self] _ in self?.onOffClosure() }, for: .touchDown)
         button.isHidden = true
         
         addSubview(label)
         addSubview(button)
 
-        label.snp.makeConstraints{
+        label.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
         }
-        button.snp.makeConstraints{
+        button.snp.makeConstraints {
             $0.top.equalTo(label.snp.bottom).offset(10)
             $0.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
@@ -74,6 +72,6 @@ extension SummaryView{
     }
 }
 
-#Preview{
+#Preview {
     SummaryView()
 }

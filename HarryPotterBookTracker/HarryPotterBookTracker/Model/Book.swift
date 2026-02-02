@@ -8,24 +8,28 @@
 /// 책 정보 모델
 struct Book : Codable {
     /// 책 타이틀
-    var title: String
+    let title: String
     /// 책 저자
-    var author: String
+    let author: String
     /// 책 페이지
-    var pages: Int
+    let pages: Int
     /// 책 발행연도
-    var release_date: String
+    let release_date: String
     /// 책 헌사
-    var dedication: String
+    let dedication: String
     /// 책 개요
-    var summary: String
+    let summary: String
     /// 위키 사이트 주소
-    var wiki: String
+    let wiki: String
     /// 책 목차
-    var chapters: [Chapter]
+    let chapters: [Chapter]
     
     func changeSummaryText(_ isFull: Bool) -> String {
-        return isFull ? summary : String(summary.prefix(450)) + "..."
+        if summary.count > 450 {
+            return isFull ? summary : String(summary.prefix(450)) + "..."
+        } else {
+            return summary
+        }
     }
 }
 

@@ -51,17 +51,17 @@ class MainView: UIView{
 // MARK: - METHOD: 개요 뷰 관련 함수
 extension MainView{
     /// 개요 내 버튼 이벤트 클로져 할당 함수
-    func setSummaryBottonAction(closure: @escaping ()->Void){
+    func setSummaryBottonAction(closure: @escaping ()->Void) {
         viewInfoSummry.onOffClosure = closure
     }
     /// 개요 뷰 텍스트 및 버튼 설정 변경 함수
-    func changeSummay(text: String, onOff: Bool){
+    func changeSummay(text: String, onOff: Bool) {
         viewInfoSummry.setSummaryText(text: text, onOff: onOff)
     }
 }
 
 // MARK: - METHOD: 뷰 데이터 업데이트 관련
-extension MainView{
+extension MainView {
     /// 뷰 데이터 변환 메소드
     func setViewData(book: Book, bookNumber: Int) {
         imageInfoImage.image = UIImage(named: "harrypotter\(bookNumber+1)")
@@ -93,9 +93,9 @@ extension MainView{
 
 
 // MARK: - METHOD: Chapter 목록 라벨 생성
-extension MainView{
+extension MainView {
     /// 챕터에 배치될 라벨 생성 메소드
-    func getUILabelToChapter(_ Chapter: String)-> UILabel{
+    func getUILabelToChapter(_ Chapter: String)-> UILabel {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
         label.textColor = .darkGray
@@ -111,7 +111,7 @@ extension MainView{
 extension MainView {
     
     /// 책 권수 대비 버튼 및 버튼 액션 생성 메소드
-    func makeBooksButtons(booksCount: Int) {
+    func configureBooksButtons(booksCount: Int) {
         /// 책 수 만큼 버튼 생성
         for i in 0..<booksCount {
             let button = UIButton()
@@ -119,12 +119,12 @@ extension MainView {
             button.setTitle(String(i+1), for: .normal)
             button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
             button.setTitleColor(.white, for: .normal)
-            button.layer.cornerRadius = 15
+            button.layer.cornerRadius = 16
             button.addAction(UIAction { [weak self] _ in
-                self?.bookButtonClosure?(i)
-            }, for: .touchUpInside)
+                             self?.bookButtonClosure?(i)},
+                             for: .touchUpInside)
             button.snp.makeConstraints {
-                $0.width.height.greaterThanOrEqualTo(30)
+                $0.width.height.greaterThanOrEqualTo(32)
             }
             stackButtons.addArrangedSubview(button)
         }
@@ -194,7 +194,7 @@ extension MainView {
         labelInfoHeader.textColor = .black
         labelInfoAuthor.font = UIFont.systemFont(ofSize: 18)
         labelInfoAuthor.textColor = .darkGray
-        [labelInfoRelesed, labelInfoPages].forEach{
+        [labelInfoRelesed, labelInfoPages].forEach {
             $0.font = UIFont.systemFont(ofSize: 14)
             $0.textColor = .darkGray
         }
@@ -234,7 +234,7 @@ extension MainView {
         }
         
         // 책 상세 내용 삽입
-        [labelInfoHeader, labelAuthor, labelInfoAuthor, labelReleased, labelInfoRelesed, labelPage, labelInfoPages].forEach { subView.addSubview($0)}
+        [labelInfoHeader, labelAuthor, labelInfoAuthor, labelReleased, labelInfoRelesed, labelPage, labelInfoPages].forEach { subView.addSubview($0) }
         stackDetailMain.addArrangedSubview(imageInfoImage)
         stackDetailMain.addArrangedSubview(subView)
 
@@ -264,7 +264,7 @@ extension MainView {
             $0.top.equalTo(safeAreaLayoutGuide).offset(10)
         }
         
-        stackButtons.snp.makeConstraints  {
+        stackButtons.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.height.width.greaterThanOrEqualTo(10)
             $0.top.equalTo(labelHeader.snp.bottom).offset(16)
@@ -276,6 +276,8 @@ extension MainView {
             $0.height.width.greaterThanOrEqualTo(10)
             $0.top.equalToSuperview()
             $0.width.equalToSuperview().inset(20)
+            $0.leading.equalToSuperview().offset(20)
+            $0.trailing.equalToSuperview().inset(20)
         }
         
         labelInfoHeader.snp.makeConstraints {
@@ -300,7 +302,7 @@ extension MainView {
             $0.top.equalTo(labelAuthor.snp.bottom).offset(5)
         }
         
-        labelInfoRelesed.snp.makeConstraints{
+        labelInfoRelesed.snp.makeConstraints {
             $0.centerY.equalTo(labelReleased.snp.centerY)
             $0.leading.equalTo(labelReleased.snp.trailing).offset(8)
         }
@@ -315,6 +317,15 @@ extension MainView {
             $0.leading.equalTo(labelPage.snp.trailing).offset(8)
         }
         
+        stackDedication.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(20)
+            $0.trailing.equalToSuperview().inset(20)
+        }
+        stackSummary.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(20)
+            $0.trailing.equalToSuperview().inset(20)
+        }
+        
         stackMatter.snp.makeConstraints {
             $0.top.equalTo(stackDetailMain.snp.bottom).offset(24)
             $0.width.equalToSuperview()
@@ -323,18 +334,19 @@ extension MainView {
         stackChapter.snp.makeConstraints {
             $0.top.equalTo(stackMatter.snp.bottom).offset(24)
             $0.bottom.equalToSuperview().inset(10)
+            $0.leading.equalToSuperview().offset(20)
+            $0.trailing.equalToSuperview().inset(20)
         }
         
         scrollViewInfo.snp.makeConstraints {
             $0.top.equalTo(stackButtons.snp.bottom).offset(18)
-            //$0.width.equalToSuperview().inset(20)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.bottom.equalTo(safeAreaLayoutGuide)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
 
 }
 
-#Preview{
+#Preview {
   MainView()
 }

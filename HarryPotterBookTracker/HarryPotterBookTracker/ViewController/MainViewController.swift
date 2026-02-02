@@ -20,27 +20,22 @@ class MainViewController: UIViewController {
     /// 해리포터 책 정보 배열
     private var bookData: [Book] = []
     /// 데이터저장소 선언
-    private let userDef = UserDefaults.standard
+    private let userDefaults = UserDefaults.standard
     /// 현재 보여지고있는 책 넘버링 Int
     private var currentBookNumber = 0
     /// 현재 뷰 개요 상태 저장용 Bool
     private var summaryIsFull = false
     
     // MARK: - Init
+    
+    override func loadView() {
+        view = mainView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        view = mainView
         loadBooks()
-        if bookData.count != 0 {
-            summaryIsFull = userDef.bool(forKey: "onOff_\(currentBookNumber)")
-            mainView.makeBooksButtons(booksCount: bookData.count)
-            mainView.setViewData(book: bookData[0]
-                                 ,bookNumber: 0)
-            mainView.changeSummay(text: bookData[0].summary, onOff: summaryIsFull)
-            setButtonClosure()
-            setSummaryClousre()
-        }
     }
 }
 
@@ -53,6 +48,16 @@ extension MainViewController{
             switch result {
             case .success(let books):
                 bookData = books
+                if bookData.count != 0 {
+                    summaryIsFull = userDefaults.bool(forKey: "onOff_\(currentBookNumber)")
+                    mainView.configureBooksButtons(booksCount: bookData.count)
+                    mainView.setViewData(book: bookData[0],
+                                         bookNumber: 0)
+                    mainView.changeSummay(text: bookData[0].changeSummaryText(summaryIsFull),
+                                          onOff: summaryIsFull)
+                    setButtonClosure()
+                    setSummaryClousre()
+                }
             case .failure(let error):
                 if let dataError = error as? DataService.DataError {
                     switch dataError {
@@ -87,15 +92,13 @@ extension MainViewController{
     func setButtonClosure() {
         mainView.bookButtonClosure = { [weak self] bookNumber in
             guard let self else { return }
-            self.userDef.set(self.summaryIsFull, forKey: "onOff_\(self.currentBookNumber)")
-            self.userDef.synchronize()
-            self.summaryIsFull = self.userDef.bool(forKey: "onOff_\(bookNumber)")
+            self.summaryIsFull = self.userDefaults.bool(forKey: "onOff_\(bookNumber)")
             self.currentBookNumber = bookNumber
             self.mainView.setViewData(
-                book: self.bookData[bookNumber]
-                , bookNumber: bookNumber)
-            self.mainView.changeSummay(text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
-                                        , onOff: self.summaryIsFull)
+                book: self.bookData[bookNumber],
+                bookNumber: bookNumber)
+            self.mainView.changeSummay(text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull),
+                                       onOff: self.summaryIsFull)
         }
     }
     /// 개요 뷰 버튼 이벤트 클로저 세팅 메소드
@@ -104,18 +107,10 @@ extension MainViewController{
             guard let self else { return }
             self.summaryIsFull = self.summaryIsFull ? false : true
             self.mainView.changeSummay(
-                text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
-                , onOff: self.summaryIsFull)
-        }
-    }
-}
-
-// MARK: - METHOD: UI 설정
-extension MainViewController{
-    /// 메인 뷰 UI 설정
-    func ConfigureUI(){
-        mainView.snp.makeConstraints {
-            $0.top.bottom.trailing.leading.equalToSuperview()
+                text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull),
+                onOff: self.summaryIsFull)
+            self.userDefaults.set(self.summaryIsFull, forKey: "onOff_\(self.currentBookNumber)")
+            self.userDefaults.synchronize()
         }
     }
 }
