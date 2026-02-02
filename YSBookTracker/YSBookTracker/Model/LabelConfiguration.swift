@@ -13,7 +13,7 @@ struct LabelConfiguration {
 }
 
 extension LabelConfiguration {
-    static let HeaderTitle = LabelConfiguration(
+    static let headerTitle = LabelConfiguration(
         font: .systemFont(ofSize: 24, weight: .bold),
         color: .black,
         lines: 0
