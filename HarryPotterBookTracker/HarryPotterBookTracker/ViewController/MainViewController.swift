@@ -10,6 +10,7 @@ import SnapKit
 
 class MainViewController: UIViewController {
     
+    // MARK: - Properties
     /// json 파싱 클래스
     private let dataService = DataService()
     /// 메인 뷰
@@ -18,11 +19,12 @@ class MainViewController: UIViewController {
     private var bookData: [Book] = []
     /// 데이터저장소 선언
     private let userDef = UserDefaults.standard
-    /// 현재 보여지고있는 책 넘버링
+    /// 현재 보여지고있는 책 넘버링 Int
     private var currentBookNumber = 0
-    
+    /// 현재 뷰 개요 상태 저장용 Bool
     private var summaryIsFull = false
     
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -33,19 +35,15 @@ class MainViewController: UIViewController {
             mainView.makeBooksButtons(booksCount: bookData.count)
             mainView.setViewData(book: bookData[0]
                                  ,bookNumber: 0)
-            mainView.refreshSummay(text: bookData[0].summary, onOff: summaryIsFull)
+            mainView.changeSummay(text: bookData[0].summary, onOff: summaryIsFull)
             setButtonClosure()
             setSummaryClousre()
         }
     }
-    
-    /// 메인 뷰 UI 설정
-    func ConfigureUI(){
-        mainView.snp.makeConstraints {
-            $0.top.bottom.trailing.leading.equalToSuperview()
-        }
-    }
-    
+}
+
+// MARK: - METHOD: 데이터 로드 관련
+extension MainViewController{
     /// 책 정보 로드 메소드
     func loadBooks() {
         dataService.loadBooks { [weak self] result in
@@ -65,30 +63,10 @@ class MainViewController: UIViewController {
             }
         }
     }
-  
-    func setButtonClosure() {
-        mainView.bookButtonClosure = { bookNumber in
-            self.userDef.set(self.summaryIsFull, forKey: "onOff_\(self.currentBookNumber)")
-            self.userDef.synchronize()
-            self.summaryIsFull = self.userDef.bool(forKey: "onOff_\(bookNumber)")
-            self.currentBookNumber = bookNumber
-            self.mainView.setViewData(
-                book: self.bookData[bookNumber]
-                , bookNumber: bookNumber)
-            self.mainView.refreshSummay(text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
-                                        , onOff: self.summaryIsFull)
-        }
-    }
-    
-    func setSummaryClousre() {
-        mainView.setSummaryBottonAction{
-            self.summaryIsFull = self.summaryIsFull ? false : true
-            self.mainView.refreshSummay(
-                text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
-                , onOff: self.summaryIsFull)
-        }
-    }
+}
 
+// MARK: - METHOD: 경고 메시지 창 관련
+extension MainViewController{
     /// 경고 메시지 출력 메소드
     private func showAlert(_ messageText: String) {
         let alert = UIAlertController(
@@ -99,9 +77,43 @@ class MainViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "확인", style: .default))
         self.present(alert, animated: true)
     }
-    
+}
 
+// MARK: - METHOD: 클로저 관련
+extension MainViewController{
+    /// 메인 뷰 책 리스트 버튼 이벤트 클로저 세팅 메소드
+    func setButtonClosure() {
+        mainView.bookButtonClosure = { bookNumber in
+            self.userDef.set(self.summaryIsFull, forKey: "onOff_\(self.currentBookNumber)")
+            self.userDef.synchronize()
+            self.summaryIsFull = self.userDef.bool(forKey: "onOff_\(bookNumber)")
+            self.currentBookNumber = bookNumber
+            self.mainView.setViewData(
+                book: self.bookData[bookNumber]
+                , bookNumber: bookNumber)
+            self.mainView.changeSummay(text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
+                                        , onOff: self.summaryIsFull)
+        }
+    }
+    /// 개요 뷰 버튼 이벤트 클로저 세팅 메소드
+    func setSummaryClousre() {
+        mainView.setSummaryBottonAction{
+            self.summaryIsFull = self.summaryIsFull ? false : true
+            self.mainView.changeSummay(
+                text: self.bookData[self.currentBookNumber].changeSummaryText(self.summaryIsFull)
+                , onOff: self.summaryIsFull)
+        }
+    }
+}
 
+// MARK: - METHOD: UI 설정
+extension MainViewController{
+    /// 메인 뷰 UI 설정
+    func ConfigureUI(){
+        mainView.snp.makeConstraints {
+            $0.top.bottom.trailing.leading.equalToSuperview()
+        }
+    }
 }
 
 #Preview{

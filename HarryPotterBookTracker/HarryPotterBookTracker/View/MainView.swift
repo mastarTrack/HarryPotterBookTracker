@@ -11,6 +11,7 @@ import SnapKit
 /// 메인 뷰 클래스
 class MainView: UIView{
     
+    // MARK: - Properties
     /// 제목 헤더 레이블
     private let labelHeader = UILabel()
     /// 책 권수 버튼을 담기위한 스택 뷰
@@ -31,10 +32,10 @@ class MainView: UIView{
     private let viewInfoSummry = SummaryView()
     /// 챕터 스택뷰
     private let stackChapters = UIStackView()
-    
+    /// 책 리스트 버튼 이벤트 전용 클로저
     var bookButtonClosure: ((Int) -> Void)?
 
-    
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .white
@@ -45,6 +46,23 @@ class MainView: UIView{
         fatalError("init(coder:) has not been implemented")
     }
     
+}
+
+// MARK: - 개요 뷰 관련 함수
+extension MainView{
+    /// 개요 내 버튼 이벤트 클로져 할당 함수
+    func setSummaryBottonAction(closure: @escaping ()->Void){
+        viewInfoSummry.onOffClosure = closure
+    }
+    /// 개요 뷰 텍스트 및 버튼 설정 변경 함수
+    func changeSummay(text: String, onOff: Bool){
+        viewInfoSummry.setSummaryText(text: text, onOff: onOff)
+    }
+}
+
+
+// MARK: - 뷰 데이터 업데이트 관련 함수
+extension MainView{
     /// 뷰 데이터 변환 메소드
     func setViewData(book: Book, bookNumber: Int) {
         imageInfoImage.image = UIImage(named: "harrypotter\(bookNumber+1)")
@@ -72,16 +90,11 @@ class MainView: UIView{
             }
         }
     }
-    
-    func refreshSummay(text: String, onOff: Bool){
-        viewInfoSummry.switchSummaryText(text: text, onOff: onOff)
-    }
-    
-    func setSummaryBottonAction(closure: @escaping ()->Void){
-        viewInfoSummry.onOffClosure = closure
-    }
-    
-    
+}
+
+
+// MARK: - Chapter 목록 라벨 생성 함수
+extension MainView{
     /// 챕터에 배치될 라벨 생성 메소드
     func getUILabelToChapter(_ Chapter: String)-> UILabel{
         let label = UILabel()
@@ -95,6 +108,7 @@ class MainView: UIView{
 }
 
 
+// MARK: - UI Draw 함수
 extension MainView {
     /// UI 초기 설정
     private func configureUI() {
